@@ -1,5 +1,4 @@
-import { CheckCircle, MessageCircle, Bot, Zap, Shield, BarChart3 } from "lucide-react";
-import Link from 'next/link';
+import { MessageCircle, Bot, Zap, Shield, BarChart3 } from "lucide-react";
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
@@ -89,7 +88,7 @@ const ProductPage = () => {
               How It Works
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              From setup to optimization, we've made building AI chatbots as simple as possible.
+              From setup to optimization, we&apos;ve made building AI chatbots as simple as possible.
             </p>
           </div>
           
@@ -150,7 +149,7 @@ const ProductPage = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white text-center">
             <h3 className="text-2xl font-bold mb-4">
-              "We built this because we were tired of complex, expensive chatbot tools."
+              &ldquo;We built this because we were tired of complex, expensive chatbot tools.&rdquo;
             </h3>
             <p className="text-xl opacity-90 mb-6">
               After struggling with existing solutions, we created the chatbot platform we wished existed. 

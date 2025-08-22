@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
@@ -29,7 +28,7 @@ const ContactPage = () => {
                 </span>
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Ready to transform your customer service with AI? Let's discuss how we can help your business grow.
+                Ready to transform your customer service with AI? Let&apos;s discuss how we can help your business grow.
               </p>
             </div>
 
@@ -142,7 +141,7 @@ const ContactPage = () => {
                     <div>
                       <h3 className="font-semibold text-lg mb-2 text-gray-900">Email Us</h3>
                       <p className="text-gray-600">
-                        Send us an email and we'll respond within 24 hours.
+                        Send us an email and we&apos;ll respond within 24 hours.
                       </p>
                       <p className="text-blue-600 font-medium mt-2">
                         hello@aiChatbotco.com

@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { Check, ArrowRight, Star } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -207,7 +206,7 @@ const PricingPage = () => {
                 Questions about pricing?
               </h3>
               <p className="text-lg text-slate-600 mb-6">
-                We're here to help you choose the right plan for your business.
+                We&apos;re here to help you choose the right plan for your business.
               </p>
               <div className="flex justify-center">
                 <button 

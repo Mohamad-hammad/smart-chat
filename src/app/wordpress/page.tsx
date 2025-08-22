@@ -1,32 +1,8 @@
 import { Download, Settings, Eye, FileText, CheckCircle, X, Zap } from "lucide-react";
-import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
 const WordPressPage = () => {
-  const beforeAfterPoints = [
-    {
-      type: "before",
-      title: "Complex Manual Setup",
-      points: [
-        "Edit WordPress theme files",
-        "Debug JavaScript errors", 
-        "Configure server settings",
-        "Hope nothing breaks"
-      ]
-    },
-    {
-      type: "after", 
-      title: "One-Click Installation",
-      points: [
-        "Install plugin from WordPress",
-        "Paste your bot token",
-        "Preview and go live",
-        "Built-in troubleshooting"
-      ]
-    }
-  ];
-
   const features = [
     {
       icon: <Settings className="w-6 h-6 text-blue-500" />,

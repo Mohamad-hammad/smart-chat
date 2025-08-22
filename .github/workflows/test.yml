@@ -1,0 +1,76 @@
+name: Test and Lint
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci --legacy-peer-deps
+
+    - name: Run ESLint
+      run: npm run test:lint
+
+    - name: Run build
+      run: npm run test:build
+
+    - name: Run tests
+      run: npm run test:ci
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        fail_ci_if_error: false
+
+  lint-only:
+    runs-on: ubuntu-latest
+    name: ESLint Check
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci --legacy-peer-deps
+
+    - name: Run ESLint with detailed output
+      run: |
+        echo "Running ESLint..."
+        npm run lint --silent
+        echo "ESLint completed successfully!"
+
+    - name: Check for ESLint errors
+      run: |
+        if npm run lint 2>&1 | grep -q "error"; then
+          echo "ESLint found errors!"
+          npm run lint
+          exit 1
+        else
+          echo "No ESLint errors found!"
+        fi

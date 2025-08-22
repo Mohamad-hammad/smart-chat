@@ -1,5 +1,4 @@
-import { MessageCircle, Settings, Palette, Code, Zap, Shield } from "lucide-react";
-import Link from 'next/link';
+import { MessageCircle, Palette, Code, Zap, Shield } from "lucide-react";
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
@@ -111,7 +110,7 @@ const ChatWidgetPage = () => {
                     <div className="flex items-start space-x-2">
                       <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex-shrink-0"></div>
                       <div className="bg-gray-100 rounded-lg p-3 text-sm">
-                        Hi! I'm here to help. What can I assist you with today?
+                        Hi! I&apos;m here to help. What can I assist you with today?
                       </div>
                     </div>
                     <div className="flex items-start space-x-2 justify-end">
@@ -123,7 +122,7 @@ const ChatWidgetPage = () => {
                     <div className="flex items-start space-x-2">
                       <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex-shrink-0"></div>
                       <div className="bg-gray-100 rounded-lg p-3 text-sm">
-                        I'd be happy to help you with our pricing options! We have plans starting from $29/month...
+                        I&apos;d be happy to help you with our pricing options! We have plans starting from $29/month...
                       </div>
                     </div>
                   </div>

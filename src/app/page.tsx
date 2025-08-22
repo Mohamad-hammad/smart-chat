@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import React from 'react';
 import { 
   ArrowRight, 
   Check, 
@@ -244,7 +243,7 @@ const LandingPage = () => {
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
               Tired of Bots That{" "}
-              <span className="text-red-500">Don't Deliver?</span>
+              <span className="text-red-500">Don&apos;t Deliver?</span>
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
@@ -269,9 +268,9 @@ const LandingPage = () => {
             {/* Belief deconstruction */}
             <div className="mt-16 p-8 bg-gray-50 rounded-xl border border-gray-200">
               <p className="text-lg md:text-xl text-gray-900 font-medium leading-relaxed">
-                You don't need an enterprise team or weeks of training to launch a great chatbot.{" "}
+                You don&apos;t need an enterprise team or weeks of training to launch a great chatbot.{" "}
                 <span className="text-blue-600 font-semibold">
-                  The problem isn't you—it's the tools.
+                  The problem isn&apos;t you—it&apos;s the tools.
                 </span>
               </p>
             </div>
@@ -381,7 +380,7 @@ const LandingPage = () => {
                   <span className="text-white font-bold text-xl">JD</span>
                 </div>
                 <blockquote className="text-lg md:text-xl text-gray-900 leading-relaxed mb-6 italic">
-                  "We built this because we were tired of chatbots that overpromised and underdelivered. Our mission is simple: make AI chatbots that are fast, reliable, and actually useful for your business."
+                  &ldquo;We built this because we were tired of chatbots that overpromised and underdelivered. Our mission is simple: make AI chatbots that are fast, reliable, and actually useful for your business.&rdquo;
                 </blockquote>
                 <p className="text-gray-600 font-medium">
                   John Doe, Founder & CEO
