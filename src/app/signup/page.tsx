@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Bot, Shield } from 'lucide-react';
 
 // Standalone Signup Component for Next.js
 const SignupComponent = () => {
@@ -69,8 +68,9 @@ const SignupComponent = () => {
         confirmPassword: '',
         acceptTerms: false
       });
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Something went wrong";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

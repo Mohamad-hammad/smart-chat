@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Bot, Shield } from 'lucide-react';
 
 const LoginComponent = () => {
   const [form, setForm] = useState({
@@ -53,8 +52,9 @@ const LoginComponent = () => {
       setTimeout(() => {
         window.location.href = '/';
       }, 1500);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Something went wrong";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -160,7 +160,7 @@ const LoginComponent = () => {
           
           {/* Bottom Link */}
           <div className="mt-6 text-center text-sm">
-            <span className="text-gray-600">Don't have an account? </span>
+            <span className="text-gray-600">Don&apos;t have an account? </span>
             <a 
               href="/signup"
               className="hover:underline font-semibold"
