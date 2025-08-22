@@ -63,7 +63,7 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="desktop-nav items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-8">
             {navItems.map((item) => (
               <Link
                 key={item.label}
@@ -80,17 +80,17 @@ const Navigation = () => {
           </div>
 
           {/* Desktop CTA */}
-          <div className="desktop-nav items-center space-x-4">
-            <button className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg transition-colors">
+          <div className="hidden lg:flex items-center space-x-4">
+            <Link href="/login" className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg transition-colors">
               Login
-            </button>
-            <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-200">
+            </Link>
+            <Link href="/signup" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-200">
               Get Started Free
-            </button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="mobile-nav">
+          <div className="lg:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-gray-600 hover:text-gray-900 p-2"
@@ -101,7 +101,7 @@ const Navigation = () => {
         </div>
 
         {/* Mobile Menu */}
-        <div className={`mobile-nav fixed inset-0 bg-white shadow-2xl z-40 transition-transform duration-300 ease-in-out overflow-hidden ${
+        <div className={`lg:hidden fixed inset-0 bg-white shadow-2xl z-40 transition-transform duration-300 ease-in-out overflow-hidden ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`} style={{ height: '100dvh' }}>
           <div className="flex flex-col h-full bg-white">
@@ -149,12 +149,20 @@ const Navigation = () => {
             {/* CTA Buttons - Fixed at bottom */}
             <div className="px-6 py-8 border-t border-gray-200 bg-gray-100">
               <div className="space-y-4">
-                <button className="w-full text-gray-600 hover:text-gray-900 px-6 py-4 rounded-lg transition-colors text-left text-lg font-medium border border-gray-300 hover:bg-gray-200 bg-white">
+                <Link 
+                  href="/login" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full text-gray-600 hover:text-gray-900 px-6 py-4 rounded-lg transition-colors text-left text-lg font-medium border border-gray-300 hover:bg-gray-200 bg-white block"
+                >
                   Login
-                </button>
-                <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-lg hover:shadow-lg transition-all duration-200 text-lg font-medium">
+                </Link>
+                <Link 
+                  href="/signup" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-lg hover:shadow-lg transition-all duration-200 text-lg font-medium block"
+                >
                   Get Started Free
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -162,7 +170,7 @@ const Navigation = () => {
         
         {/* Backdrop */}
         <div 
-          className={`mobile-nav fixed inset-0 bg-black/40 z-30 transition-opacity duration-300 ${
+          className={`lg:hidden fixed inset-0 bg-black/40 z-30 transition-opacity duration-300 ${
             isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
           onClick={() => setIsMobileMenuOpen(false)}
