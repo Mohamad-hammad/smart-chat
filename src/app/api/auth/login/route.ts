@@ -22,17 +22,19 @@ export async function POST(request: NextRequest) {
     const user = await UserService.authenticateUser(email, password);
 
     // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _unused, ...userWithoutPassword } = user;
 
     return NextResponse.json({
       message: "Login successful",
       user: userWithoutPassword,
     });
-  } catch (error: any) {
-    console.error("Login error:", error);
-    return NextResponse.json(
-      { error: error.message || "Internal server error" },
-      { status: 401 }
-    );
-  }
+      } catch (error: unknown) {
+      console.error("Login error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Internal server error";
+      return NextResponse.json(
+        { error: errorMessage },
+        { status: 401 }
+      );
+    }
 }

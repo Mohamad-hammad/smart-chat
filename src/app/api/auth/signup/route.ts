@@ -34,7 +34,8 @@ export async function POST(request: NextRequest) {
     });
 
     // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _unused, ...userWithoutPassword } = user;
 
     return NextResponse.json(
       {
@@ -43,11 +44,12 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
-    console.error("Signup error:", error);
-    return NextResponse.json(
-      { error: error.message || "Internal server error" },
-      { status: 500 }
-    );
-  }
+      } catch (error: unknown) {
+      console.error("Signup error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Internal server error";
+      return NextResponse.json(
+        { error: errorMessage },
+        { status: 500 }
+      );
+    }
 }
