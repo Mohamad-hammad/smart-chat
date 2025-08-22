@@ -5,6 +5,27 @@
   --foreground: #171717;
 }
 
+/* Custom breakpoint for 1030px */
+@media (max-width: 1030px) {
+  .mobile-nav {
+    display: block;
+  }
+  
+  .desktop-nav {
+    display: none;
+  }
+}
+
+@media (min-width: 1031px) {
+  .mobile-nav {
+    display: none;
+  }
+  
+  .desktop-nav {
+    display: flex;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

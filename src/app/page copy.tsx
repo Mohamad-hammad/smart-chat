@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
+  Menu, 
+  X, 
   ArrowRight, 
   Check, 
   MessageSquare, 
@@ -21,12 +23,27 @@ import {
   Rocket,
   CheckCircle
 } from 'lucide-react';
-import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
 
 const LandingPage = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
 
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const navItems = [
+    { label: "Product", href: "/product" },
+    { label: "Chat Widget", href: "/chat-widget" },
+    { label: "WordPress", href: "/wordpress" },
+    { label: "Pricing", href: "/pricing" },
+    { label: "Contact", href: "/contact" },
+  ];
 
   const benefits = [
     {
@@ -160,12 +177,95 @@ const LandingPage = () => {
     }
   ];
 
-
+  const quickLinks = [
+    { label: "Documentation", href: "#docs" },
+    { label: "Privacy Policy", href: "#privacy" },
+    { label: "Terms of Service", href: "#terms" },
+    { label: "Contact Support", href: "#contact" },
+  ];
 
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <Navigation />
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled
+            ? "bg-white/80 backdrop-blur-lg border-b border-gray-200 shadow-lg"
+            : "bg-transparent"
+        }`}
+      >
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link href="/" className="flex items-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-bold text-sm">AI</span>
+              </div>
+              <span className="ml-2 text-xl font-bold text-gray-900">
+                ChatBot Pro
+              </span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              {navItems.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+
+            {/* Desktop CTA */}
+            <div className="hidden md:flex items-center space-x-4">
+              <button className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg transition-colors">
+                Login
+              </button>
+              <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-200">
+                Get Started Free
+              </button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="text-gray-600 hover:text-gray-900 p-2"
+              >
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Menu */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden border-t border-gray-200 bg-white/95 backdrop-blur-lg">
+              <div className="px-2 pt-2 pb-3 space-y-1">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200 w-full text-left"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <div className="flex flex-col space-y-2 px-3 pt-4">
+                  <button className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg transition-colors text-left">
+                    Login
+                  </button>
+                  <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-200">
+                    Get Started Free
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
 
       {/* Hero Section */}
       <section className="relative pt-24 pb-16 lg:pt-32 lg:pb-24 overflow-hidden">
@@ -508,7 +608,84 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <Footer />
+      <footer className="bg-white border-t border-gray-200 py-12">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="max-w-6xl mx-auto">
+            {/* Main footer content */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+              {/* Brand */}
+              <div className="md:col-span-2">
+                <div className="flex items-center mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">AI</span>
+                  </div>
+                  <span className="ml-2 text-xl font-bold text-gray-900">
+                    ChatBot Pro
+                  </span>
+                </div>
+                <p className="text-gray-600 leading-relaxed max-w-md">
+                  The AI Chatbot SaaS built for real businesses. Launch powerful, 
+                  reliable chatbots in minutes with our WordPress plugin and deep integrations.
+                </p>
+              </div>
+
+              {/* Quick Links */}
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-4">Quick Links</h4>
+                <ul className="space-y-2">
+                  {quickLinks.map((link, index) => (
+                    <li key={index}>
+                      <a
+                        href={link.href}
+                        className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
+                      >
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Contact */}
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-4">Contact</h4>
+                <div className="space-y-2 text-gray-600">
+                  <p>hello@chatbotpro.com</p>
+                  <p>1-800-CHATBOT</p>
+                  <p>24/7 Support Available</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom bar */}
+            <div className="pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
+              <p className="text-gray-600 text-sm">
+                © 2024 ChatBot Pro. All rights reserved.
+              </p>
+              <div className="flex items-center space-x-6 mt-4 md:mt-0">
+                <a
+                  href="#privacy"
+                  className="text-gray-600 hover:text-blue-600 text-sm transition-colors duration-200"
+                >
+                  Privacy
+        </a>
+        <a
+                  href="#terms"
+                  className="text-gray-600 hover:text-blue-600 text-sm transition-colors duration-200"
+                >
+                  Terms
+        </a>
+        <a
+                  href="#contact"
+                  className="text-gray-600 hover:text-blue-600 text-sm transition-colors duration-200"
+                >
+                  Contact
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
