@@ -1,18 +1,209 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import emailjs from '@emailjs/browser';
+
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  company: string;
+  phone: string;
+  message: string;
+}
+
+interface FormErrors {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  company?: string;
+  phone?: string;
+  message?: string;
+}
 
 const ContactPage = () => {
-  const handleSubmit = (e: React.FormEvent) => {
+  const [formData, setFormData] = useState<FormData>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    company: '',
+    phone: '',
+    message: ''
+  });
+
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [submitMessage, setSubmitMessage] = useState('');
+
+  // EmailJS Configuration
+  const EMAILJS_SERVICE_ID = 'service_sd9btqr';
+  const EMAILJS_TEMPLATE_ID = 'template_2c64val';
+  const EMAILJS_PUBLIC_KEY = '1cVCZ6R1bGo6efBGC';
+
+  useEffect(() => {
+    // Initialize EmailJS
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  }, []);
+
+  const validateField = (name: keyof FormData, value: string): string => {
+    switch (name) {
+      case 'firstName':
+        if (!value.trim()) return 'First name is required';
+        if (value.trim().length < 2) return 'First name must be at least 2 characters';
+        return '';
+      
+      case 'lastName':
+        if (!value.trim()) return 'Last name is required';
+        if (value.trim().length < 2) return 'Last name must be at least 2 characters';
+        return '';
+      
+      case 'email':
+        if (!value.trim()) return 'Email is required';
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) return 'Please enter a valid email address';
+        return '';
+      
+      case 'company':
+        if (value.trim() && value.trim().length < 2) return 'Company name must be at least 2 characters';
+        return '';
+      
+      case 'phone':
+        if (value.trim()) {
+          const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+          if (!phoneRegex.test(value.replace(/[\s\-\(\)]/g, ''))) {
+            return 'Please enter a valid phone number';
+          }
+        }
+        return '';
+      
+      case 'message':
+        if (!value.trim()) return 'Message is required';
+        if (value.trim().length < 10) return 'Message must be at least 10 characters';
+        if (value.trim().length > 1000) return 'Message must be less than 1000 characters';
+        return '';
+      
+      default:
+        return '';
+    }
+  };
+
+  const handleInputChange = (name: keyof FormData, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      const newError = validateField(name, value);
+      if (newError !== errors[name]) {
+        setErrors(prev => ({ ...prev, [name]: newError }));
+      }
+    }
+  };
+
+  const handleInputBlur = (name: keyof FormData) => {
+    const error = validateField(name, formData[name]);
+    setErrors(prev => ({ ...prev, [name]: error }));
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+    let isValid = true;
+
+    Object.keys(formData).forEach((key) => {
+      const fieldName = key as keyof FormData;
+      const error = validateField(fieldName, formData[fieldName]);
+      if (error) {
+        newErrors[fieldName] = error;
+        isValid = false;
+      }
+    });
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log("Form submitted");
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+
+    try {
+      // Prepare EmailJS template parameters
+      const templateParams = {
+        to_email: 'shared.affan@gmail.com',
+        from_name: `${formData.firstName} ${formData.lastName}`,
+        from_email: formData.email,
+        company: formData.company || 'Not specified',
+        phone: formData.phone || 'Not specified',
+        message: formData.message,
+        reply_to: formData.email
+      };
+
+      // Send email using EmailJS
+      const response = await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams,
+        EMAILJS_PUBLIC_KEY
+      );
+
+      if (response.status === 200) {
+        setSubmitStatus('success');
+        setSubmitMessage('Thank you! Your message has been sent successfully. We\'ll get back to you within 24 hours.');
+        
+        // Reset form
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          company: '',
+          phone: '',
+          message: ''
+        });
+        setErrors({});
+      } else {
+        throw new Error('Failed to send email');
+      }
+      
+    } catch (error) {
+      console.error('EmailJS Error:', error);
+      setSubmitStatus('error');
+      setSubmitMessage('Sorry, something went wrong. Please try again or contact us directly at shared.affan@gmail.com');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const getInputClassName = (fieldName: keyof FormData) => {
+    const baseClasses = "flex h-10 w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#6566F1] focus:border-transparent";
+    
+    if (errors[fieldName]) {
+      return `${baseClasses} border-red-300 bg-red-50 text-red-900 placeholder:text-red-400`;
+    }
+    
+    return `${baseClasses} border-gray-300 bg-white text-gray-900 placeholder:text-gray-500`;
+  };
+
+  const getTextareaClassName = () => {
+    const baseClasses = "flex min-h-32 w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#6566F1] focus:border-transparent resize-none";
+    
+    if (errors.message) {
+      return `${baseClasses} border-red-300 bg-red-50 text-red-900 placeholder:text-red-400`;
+    }
+    
+    return `${baseClasses} border-gray-300 bg-white text-gray-900 placeholder:text-gray-500`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
       <Navigation />
       
@@ -23,7 +214,7 @@ const ContactPage = () => {
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
                 Contact{" "}
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[#6566F1] to-purple-600 bg-clip-text text-transparent">
                   Sales
                 </span>
               </h1>
@@ -42,88 +233,157 @@ const ContactPage = () => {
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label htmlFor="firstName" className="text-sm font-medium text-gray-700">
-                          First Name
+                        <label htmlFor="firstName" className="text-sm font-bold text-gray-700">
+                          First Name *
                         </label>
                         <input
                           id="firstName"
                           name="firstName"
                           required
+                          value={formData.firstName}
+                          onChange={(e) => handleInputChange('firstName', e.target.value)}
+                          onBlur={() => handleInputBlur('firstName')}
                           placeholder="Enter your first name"
-                          className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          className={getInputClassName('firstName')}
                         />
+                        {errors.firstName && (
+                          <p className="text-sm text-red-600 flex items-center space-x-1">
+                            <XCircle className="w-4 h-4" />
+                            <span>{errors.firstName}</span>
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-2">
-                        <label htmlFor="lastName" className="text-sm font-medium text-gray-700">
-                          Last Name
+                        <label htmlFor="lastName" className="text-sm font-bold text-gray-700">
+                          Last Name *
                         </label>
                         <input
                           id="lastName"
                           name="lastName"
                           required
+                          value={formData.lastName}
+                          onChange={(e) => handleInputChange('lastName', e.target.value)}
+                          onBlur={() => handleInputBlur('lastName')}
                           placeholder="Enter your last name"
-                          className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          className={getInputClassName('lastName')}
                         />
+                        {errors.lastName && (
+                          <p className="text-sm text-red-600 flex items-center space-x-1">
+                            <XCircle className="w-4 h-4" />
+                            <span>{errors.lastName}</span>
+                          </p>
+                        )}
                       </div>
                     </div>
                     
                     <div className="space-y-2">
-                      <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                        Email
+                      <label htmlFor="email" className="text-sm font-bold text-gray-700">
+                        Email *
                       </label>
                       <input
                         id="email"
                         name="email"
                         type="email"
                         required
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        onBlur={() => handleInputBlur('email')}
                         placeholder="Enter your email address"
-                        className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className={getInputClassName('email')}
                       />
+                      {errors.email && (
+                        <p className="text-sm text-red-600 flex items-center space-x-1">
+                          <XCircle className="w-4 h-4" />
+                          <span>{errors.email}</span>
+                        </p>
+                      )}
                     </div>
                     
                     <div className="space-y-2">
-                      <label htmlFor="company" className="text-sm font-medium text-gray-700">
+                      <label htmlFor="company" className="text-sm font-bold text-gray-700">
                         Company
                       </label>
                       <input
                         id="company"
                         name="company"
+                        value={formData.company}
+                        onChange={(e) => handleInputChange('company', e.target.value)}
+                        onBlur={() => handleInputBlur('company')}
                         placeholder="Enter your company name"
-                        className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className={getInputClassName('company')}
                       />
+                      {errors.company && (
+                        <p className="text-sm text-red-600 flex items-center space-x-1">
+                          <XCircle className="w-4 h-4" />
+                          <span>{errors.company}</span>
+                        </p>
+                      )}
                     </div>
                     
                     <div className="space-y-2">
-                      <label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                      <label htmlFor="phone" className="text-sm font-bold text-gray-700">
                         Phone Number
                       </label>
                       <input
                         id="phone"
                         name="phone"
                         type="tel"
+                        value={formData.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        onBlur={() => handleInputBlur('phone')}
                         placeholder="Enter your phone number"
-                        className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className={getInputClassName('phone')}
                       />
+                      {errors.phone && (
+                        <p className="text-sm text-red-600 flex items-center space-x-1">
+                          <XCircle className="w-4 h-4" />
+                          <span>{errors.phone}</span>
+                        </p>
+                      )}
                     </div>
                     
                     <div className="space-y-2">
-                      <label htmlFor="message" className="text-sm font-medium text-gray-700">
-                        Message
-                      </label>
+                      <div className="flex justify-between items-center">
+                        <label htmlFor="message" className="text-sm font-bold text-gray-700">
+                          Message *
+                        </label>
+                        <span className={`text-xs ${
+                          formData.message.length > 1000 ? 'text-red-500' : 'text-gray-500'
+                        }`}>
+                          {formData.message.length}/1000
+                        </span>
+                      </div>
                       <textarea
                         id="message"
                         name="message"
                         required
+                        value={formData.message}
+                        onChange={(e) => handleInputChange('message', e.target.value)}
+                        onBlur={() => handleInputBlur('message')}
                         placeholder="Tell us about your needs and how we can help..."
-                        className="flex min-h-32 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                        className={getTextareaClassName()}
                       />
+                      {errors.message && (
+                        <p className="text-sm text-red-600 flex items-center space-x-1">
+                          <XCircle className="w-4 h-4" />
+                          <span>{errors.message}</span>
+                        </p>
+                      )}
                     </div>
                     
                     <button 
                       type="submit" 
-                      className="w-full h-12 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+                      disabled={isSubmitting}
+                      className="w-full h-12 bg-[#6566F1] text-white font-semibold rounded-2xl hover:bg-[#5A5BD9] disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                     >
-                      Send Message
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span>Sending...</span>
+                        </>
+                      ) : (
+                        <span>Send Message</span>
+                      )}
                     </button>
                   </form>
                 </div>
@@ -131,10 +391,28 @@ const ContactPage = () => {
 
               {/* Contact Information */}
               <div className="space-y-8">
+                {/* Success/Error Message - Appears above Email Us on small screens, in right column on large screens */}
+                {submitStatus !== 'idle' && (
+                  <div className={`p-4 rounded-2xl border ${
+                    submitStatus === 'success' 
+                      ? 'bg-green-50 border-green-200 text-green-800' 
+                      : 'bg-red-50 border-red-200 text-red-800'
+                  }`}>
+                    <div className="flex items-center space-x-3">
+                      {submitStatus === 'success' ? (
+                        <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                      ) : (
+                        <XCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                      )}
+                      <p className="font-medium">{submitMessage}</p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-12 h-12 bg-[#6566F1]/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-6 h-6 text-[#6566F1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                     </div>
@@ -143,8 +421,8 @@ const ContactPage = () => {
                       <p className="text-gray-600">
                         Send us an email and we&apos;ll respond within 24 hours.
                       </p>
-                      <p className="text-blue-600 font-medium mt-2">
-                        hello@aiChatbotco.com
+                      <p className="text-[#6566F1] font-bold mt-2">
+                        shared.affan@gmail.com
                       </p>
                     </div>
                   </div>
@@ -152,8 +430,8 @@ const ContactPage = () => {
 
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-12 h-12 bg-[#6566F1]/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-6 h-6 text-[#6566F1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                       </svg>
                     </div>
@@ -162,7 +440,7 @@ const ContactPage = () => {
                       <p className="text-gray-600">
                         Speak directly with our sales team.
                       </p>
-                      <p className="text-blue-600 font-medium mt-2">
+                      <p className="text-[#6566F1] font-bold mt-2">
                         +1 (555) 123-4567
                       </p>
                     </div>
@@ -171,8 +449,8 @@ const ContactPage = () => {
 
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-12 h-12 bg-[#6566F1]/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-6 h-6 text-[#6566F1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
@@ -182,7 +460,7 @@ const ContactPage = () => {
                       <p className="text-gray-600">
                         Our office is open Monday to Friday, 9 AM to 6 PM.
                       </p>
-                      <p className="text-blue-600 font-medium mt-2">
+                      <p className="text-[#6566F1] font-bold mt-2">
                         123 Business Ave<br />
                         Suite 100<br />
                         San Francisco, CA 94105
