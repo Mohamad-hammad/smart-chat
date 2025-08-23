@@ -76,14 +76,16 @@ jobs:
         LINT_OUTPUT=$(npm run lint 2>&1)
         echo "$LINT_OUTPUT"
         
-        # Check if there are actual errors (not just warnings)
-        if echo "$LINT_OUTPUT" | grep -q "✖.*error"; then
+        # Count actual errors (not warnings) - exclude summary lines
+        ERROR_COUNT=$(echo "$LINT_OUTPUT" | grep -v "✖.*problems" | grep -c "error" || echo "0")
+        WARNING_COUNT=$(echo "$LINT_OUTPUT" | grep -c "warning" || echo "0")
+        
+        echo "Found $ERROR_COUNT errors and $WARNING_COUNT warnings"
+        
+        if [ "$ERROR_COUNT" -gt 0 ]; then
           echo "❌ ESLint found errors! Build will fail."
           exit 1
-        elif echo "$LINT_OUTPUT" | grep -q "✖.*warning"; then
-          echo "⚠️  ESLint found warnings but no errors. Build will continue."
-          exit 0
         else
-          echo "✅ No ESLint errors or warnings found!"
+          echo "✅ No ESLint errors found (only warnings). Build will continue."
           exit 0
         fi
