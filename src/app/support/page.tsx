@@ -125,7 +125,7 @@ const SupportPage = () => {
                       <h3 className="text-2xl font-bold text-gray-900">Email Support</h3>
                     </div>
                     <p className="text-gray-700 leading-relaxed text-lg mb-6">
-                      Send us a detailed message and we'll respond within 24 hours. Perfect for complex 
+                      Send us a detailed message and we&apos;ll respond within 24 hours. Perfect for complex 
                       issues that require thorough investigation.
                     </p>
                     <button className="inline-flex items-center text-green-600 hover:text-green-700 font-semibold transition-colors">
@@ -184,7 +184,7 @@ const SupportPage = () => {
                     </div>
                     <p className="text-gray-700 leading-relaxed text-lg mb-6">
                       Monitor response times, uptime, and performance metrics across all our services. 
-                      Transparent reporting on our platform's reliability.
+                      Transparent reporting on our platform&apos;s reliability.
                     </p>
                     <div className="text-sm text-gray-500">
                       <p>Uptime: 99.9%</p>
