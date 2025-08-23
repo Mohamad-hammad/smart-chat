@@ -14,6 +14,10 @@ jobs:
       matrix:
         node-version: [18.x, 20.x]
 
+    env:
+      NODE_ENV: test
+      TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4

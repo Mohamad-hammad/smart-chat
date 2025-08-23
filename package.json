@@ -12,7 +12,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:lint": "npm run lint",
-    "test:build": "npm run build",
+    "test:build": "NODE_ENV=test next build --turbopack",
     "test:all": "npm run test:lint && npm run test:build && npm run test",
     "test:ci": "npm run test:lint && npm run test:build && npm run test -- --ci --coverage --watchAll=false",
     "typeorm": "typeorm-ts-node-commonjs",
