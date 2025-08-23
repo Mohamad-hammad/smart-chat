@@ -65,12 +65,21 @@ jobs:
         npm run lint --silent
         echo "ESLint completed successfully!"
 
-    - name: Check for ESLint errors
+    - name: Check for ESLint errors (not warnings)
       run: |
-        if npm run lint 2>&1 | grep -q "error"; then
-          echo "ESLint found errors!"
-          npm run lint
+        echo "Checking ESLint output for errors..."
+        # Run ESLint and capture output
+        LINT_OUTPUT=$(npm run lint 2>&1)
+        echo "$LINT_OUTPUT"
+        
+        # Check if there are actual errors (not just warnings)
+        if echo "$LINT_OUTPUT" | grep -q "✖.*error"; then
+          echo "❌ ESLint found errors! Build will fail."
           exit 1
+        elif echo "$LINT_OUTPUT" | grep -q "✖.*warning"; then
+          echo "⚠️  ESLint found warnings but no errors. Build will continue."
+          exit 0
         else
-          echo "No ESLint errors found!"
+          echo "✅ No ESLint errors or warnings found!"
+          exit 0
         fi
