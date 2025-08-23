@@ -33,7 +33,7 @@ const PricingPage = () => {
         "1,000 conversations/month",
         "Basic customization", 
         "Email support",
-        "WordPress plugin",
+        "Basic integrations",
         "24-hour response time"
       ],
       cta: "Start Free Trial",

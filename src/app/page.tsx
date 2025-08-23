@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { 
   ArrowRight, 
   Check, 
@@ -22,6 +23,7 @@ import {
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import TestimonialsSection from '@/components/TestimonialsSection';
 
 const LandingPage = () => {
 
@@ -46,33 +48,35 @@ const LandingPage = () => {
     },
     {
       icon: <Puzzle className="w-5 h-5" />,
-      text: "Works out-of-the-box with WordPress, Shopify, and more"
+      text: "Works out-of-the-box with Shopify and more"
     }
   ];
 
   const painPoints = [
     {
       icon: <AlertTriangle className="w-8 h-8 text-red-500" />,
-      title: "Bots that feel robotic",
-      description: "Most chatbots fail to understand real questions, frustrating visitors instead of helping them. Your customers end up more confused than when they started."
+      title: "Generic Responses",
+      description: "Your customers get the same canned answers that don't actually solve their problems."
     },
     {
       icon: <TrendingDown className="w-8 h-8 text-orange-500" />,
-      title: "Lost opportunities",
-      description: "Without proper lead capture and handover, potential customers leave without converting. You're losing money every day from missed connections."
+      title: "Lost Opportunities",
+      description: "Poor chatbot experiences drive customers away instead of converting them into sales."
     },
     {
-      icon: <DollarSign className="w-8 h-8 text-yellow-600" />,
-      title: "Complex, expensive tools",
-      description: "Competing solutions are bloated, hard to set up, and charge too much for too little. You need an enterprise team just to configure basic features."
+      icon: <DollarSign className="w-8 h-8 text-yellow-500" />,
+      title: "Hidden Costs",
+      description: "Complex setups, training time, and ongoing maintenance eat into your ROI."
     }
   ];
+
+
 
   const outcomes = [
     {
       icon: <Clock className="w-8 h-8 text-blue-500" />,
       title: "Faster Support",
-      description: "Customers get accurate answers instantly, in their own language. No more waiting for hours or dealing with unhelpful responses.",
+      description: "Customers get accurate answers instantly, in their language. No more waiting or unhelpful responses.",
       metric: "90% faster response time"
     },
     {
@@ -118,7 +122,7 @@ const LandingPage = () => {
         "1,000 conversations/month",
         "Basic customization",
         "Email support",
-        "WordPress plugin"
+        "Basic integrations"
       ],
       cta: "Start Free Trial",
       popular: false
@@ -188,7 +192,7 @@ const LandingPage = () => {
             
             {/* Subheadline */}
             <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              For businesses, agencies, and website owners tired of clunky bots. Our SaaS platform + WordPress plugin makes it effortless to launch AI-powered chat, automate conversations, and seamlessly hand over to humans when needed.
+              For businesses, agencies, and website owners tired of clunky bots. Our SaaS platform makes it effortless to launch AI-powered chat, automate conversations, and seamlessly hand over to humans when needed.
             </p>
             
             {/* Benefits list */}
@@ -209,13 +213,13 @@ const LandingPage = () => {
             
             {/* CTA buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:shadow-xl transition-all duration-200 group flex items-center">
-                Get Started Free
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button className="border border-gray-300 text-gray-700 px-8 py-4 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-200">
-                Watch Demo
-              </button>
+                             <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-xl transition-all duration-200 group flex items-center">
+                 Get Started Free
+                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+               </button>
+               <button className="border border-gray-300 text-gray-700 px-8 py-4 rounded-2xl font-semibold hover:bg-gray-50 transition-all duration-200">
+                 Watch Demo
+               </button>
             </div>
             
             {/* Trust indicators */}
@@ -237,46 +241,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Pain Section */}
-      <section id="pain" className="py-16 lg:py-24 bg-white">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Tired of Bots That{" "}
-              <span className="text-red-500">Don&apos;t Deliver?</span>
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-              {painPoints.map((pain, index) => (
-                <div
-                  key={index}
-                  className="bg-white border border-gray-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <div className="flex justify-center mb-4">
-                    {pain.icon}
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    {pain.title}
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    {pain.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-            
-            {/* Belief deconstruction */}
-            <div className="mt-16 p-8 bg-gray-50 rounded-xl border border-gray-200">
-              <p className="text-lg md:text-xl text-gray-900 font-medium leading-relaxed">
-                You don&apos;t need an enterprise team or weeks of training to launch a great chatbot.{" "}
-                <span className="text-blue-600 font-semibold">
-                  The problem isn&apos;t you—it&apos;s the tools.
-                </span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       {/* Outcome Section */}
       <section id="outcomes" className="py-16 lg:py-24 bg-gradient-to-b from-white to-gray-50">
@@ -321,10 +286,10 @@ const LandingPage = () => {
               <p className="text-lg text-gray-600 leading-relaxed mb-6">
                 We combine AI + automation + human handover into one simple platform—so you never have to compromise between customer experience and efficiency.
               </p>
-              <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 group flex items-center mx-auto">
-                See How It Works
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </button>
+                             <Link href="/product" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-2xl font-semibold hover:shadow-lg transition-all duration-200 group flex items-center mx-auto w-fit">
+                 See How It Works
+                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+               </Link>
             </div>
           </div>
         </div>
@@ -343,7 +308,7 @@ const LandingPage = () => {
                 </span>
               </h2>
               <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                The AI Chatbot SaaS built for real businesses. With our WordPress plugin, n8n workflows, and deep integrations, you can launch a powerful, reliable chatbot in minutes.
+                The AI Chatbot SaaS built for real businesses. With our n8n workflows and deep integrations, you can launch a powerful, reliable chatbot in minutes.
               </p>
             </div>
 
@@ -388,6 +353,11 @@ const LandingPage = () => {
               </div>
             </div>
 
+            {/* Testimonials Section */}
+            <div className="mt-16 mb-16">
+              <TestimonialsSection />
+            </div>
+
             {/* Final CTA */}
             <div className="mt-16 text-center">
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 md:p-12 text-white">
@@ -398,7 +368,7 @@ const LandingPage = () => {
                   Start your free trial today and see the difference—no credit card required.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-200 group flex items-center">
+                  <button className="bg-white text-blue-600 px-8 py-3 rounded-2xl font-semibold hover:bg-gray-50 transition-all duration-200 group flex items-center">
                     Launch My Chatbot
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </button>
@@ -413,98 +383,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-16 lg:py-24 bg-gray-50">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="max-w-6xl mx-auto">
-            {/* Section header */}
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-                Simple, Transparent{" "}
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Pricing
-                </span>
-              </h2>
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Choose the plan that fits your needs. All plans include a 14-day free trial.
-              </p>
-            </div>
 
-            {/* Pricing cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              {plans.map((plan, index) => (
-                <div
-                  key={index}
-                  className={`relative bg-white border rounded-xl p-8 shadow-lg transition-all duration-300 hover:shadow-xl ${
-                    plan.popular
-                      ? "border-blue-500 shadow-blue-100 scale-105"
-                      : "border-gray-200"
-                  }`}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-                        Most Popular
-                      </span>
-                    </div>
-                  )}
-                  
-                  <div className="text-center mb-8">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {plan.name}
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      {plan.description}
-                    </p>
-                    <div className="flex items-baseline justify-center">
-                      <span className="text-4xl font-bold text-gray-900">
-                        {plan.price}
-                      </span>
-                      <span className="text-gray-600 ml-1">
-                        {plan.period}
-                      </span>
-                    </div>
-                  </div>
-
-                  <ul className="space-y-4 mb-8">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-start">
-                        <Check className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
-                        <span className="text-gray-600">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <button
-                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-all duration-200 group flex items-center justify-center ${
-                      plan.popular
-                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg"
-                        : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    {plan.cta}
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* FAQ */}
-            <div className="text-center">
-              <p className="text-gray-600 mb-4">
-                Questions? Check our{" "}
-                <a href="#" className="text-blue-600 hover:underline">
-                  FAQ
-                </a>{" "}
-                or{" "}
-                <a href="#" className="text-blue-600 hover:underline">
-                  contact us
-                </a>
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <Footer />

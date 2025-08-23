@@ -33,9 +33,8 @@ const Navigation = () => {
   }, [isMobileMenuOpen]);
 
   const navItems = [
+    { label: "Home", href: "/" },
     { label: "Product", href: "/product" },
-    { label: "Chat Widget", href: "/chat-widget" },
-    { label: "WordPress", href: "/wordpress" },
     { label: "Pricing", href: "/pricing" },
     { label: "Contact", href: "/contact" },
   ];
@@ -68,7 +67,7 @@ const Navigation = () => {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`transition-colors duration-200 ${
+                className={`transition-all duration-200 hover:scale-110 ${
                   isActive(item.href)
                     ? "text-blue-600 font-medium"
                     : "text-gray-600 hover:text-gray-900"
@@ -84,7 +83,7 @@ const Navigation = () => {
             <Link href="/login" className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg transition-colors">
               Login
             </Link>
-            <Link href="/signup" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-200">
+            <Link href="/signup" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-xl hover:shadow-lg transition-all duration-200">
               Get Started Free
             </Link>
           </div>
@@ -134,7 +133,7 @@ const Navigation = () => {
                     key={item.label}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`block text-2xl font-medium transition-colors duration-200 w-full text-left py-3 ${
+                    className={`block text-2xl font-medium transition-all duration-200 w-full text-left py-3 hover:scale-105 ${
                       isActive(item.href)
                         ? "text-blue-600"
                         : "text-gray-600 hover:text-gray-900"
@@ -159,7 +158,7 @@ const Navigation = () => {
                 <Link 
                   href="/signup" 
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-lg hover:shadow-lg transition-all duration-200 text-lg font-medium block"
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:shadow-lg transition-all duration-200 text-lg font-medium block"
                 >
                   Get Started Free
                 </Link>
