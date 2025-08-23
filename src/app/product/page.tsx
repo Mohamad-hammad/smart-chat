@@ -4,23 +4,6 @@ import Footer from '@/components/Footer';
 import TestimonialsSection from '@/components/TestimonialsSection';
 
 const ProductPage = () => {
-  const steps = [
-    {
-      icon: <Bot className="w-8 h-8 text-blue-600" />,
-      title: "Create Your Bot",
-      description: "Build your AI chatbot in minutes with our intuitive drag-and-drop interface. No coding required."
-    },
-    {
-      icon: <MessageCircle className="w-8 h-8 text-green-600" />,
-      title: "Train & Deploy",
-      description: "Upload your content, train the AI on your business data, and deploy across all platforms instantly."
-    },
-    {
-      icon: <BarChart3 className="w-8 h-8 text-purple-600" />,
-      title: "Monitor & Optimize",
-      description: "Track performance, analyze conversations, and continuously improve your bot's effectiveness."
-    }
-  ];
 
   const features = [
     {
@@ -100,7 +83,7 @@ const ProductPage = () => {
       </section>
 
       {/* How It Works */}
-      <section className="py-16 bg-white">
+      <section id="how-it-works" className="py-16 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
@@ -141,7 +124,7 @@ const ProductPage = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">Monitor & Optimize</h3>
               <p className="text-gray-600 leading-relaxed text-center">
-                Track performance, analyze conversations, and continuously improve your bot's effectiveness.
+                Track performance, analyze conversations, and continuously improve your bot&apos;s effectiveness.
               </p>
             </div>
           </div>
@@ -194,7 +177,11 @@ const ProductPage = () => {
               Simple, powerful, and affordable for businesses of all sizes.
             </p>
             <div className="flex items-center justify-center space-x-4">
-              <div className="w-12 h-12 bg-white/20 rounded-full"></div>
+              <img 
+                src="/images/ceo-photo.jpg?v=1" 
+                alt="Sarah Johnson, Founder & CEO" 
+                className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
+              />
               <div className="text-left">
                 <p className="font-semibold">Sarah Johnson</p>
                 <p className="opacity-75">Founder & CEO</p>
@@ -367,7 +354,9 @@ const ProductPage = () => {
       </section>
 
       {/* Testimonials Section */}
-      <TestimonialsSection />
+      <section id="testimonials">
+        <TestimonialsSection />
+      </section>
 
       {/* Footer */}
       <Footer />

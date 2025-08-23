@@ -10,9 +10,6 @@ import {
   Zap, 
   BarChart3, 
   Puzzle,
-  AlertTriangle,
-  TrendingDown,
-  DollarSign,
   Clock,
   TrendingUp,
   Shield,
@@ -52,23 +49,7 @@ const LandingPage = () => {
     }
   ];
 
-  const painPoints = [
-    {
-      icon: <AlertTriangle className="w-8 h-8 text-red-500" />,
-      title: "Generic Responses",
-      description: "Your customers get the same canned answers that don't actually solve their problems."
-    },
-    {
-      icon: <TrendingDown className="w-8 h-8 text-orange-500" />,
-      title: "Lost Opportunities",
-      description: "Poor chatbot experiences drive customers away instead of converting them into sales."
-    },
-    {
-      icon: <DollarSign className="w-8 h-8 text-yellow-500" />,
-      title: "Hidden Costs",
-      description: "Complex setups, training time, and ongoing maintenance eat into your ROI."
-    }
-  ];
+
 
 
 
@@ -111,57 +92,7 @@ const LandingPage = () => {
     }
   ];
 
-  const plans = [
-    {
-      name: "Starter",
-      price: "$29",
-      period: "/month",
-      description: "Perfect for small businesses",
-      features: [
-        "1 AI chatbot",
-        "1,000 conversations/month",
-        "Basic customization",
-        "Email support",
-        "Basic integrations"
-      ],
-      cta: "Start Free Trial",
-      popular: false
-    },
-    {
-      name: "Professional",
-      price: "$79",
-      period: "/month",
-      description: "Best for growing businesses",
-      features: [
-        "5 AI chatbots",
-        "10,000 conversations/month",
-        "Advanced customization",
-        "Priority support",
-        "All integrations",
-        "Analytics dashboard",
-        "Human handover"
-      ],
-      cta: "Start Free Trial",
-      popular: true
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      period: "",
-      description: "For large organizations",
-      features: [
-        "Unlimited chatbots",
-        "Unlimited conversations",
-        "White-label solution",
-        "Dedicated support",
-        "Custom integrations",
-        "SLA guarantee",
-        "Advanced analytics"
-      ],
-      cta: "Contact Sales",
-      popular: false
-    }
-  ];
+
 
 
 
@@ -338,20 +269,7 @@ const LandingPage = () => {
               ))}
             </div>
 
-            {/* Founder message */}
-            <div className="bg-white border border-gray-200 rounded-xl p-8 md:p-12 shadow-lg">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto mb-6 flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">JD</span>
-                </div>
-                <blockquote className="text-lg md:text-xl text-gray-900 leading-relaxed mb-6 italic">
-                  &ldquo;We built this because we were tired of chatbots that overpromised and underdelivered. Our mission is simple: make AI chatbots that are fast, reliable, and actually useful for your business.&rdquo;
-                </blockquote>
-                <p className="text-gray-600 font-medium">
-                  John Doe, Founder & CEO
-                </p>
-              </div>
-            </div>
+
 
             {/* Testimonials Section */}
             <div className="mt-16 mb-16">
