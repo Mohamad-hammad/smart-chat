@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import emailjs from '@emailjs/browser';
 
 interface FormData {
   firstName: string;
@@ -38,16 +37,6 @@ const ContactPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [submitMessage, setSubmitMessage] = useState('');
-
-  // EmailJS Configuration
-  const EMAILJS_SERVICE_ID = 'service_sd9btqr';
-  const EMAILJS_TEMPLATE_ID = 'template_2c64val';
-  const EMAILJS_PUBLIC_KEY = '1cVCZ6R1bGo6efBGC';
-
-  useEffect(() => {
-    // Initialize EmailJS
-    emailjs.init(EMAILJS_PUBLIC_KEY);
-  }, []);
 
   const validateField = (name: keyof FormData, value: string): string => {
     switch (name) {
@@ -136,28 +125,20 @@ const ContactPage = () => {
     setSubmitStatus('idle');
 
     try {
-      // Prepare EmailJS template parameters
-      const templateParams = {
-        to_email: 'shared.affan@gmail.com',
-        from_name: `${formData.firstName} ${formData.lastName}`,
-        from_email: formData.email,
-        company: formData.company || 'Not specified',
-        phone: formData.phone || 'Not specified',
-        message: formData.message,
-        reply_to: formData.email
-      };
+      // Send form data to API
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-      // Send email using EmailJS
-      const response = await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        templateParams,
-        EMAILJS_PUBLIC_KEY
-      );
+      const data = await response.json();
 
-      if (response.status === 200) {
+      if (response.ok && data.success) {
         setSubmitStatus('success');
-        setSubmitMessage('Thank you! Your message has been sent successfully. We\'ll get back to you within 24 hours.');
+        setSubmitMessage(data.message);
         
         // Reset form
         setFormData({
@@ -170,13 +151,14 @@ const ContactPage = () => {
         });
         setErrors({});
       } else {
-        throw new Error('Failed to send email');
+        setSubmitStatus('error');
+        setSubmitMessage(data.error || 'Failed to send message. Please try again.');
       }
       
     } catch (error) {
-      console.error('EmailJS Error:', error);
+      console.error('Contact form error:', error);
       setSubmitStatus('error');
-      setSubmitMessage('Sorry, something went wrong. Please try again or contact us directly at shared.affan@gmail.com');
+      setSubmitMessage('An error occurred. Please try again or contact us directly.');
     } finally {
       setIsSubmitting(false);
     }

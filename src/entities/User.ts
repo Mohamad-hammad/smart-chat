@@ -5,44 +5,44 @@ export class User {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column({ unique: true })
+  @Column({ type: "varchar", unique: true })
   @Index()
   email!: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   password!: string;
 
-  @Column({ nullable: true })
-  firstName!: string;
+  @Column({ type: "varchar", nullable: true })
+  firstName!: string | null;
 
-  @Column({ nullable: true })
-  lastName!: string;
+  @Column({ type: "varchar", nullable: true })
+  lastName!: string | null;
 
-  @Column({ default: false })
+  @Column({ type: "boolean", default: false })
   isEmailVerified!: boolean;
 
-  @Column({ nullable: true })
-  emailVerificationToken!: string;
+  @Column({ type: "varchar", nullable: true })
+  emailVerificationToken!: string | null;
 
-  @Column({ nullable: true })
-  passwordResetToken!: string;
+  @Column({ type: "varchar", nullable: true })
+  passwordResetToken!: string | null;
 
-  @Column({ nullable: true })
-  passwordResetExpires!: Date;
+  @Column({ type: "timestamp", nullable: true })
+  passwordResetExpires!: Date | null;
 
-  @Column({ default: "user" })
+  @Column({ type: "varchar", default: "user" })
   role!: string;
 
-  @Column({ default: true })
+  @Column({ type: "boolean", default: true })
   isActive!: boolean;
 
-  @Column({ nullable: true })
-  lastLoginAt!: Date;
+  @Column({ type: "timestamp", nullable: true })
+  lastLoginAt!: Date | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: "timestamp" })
   updatedAt!: Date;
 
   // Virtual property for full name

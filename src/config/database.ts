@@ -48,16 +48,25 @@ const getDatabaseConfig = () => {
   return {
     url: devDbUrl,
     synchronize: true, // Allow schema changes in development
-    logging: true
+    logging: true,
+    nodeEnv: nodeEnv // Add nodeEnv to the config
   };
 };
 
 // Create data source with environment-specific config
 const config = getDatabaseConfig();
+console.log('Database config:', {
+  nodeEnv: process.env.NODE_ENV,
+  synchronize: config.synchronize,
+  dropSchema: process.env.NODE_ENV === 'development',
+  url: config.url ? 'Set' : 'Not set'
+});
+
 export const AppDataSource = new DataSource({
   type: "postgres",
   url: config.url,
   synchronize: config.synchronize,
+  dropSchema: process.env.NODE_ENV === 'development', // Drop and recreate schema in development
   logging: config.logging,
   entities: [User],
   migrations: [],
@@ -81,3 +90,6 @@ export const initializeDatabase = async () => {
     throw error;
   }
 };
+
+// Remove automatic initialization - let each API route handle it
+// AppDataSource.initialize().catch(console.error);

@@ -1,40 +1,82 @@
-import { NextRequest, NextResponse } from "next/server";
-import { UserService } from "../../../../services/userService";
-import { initializeDatabase } from "../../../../config/database";
+import { NextRequest, NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { AppDataSource } from '@/config/database';
+import { User } from '@/entities/User';
 
 export async function POST(request: NextRequest) {
   try {
-    // Initialize database connection
-    await initializeDatabase();
-
-    const body = await request.json();
-    const { email, password } = body;
+    // Initialize database connection only if not already initialized
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+    
+    const { email, password } = await request.json();
 
     // Validate input
     if (!email || !password) {
       return NextResponse.json(
-        { error: "Email and password are required" },
+        { error: 'Email and password are required' },
         { status: 400 }
       );
     }
 
-    // Authenticate user
-    const user = await UserService.authenticateUser(email, password);
+    // Find user by email
+    const userRepository = AppDataSource.getRepository(User);
+    const user = await userRepository.findOne({ where: { email } });
 
-    // Remove password from response
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _unused, ...userWithoutPassword } = user;
-
-    return NextResponse.json({
-      message: "Login successful",
-      user: userWithoutPassword,
-    });
-      } catch (error: unknown) {
-      console.error("Login error:", error);
-      const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    if (!user) {
       return NextResponse.json(
-        { error: errorMessage },
+        { error: 'Invalid email or password' },
         { status: 401 }
       );
     }
+
+    // Check if user is active
+    if (!user.isActive) {
+      return NextResponse.json(
+        { error: 'Account is not active. Please verify your email first.' },
+        { status: 401 }
+      );
+    }
+
+    // Check if email is verified
+    if (!user.isEmailVerified) {
+      return NextResponse.json(
+        { 
+          error: 'Please verify your email before logging in. Check your inbox for a verification link.',
+          needsVerification: true,
+          email: user.email
+        },
+        { status: 401 }
+      );
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { error: 'Invalid email or password' },
+        { status: 401 }
+      );
+    }
+
+    // Update last login
+    user.lastLoginAt = new Date();
+    await userRepository.save(user);
+
+    // Remove password from response
+    const { password: _, ...userWithoutPassword } = user;
+
+    return NextResponse.json({
+      message: 'Login successful',
+      user: userWithoutPassword
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }

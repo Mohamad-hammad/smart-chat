@@ -1,55 +1,87 @@
-import { NextRequest, NextResponse } from "next/server";
-import { UserService } from "../../../../services/userService";
-import { initializeDatabase } from "../../../../config/database";
+import { NextRequest, NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { AppDataSource } from '@/config/database';
+import { User } from '@/entities/User';
+import { EmailVerificationService } from '@/services/emailVerificationService';
 
 export async function POST(request: NextRequest) {
   try {
-    // Initialize database connection
-    await initializeDatabase();
-
-    const body = await request.json();
-    const { email, password, firstName, lastName } = body;
+    // Initialize database connection only if not already initialized
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+    
+    const { email, password, firstName, lastName } = await request.json();
 
     // Validate input
     if (!email || !password) {
       return NextResponse.json(
-        { error: "Email and password are required" },
+        { error: 'Email and password are required' },
         { status: 400 }
       );
     }
 
-    if (password.length < 6) {
+    // Check if user already exists
+    const userRepository = AppDataSource.getRepository(User);
+    const existingUser = await userRepository.findOne({ where: { email } });
+
+    if (existingUser) {
       return NextResponse.json(
-        { error: "Password must be at least 6 characters long" },
-        { status: 400 }
+        { 
+          error: 'An account with this email already exists. Please try logging in instead.',
+          code: 'EMAIL_EXISTS'
+        },
+        { status: 409 }
       );
     }
 
-    // Create user
-    const user = await UserService.createUser({
-      email,
-      password,
-      firstName,
-      lastName,
-    });
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Remove password from response
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _unused, ...userWithoutPassword } = user;
+    // Generate verification token
+    const verificationToken = EmailVerificationService.generateVerificationToken();
 
-    return NextResponse.json(
-      {
-        message: "User created successfully",
-        user: userWithoutPassword,
-      },
-      { status: 201 }
-    );
-      } catch (error: unknown) {
-      console.error("Signup error:", error);
-      const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    // Create user (not verified yet)
+    const user = new User();
+    user.email = email;
+    user.password = hashedPassword;
+    user.firstName = firstName || null;
+    user.lastName = lastName || null;
+    user.isEmailVerified = false;
+    user.emailVerificationToken = verificationToken;
+    user.isActive = false; // User is inactive until email is verified
+
+    // Save user to database
+    await userRepository.save(user);
+
+    // Generate verification URL
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const verificationUrl = `${baseUrl}/verify-email?token=${verificationToken}`;
+
+    // Send verification email
+    const emailSent = await EmailVerificationService.sendVerificationEmail(user, verificationUrl);
+
+    if (!emailSent) {
+      // If email fails, delete the user and return error
+      await userRepository.remove(user);
       return NextResponse.json(
-        { error: errorMessage },
+        { error: 'Failed to send verification email. Please try again.' },
         { status: 500 }
       );
     }
+
+    // Return success response
+    return NextResponse.json({
+      message: 'Account created successfully! Please check your email to verify your account.',
+      userId: user.id,
+      email: user.email
+    }, { status: 201 });
+
+  } catch (error) {
+    console.error('Signup error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }
