@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 import { Menu, X } from 'lucide-react';
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,6 +42,10 @@ const Navigation = () => {
   ];
 
   const isActive = (href: string) => pathname === href;
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: '/' });
+  };
 
   return (
     <nav
@@ -80,12 +86,31 @@ const Navigation = () => {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center space-x-4">
-            <Link href="/login" className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg transition-colors">
-              Login
-            </Link>
-            <Link href="/signup" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-xl hover:shadow-lg transition-all duration-200">
-              Get Started Free
-            </Link>
+            {session ? (
+              <>
+                <button
+                  onClick={handleSignOut}
+                  className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg transition-colors"
+                >
+                  Sign Out
+                </button>
+                <Link 
+                  href="/dashboard" 
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-xl hover:shadow-lg transition-all duration-200"
+                >
+                  Dashboard
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg transition-colors">
+                  Login
+                </Link>
+                <Link href="/signup" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-xl hover:shadow-lg transition-all duration-200">
+                  Get Started Free
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -148,20 +173,43 @@ const Navigation = () => {
             {/* CTA Buttons - Fixed at bottom */}
             <div className="px-6 py-8 border-t border-gray-200 bg-gray-100">
               <div className="space-y-4">
-                <Link 
-                  href="/login" 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-gray-600 hover:text-gray-900 px-6 py-4 rounded-lg transition-colors text-left text-lg font-medium border border-gray-300 hover:bg-gray-200 bg-white block"
-                >
-                  Login
-                </Link>
-                <Link 
-                  href="/signup" 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:shadow-lg transition-all duration-200 text-lg font-medium block"
-                >
-                  Get Started Free
-                </Link>
+                {session ? (
+                  <>
+                    <button 
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        handleSignOut();
+                      }}
+                      className="w-full text-gray-600 hover:text-gray-900 px-6 py-4 rounded-lg transition-colors text-left text-lg font-medium border border-gray-300 hover:bg-gray-200 bg-white block"
+                    >
+                      Sign Out
+                    </button>
+                    <Link 
+                      href="/dashboard" 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:shadow-lg transition-all duration-200 text-lg font-medium block"
+                    >
+                      Dashboard
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link 
+                      href="/login" 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full text-gray-600 hover:text-gray-900 px-6 py-4 rounded-lg transition-colors text-left text-lg font-medium border border-gray-300 hover:bg-gray-200 bg-white block"
+                    >
+                      Login
+                    </Link>
+                    <Link 
+                      href="/signup" 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:shadow-lg transition-all duration-200 text-lg font-medium block"
+                    >
+                      Get Started Free
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>

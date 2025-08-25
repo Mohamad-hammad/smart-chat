@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 const LoginComponent = () => {
   const [form, setForm] = useState({
@@ -48,9 +49,9 @@ const LoginComponent = () => {
         password: '',
       });
       
-      // Redirect to dashboard or home page after successful login
+      // Redirect to dashboard after successful login
       setTimeout(() => {
-        window.location.href = '/';
+        window.location.href = '/dashboard';
       }, 1500);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Something went wrong";
@@ -95,6 +96,21 @@ const LoginComponent = () => {
               {error}
             </div>
           )}
+
+          {/* Google Sign In Button */}
+          <div className="mb-6">
+            <GoogleSignInButton text="Sign in with Google" />
+          </div>
+
+          {/* Divider */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-200" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">Or continue with email</span>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}

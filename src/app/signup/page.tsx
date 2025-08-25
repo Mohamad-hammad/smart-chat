@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 // Standalone Signup Component for Next.js
 const SignupComponent = () => {
@@ -68,6 +69,11 @@ const SignupComponent = () => {
         confirmPassword: '',
         acceptTerms: false
       });
+      
+      // Redirect to dashboard after successful signup
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 2000);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Something went wrong";
       setError(errorMessage);
@@ -111,6 +117,21 @@ const SignupComponent = () => {
               {error}
             </div>
           )}
+
+          {/* Google Sign In Button */}
+          <div className="mb-6">
+            <GoogleSignInButton text="Sign up with Google" />
+          </div>
+
+          {/* Divider */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-200" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">Or continue with email</span>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* First Name and Last Name */}
