@@ -28,8 +28,30 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci --legacy-peer-deps
+    - name: Clear npm cache
+      run: npm cache clean --force
+
+    - name: Install dependencies (with retry)
+      run: |
+        echo "Attempting to install dependencies..."
+        for i in 1 2 3; do
+          echo "Attempt $i of 3..."
+          if npm ci --legacy-peer-deps --no-audit --no-fund; then
+            echo "Dependencies installed successfully!"
+            break
+          else
+            echo "Attempt $i failed. Retrying..."
+            if [ $i -lt 3 ]; then
+              sleep 10
+              npm cache clean --force
+            fi
+          fi
+        done
+        
+        if [ $? -ne 0 ]; then
+          echo "All attempts failed. Trying alternative approach..."
+          npm install --legacy-peer-deps --no-audit --no-fund
+        fi
 
     - name: Run ESLint
       run: npm run test:lint
@@ -60,8 +82,30 @@ jobs:
         node-version: '20.x'
         cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci --legacy-peer-deps
+    - name: Clear npm cache
+      run: npm cache clean --force
+
+    - name: Install dependencies (with retry)
+      run: |
+        echo "Attempting to install dependencies..."
+        for i in 1 2 3; do
+          echo "Attempt $i of 3..."
+          if npm ci --legacy-peer-deps --no-audit --no-fund; then
+            echo "Dependencies installed successfully!"
+            break
+          else
+            echo "Attempt $i failed. Retrying..."
+            if [ $i -lt 3 ]; then
+              sleep 10
+              npm cache clean --force
+            fi
+          fi
+        done
+        
+        if [ $? -ne 0 ]; then
+          echo "All attempts failed. Trying alternative approach..."
+          npm install --legacy-peer-deps --no-audit --no-fund
+        fi
 
     - name: Run ESLint with detailed output
       run: |
