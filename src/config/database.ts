@@ -1,5 +1,7 @@
 import { DataSource } from "typeorm";
 import { User } from "../entities/User";
+import { Bot } from "../entities/Bot";
+import { BotAssignment } from "../entities/BotAssignment";
 
 // Environment-specific database configuration
 const getDatabaseConfig = () => {
@@ -66,7 +68,7 @@ export const AppDataSource = new DataSource({
   url: config.url,
   synchronize: config.synchronize,
   logging: config.logging,
-  entities: [User],
+  entities: [User, Bot, BotAssignment],
   migrations: [],
   subscribers: [],
   ssl: {

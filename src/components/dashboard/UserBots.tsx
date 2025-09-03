@@ -40,6 +40,7 @@ const UserBots = () => {
   const { data: session } = useSession();
   const [bots, setBots] = useState<AssignedBot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -81,18 +82,33 @@ const UserBots = () => {
   ];
 
   useEffect(() => {
-    // Simulate API call to fetch assigned bots
+    // Fetch assigned bots from API
     const fetchAssignedBots = async () => {
-      setLoading(true);
-      // In a real app, this would be an API call
-      setTimeout(() => {
+      try {
+        setLoading(true);
+        
+        const response = await fetch('/api/user/assigned-bots');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch assigned bots');
+        }
+        
+        const data = await response.json();
+        setBots(data.bots || []);
+      } catch (err) {
+        console.error('Error fetching assigned bots:', err);
+        setError('Failed to load assigned bots. Please try again.');
+        // Fallback to mock data if API fails
         setBots(mockAssignedBots);
+      } finally {
         setLoading(false);
-      }, 1000);
+      }
     };
 
-    fetchAssignedBots();
-  }, []);
+    if (session?.user?.email) {
+      fetchAssignedBots();
+    }
+  }, [session?.user?.email]);
 
   const filteredBots = bots.filter(bot => {
     const matchesSearch = bot.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -126,6 +142,28 @@ const UserBots = () => {
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6566F1] mx-auto mb-4"></div>
             <p className="text-gray-600">Loading your assigned bots...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Bot className="w-6 h-6 text-red-600" />
+            </div>
+            <p className="text-red-600 mb-2">Error Loading Bots</p>
+            <p className="text-gray-600 text-sm">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-[#6566F1] text-white rounded-lg hover:bg-[#5A5BD9] transition-colors"
+            >
+              Try Again
+            </button>
           </div>
         </div>
       </div>
@@ -220,7 +258,7 @@ const UserBots = () => {
             <Bot className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No bots assigned</h3>
             <p className="text-gray-600 mb-4">
-              You don&apos;t have any bots assigned to you yet. Contact your manager to get access to bots.
+              {session?.user?.name ? `${session.user.name}, you don&apos;t have any bots assigned to you yet.` : "You don&apos;t have any bots assigned to you yet."} Contact your manager to get access to bots.
             </p>
           </CardContent>
         </Card>
