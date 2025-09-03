@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { BotAssignment } from './BotAssignment';
 
 @Entity('bots')
 export class Bot {
@@ -41,6 +40,6 @@ export class Bot {
   updatedAt!: Date;
 
   // Relations
-  @OneToMany(() => BotAssignment, assignment => assignment.bot)
-  assignments?: BotAssignment[];
+  @OneToMany('BotAssignment', 'bot')
+  assignments?: any[];
 }
