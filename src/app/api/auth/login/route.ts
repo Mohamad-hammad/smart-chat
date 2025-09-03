@@ -67,9 +67,18 @@ export async function POST(request: NextRequest) {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
+    // Determine redirect URL based on user role
+    let redirectUrl = '/user-dashboard'; // default
+    if (user.role === 'admin') {
+      redirectUrl = '/admin-dashboard';
+    } else if (user.role === 'manager') {
+      redirectUrl = '/manager-dashboard';
+    }
+
     return NextResponse.json({
       message: 'Login successful',
-      user: userWithoutPassword
+      user: userWithoutPassword,
+      redirectUrl: redirectUrl
     });
 
   } catch (error) {

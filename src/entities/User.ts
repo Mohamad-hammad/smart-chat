@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from "typeorm";
+import { UserRole } from "../types/UserRole";
 
 @Entity("users")
 export class User {
@@ -30,8 +31,12 @@ export class User {
   @Column({ type: "timestamp", nullable: true })
   passwordResetExpires!: Date | null;
 
-  @Column({ type: "varchar", default: "user" })
-  role!: string;
+  @Column({ 
+    type: "enum", 
+    enum: UserRole, 
+    default: UserRole.USER 
+  })
+  role!: UserRole;
 
   @Column({ type: "boolean", default: true })
   isActive!: boolean;

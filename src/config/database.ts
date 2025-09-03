@@ -58,7 +58,6 @@ const config = getDatabaseConfig();
 console.log('Database config:', {
   nodeEnv: process.env.NODE_ENV,
   synchronize: config.synchronize,
-  dropSchema: process.env.NODE_ENV === 'development',
   url: config.url ? 'Set' : 'Not set'
 });
 
@@ -66,7 +65,6 @@ export const AppDataSource = new DataSource({
   type: "postgres",
   url: config.url,
   synchronize: config.synchronize,
-  dropSchema: process.env.NODE_ENV === 'development', // Drop and recreate schema in development
   logging: config.logging,
   entities: [User],
   migrations: [],

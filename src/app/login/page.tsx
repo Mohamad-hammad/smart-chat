@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { signIn, getSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 const LoginComponent = () => {
+  const router = useRouter();
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -26,33 +29,42 @@ const LoginComponent = () => {
     setMessage('');
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: form.email,
-          password: form.password,
-        }),
+      // Use NextAuth signIn with credentials
+      const result = await signIn('credentials', {
+        email: form.email,
+        password: form.password,
+        redirect: false,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Something went wrong');
+      if (result?.error) {
+        throw new Error('Invalid email or password');
       }
 
-      setMessage(data.message);
-      setForm({
-        email: '',
-        password: '',
-      });
-      
-      // Redirect to dashboard after successful login
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 1500);
+      if (result?.ok) {
+        setMessage('Login successful!');
+        setForm({
+          email: '',
+          password: '',
+        });
+        
+        // Get the session to determine user role and redirect appropriately
+        const session = await getSession();
+        if (session?.user?.email) {
+          // Get role from session
+          const userRole = (session.user as any).role;
+          
+          let redirectUrl = '/user-dashboard'; // default
+          if (userRole === 'admin') {
+            redirectUrl = '/admin-dashboard';
+          } else if (userRole === 'manager') {
+            redirectUrl = '/manager-dashboard';
+          }
+          
+          setTimeout(() => {
+            router.push(redirectUrl);
+          }, 1500);
+        }
+      }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Something went wrong";
       setError(errorMessage);
