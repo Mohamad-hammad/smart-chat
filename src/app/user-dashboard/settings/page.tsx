@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import DashboardLayoutWithAuth from '@/components/dashboard/DashboardLayoutWithAuth';
+
 
 const SettingsPage = () => {
   const router = useRouter();
@@ -56,8 +56,8 @@ const SettingsPage = () => {
   };
 
   return (
-    <DashboardLayoutWithAuth activeSection="settings">
-      <div className="space-y-6">
+    
+      <div className="p-6 space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
@@ -377,7 +377,7 @@ const SettingsPage = () => {
           </Card>
         )}
       </div>
-    </DashboardLayoutWithAuth>
+    
   );
 };
 

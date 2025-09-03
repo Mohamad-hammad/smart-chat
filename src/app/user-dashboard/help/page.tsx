@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import DashboardLayoutWithAuth from '@/components/dashboard/DashboardLayoutWithAuth';
+
 
 const HelpPage = () => {
   const router = useRouter();
@@ -105,8 +105,8 @@ const HelpPage = () => {
   };
 
   return (
-    <DashboardLayoutWithAuth activeSection="help">
-      <div className="space-y-6">
+    
+      <div className="p-6 space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Help Center</h1>
@@ -266,7 +266,7 @@ const HelpPage = () => {
           </Card>
         )}
       </div>
-    </DashboardLayoutWithAuth>
+    
   );
 };
 

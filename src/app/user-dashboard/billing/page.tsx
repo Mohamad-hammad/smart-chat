@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import DashboardLayoutWithAuth from '@/components/dashboard/DashboardLayoutWithAuth';
+
 
 const BillingPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -26,8 +26,8 @@ const BillingPage = () => {
   ];
 
   return (
-    <DashboardLayoutWithAuth activeSection="billing">
-      <div className="space-y-6">
+    
+      <div className="p-6 space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Billing</h1>
@@ -57,7 +57,7 @@ const BillingPage = () => {
 
         {/* Overview Tab Content */}
         {activeTab === 'overview' && (
-          <div className="space-y-6">
+          <div className="p-6 space-y-6">
             {/* Current Plan */}
             <Card className="border border-gray-200 bg-white">
               <CardHeader>
@@ -233,7 +233,7 @@ const BillingPage = () => {
           </Card>
         )}
       </div>
-    </DashboardLayoutWithAuth>
+    
   );
 };
 

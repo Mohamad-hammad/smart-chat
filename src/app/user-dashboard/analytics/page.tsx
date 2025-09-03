@@ -37,7 +37,7 @@ import {
   ResponsiveContainer,
   Legend
 } from 'recharts';
-import DashboardLayoutWithAuth from '@/components/dashboard/DashboardLayoutWithAuth';
+
 
 // Mock analytics data matching the image exactly
 const conversationData = [
@@ -78,8 +78,7 @@ const AnalyticsPage = () => {
   const [timeRange, setTimeRange] = useState("7d");
 
   return (
-    <DashboardLayoutWithAuth activeSection="analytics">
-      <div className="space-y-6">
+    <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -372,8 +371,7 @@ const AnalyticsPage = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </DashboardLayoutWithAuth>
+    </div>
   );
 };
 
