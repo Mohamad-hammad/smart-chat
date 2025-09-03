@@ -98,12 +98,12 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
                   sidebarCollapsed ? 'justify-center px-2' : 'px-3'
                 } py-3 text-sm font-medium rounded-lg transition-colors ${
                   isActive
-                    ? 'bg-[#6566F1] text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'border-2 border-[#6566F1] bg-[#6566F1]/10 text-[#6566F1]'
+                    : 'text-gray-700 hover:bg-gray-100 border-2 border-transparent'
                 }`}
               >
                 <Icon className={`w-5 h-5 flex-shrink-0 ${
-                  isActive ? 'text-white' : 'text-gray-500'
+                  isActive ? 'text-[#6566F1]' : 'text-gray-500'
                 }`} />
                 <div className={`overflow-hidden transition-all duration-300 ${
                   sidebarCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
