@@ -28,6 +28,7 @@ const TeamManagement = () => {
     email: '',
     phone: ''
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   // Mock data for team members
   const teamMembers = [
@@ -95,6 +96,45 @@ const TeamManagement = () => {
   ];
 
   const selectedAgentData = teamMembers[selectedAgent];
+
+  const handleAddMember = async () => {
+    if (!newMember.firstName || !newMember.lastName || !newMember.email) {
+      alert('Please fill in all required fields (First Name, Last Name, Email)');
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('/api/admin/invite-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: `${newMember.firstName} ${newMember.lastName}`,
+          email: newMember.email,
+          role: 'user'
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert('Invitation sent successfully! Check the server console for details.');
+        console.log('Invitation response:', data);
+        setIsAddModalOpen(false);
+        setNewMember({ firstName: '', lastName: '', email: '', phone: '' });
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to send invitation: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error sending invitation:', error);
+      alert('Error sending invitation. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
@@ -365,15 +405,11 @@ const TeamManagement = () => {
                 Cancel
               </Button>
               <Button
-                onClick={() => {
-                  // Handle add member logic here
-                  console.log('Adding new member:', newMember);
-                  setIsAddModalOpen(false);
-                  setNewMember({ firstName: '', lastName: '', email: '', phone: '' });
-                }}
-                className="bg-[#6566F1] hover:bg-[#5A5BD9] text-white px-4 py-2"
+                onClick={handleAddMember}
+                disabled={isLoading}
+                className="bg-[#6566F1] hover:bg-[#5A5BD9] text-white px-4 py-2 disabled:opacity-50"
               >
-                Add Member
+                {isLoading ? 'Sending...' : 'Add Member'}
               </Button>
             </div>
           </div>
