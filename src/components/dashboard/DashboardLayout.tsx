@@ -13,7 +13,8 @@ import {
   X,
   PanelLeftClose,
   PanelLeftOpen,
-  Zap
+  Zap,
+  MessageSquare
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -33,6 +34,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/dashboard' },
     { id: 'bots', label: 'Bots', icon: Bot, path: '/dashboard/bots' },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/dashboard/analytics' },
+    { id: 'chatbot-analytics', label: 'Chatbot Analytics', icon: MessageSquare, path: '/dashboard/chatbot-analytics' },
     { id: 'settings', label: 'Settings', icon: Settings, path: '/dashboard/settings' },
     { id: 'billing', label: 'Billing', icon: CreditCard, path: '/dashboard/billing' },
     { id: 'help', label: 'Help', icon: HelpCircle, path: '/dashboard/help' },
