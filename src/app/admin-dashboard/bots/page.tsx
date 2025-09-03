@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import DashboardLayoutWithAuth from '@/components/dashboard/DashboardLayoutWithAuth';
+import RoleGuard from '@/components/auth/RoleGuard';
 
 // Mock data
 const mockBots = [
@@ -84,7 +85,8 @@ const BotsPage = () => {
   };
 
   return (
-    <DashboardLayoutWithAuth activeSection="bots">
+    <RoleGuard allowedRoles={['admin']}>
+      <DashboardLayoutWithAuth activeSection="bots">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -238,7 +240,8 @@ const BotsPage = () => {
           </div>
         )}
       </div>
-    </DashboardLayoutWithAuth>
+      </DashboardLayoutWithAuth>
+    </RoleGuard>
   );
 };
 

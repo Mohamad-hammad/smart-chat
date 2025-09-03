@@ -1,13 +1,13 @@
 'use client';
 
 import React from 'react';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import DashboardLayoutWithAuth from '@/components/dashboard/DashboardLayoutWithAuth';
 import Overview from '@/components/dashboard/Overview';
 
 export default function DashboardPage() {
   return (
-    <DashboardLayout activeSection="overview">
+    <DashboardLayoutWithAuth activeSection="overview">
       <Overview />
-    </DashboardLayout>
+    </DashboardLayoutWithAuth>
   );
 }
