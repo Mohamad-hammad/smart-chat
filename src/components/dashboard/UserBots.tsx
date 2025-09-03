@@ -220,7 +220,7 @@ const UserBots = () => {
             <Bot className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No bots assigned</h3>
             <p className="text-gray-600 mb-4">
-              You don't have any bots assigned to you yet. Contact your manager to get access to bots.
+              You don&apos;t have any bots assigned to you yet. Contact your manager to get access to bots.
             </p>
           </CardContent>
         </Card>

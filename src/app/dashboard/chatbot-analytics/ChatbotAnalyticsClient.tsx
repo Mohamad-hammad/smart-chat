@@ -115,7 +115,7 @@ const ChatbotAnalyticsClient: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Chatbot Analytics</h1>
-            <p className="text-gray-600">Monitor your chatbot's performance and user interactions.</p>
+            <p className="text-gray-600">Monitor your chatbot&apos;s performance and user interactions.</p>
           </div>
           <div className="flex items-center space-x-3">
             <Select value={timeRange} onValueChange={setTimeRange}>
