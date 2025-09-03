@@ -51,7 +51,7 @@ const LoginComponent = () => {
         const session = await getSession();
         if (session?.user?.email) {
           // Get role from session
-          const userRole = (session.user as any).role;
+          const userRole = 'role' in session.user ? session.user.role : 'user';
           
           let redirectUrl = '/user-dashboard'; // default
           if (userRole === 'admin') {

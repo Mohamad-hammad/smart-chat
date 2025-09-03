@@ -6,7 +6,7 @@ import { User } from "@/entities/User"
 import { UserRole } from "@/types/UserRole"
 import bcrypt from "bcryptjs"
 
-const handler = NextAuth({
+export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -117,8 +117,8 @@ const handler = NextAuth({
       }
       
       // Add role to token for credentials provider
-      if (user && (user as any).role) {
-        token.role = (user as any).role;
+      if (user && 'role' in user && user.role) {
+        token.role = user.role;
       }
       
       return token;
@@ -161,6 +161,8 @@ const handler = NextAuth({
       },
     },
   },
-})
+}
+
+const handler = NextAuth(authOptions)
 
 export { handler as GET, handler as POST }

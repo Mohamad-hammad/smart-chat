@@ -31,7 +31,7 @@ const RoleGuard: React.FC<RoleGuardProps> = ({
     }
 
     if (session?.user) {
-      const userRole = (session.user as any).role;
+      const userRole = 'role' in session.user ? session.user.role : 'user';
       
       if (allowedRoles.includes(userRole)) {
         setIsAuthorized(true);

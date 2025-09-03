@@ -44,7 +44,7 @@ const DashboardLayoutWithAuth: React.FC<DashboardLayoutProps> = ({
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
       // Check role from session
-      const userRole = (session.user as any).role;
+      const userRole = 'role' in session.user ? session.user.role : 'user';
       setIsAdmin(userRole === 'admin');
       setIsManager(userRole === 'manager');
       setLoading(false);
@@ -55,7 +55,7 @@ const DashboardLayoutWithAuth: React.FC<DashboardLayoutProps> = ({
 
   // Get the base dashboard path based on user role
   const getDashboardBasePath = () => {
-    const userRole = (session?.user as any)?.role;
+    const userRole = session?.user && 'role' in session.user ? session.user.role : 'user';
     if (userRole === 'admin') return '/admin-dashboard';
     if (userRole === 'manager') return '/manager-dashboard';
     return '/user-dashboard';
