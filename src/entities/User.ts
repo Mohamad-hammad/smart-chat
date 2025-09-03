@@ -10,8 +10,8 @@ export class User {
   @Index()
   email!: string;
 
-  @Column({ type: "varchar" })
-  password!: string;
+  @Column({ type: "varchar", nullable: true })
+  password!: string | null;
 
   @Column({ type: "varchar", nullable: true })
   firstName!: string | null;
@@ -43,6 +43,15 @@ export class User {
 
   @Column({ type: "timestamp", nullable: true })
   lastLoginAt!: Date | null;
+
+  @Column({ type: "varchar", nullable: true })
+  invitationToken!: string | null;
+
+  @Column({ type: "timestamp", nullable: true })
+  tokenExpiry!: Date | null;
+
+  @Column({ type: "uuid", nullable: true })
+  invitedBy!: string | null;
 
   @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;
