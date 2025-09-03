@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/components/SessionProvider";
 import ChatBot from "@/components/ChatBot";
-import CustomCursor from "@/components/CustomCursor";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +33,6 @@ export default function RootLayout({
         <SessionProvider>
           {children}
           <ChatBot apiKey={process.env.NEXT_PUBLIC_OPENAI_API_KEY || ""} />
-          <CustomCursor />
         </SessionProvider>
       </body>
     </html>

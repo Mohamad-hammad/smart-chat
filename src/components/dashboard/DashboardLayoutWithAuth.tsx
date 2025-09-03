@@ -259,8 +259,38 @@ const DashboardLayoutWithAuth: React.FC<DashboardLayoutProps> = ({
         </div>
       )}
 
+      {/* Top Bar for User Dashboard */}
+      {!isManager && !isAdmin && (
+        <div className="fixed top-0 right-0 left-0 bg-white border-b border-gray-200 z-40" style={{ marginLeft: sidebarCollapsed ? '80px' : '256px' }}>
+          <div className="flex items-center justify-between px-6 py-4">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-xl font-semibold text-gray-900">User Dashboard</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-[#6566F1] rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">
+                    {session?.user?.name?.charAt(0) || session?.user?.email?.charAt(0) || 'U'}
+                  </span>
+                </div>
+                <span className="text-sm font-medium text-gray-700">
+                  {session?.user?.name || session?.user?.email || 'User'}
+                </span>
+              </div>
+              <button
+                onClick={() => router.push('/api/auth/signout')}
+                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
-      <div className={`transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-64'} ${isManager ? 'pt-16' : ''}`}>
+      <div className={`transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-64'} ${isManager ? 'pt-16' : (!isManager && !isAdmin ? 'pt-16' : '')}`}>
         <div className="min-h-screen">
           {children}
         </div>
