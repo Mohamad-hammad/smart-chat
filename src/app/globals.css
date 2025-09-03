@@ -43,5 +43,60 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Hide default cursor globally */
+* {
+  cursor: none !important;
+}
+
+/* Show default cursor on interactive elements - but allow custom cursor to show */
+a, button, input, textarea, select, [role="button"], [tabindex], .cursor-auto {
+  cursor: none !important;
+}
+
+/* Hide the custom cursor on interactive elements - but allow custom cursor to show */
+a:hover, button:hover, input:hover, textarea:hover, select:hover, [role="button"]:hover, [tabindex]:hover {
+  cursor: none !important;
+}
+
+/* Ensure custom cursor is always visible */
+.custom-cursor {
+  z-index: 999999999 !important;
+  position: fixed !important;
+  pointer-events: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  mix-blend-mode: normal !important;
+  backface-visibility: hidden !important;
+  transform-style: preserve-3d !important;
+}
+
+/* Ensure custom cursor is never hidden by any element */
+.custom-cursor * {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  z-index: 999999999 !important;
+}
+
+/* Override any potential z-index conflicts with dashboard elements */
+.custom-cursor,
+.custom-cursor * {
+  z-index: 999999999 !important;
+  position: relative !important;
+}
+
+/* Ensure cursor is visible over manager dashboard elements */
+.custom-cursor {
+  z-index: 999999999 !important;
+}
+
+/* Override any potential z-index conflicts */
+.custom-cursor,
+.custom-cursor * {
+  z-index: 999999999 !important;
+  position: relative !important;
 }

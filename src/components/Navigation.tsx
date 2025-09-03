@@ -47,6 +47,13 @@ const Navigation = () => {
     signOut({ callbackUrl: '/' });
   };
 
+  // Function to get dashboard URL based on user role
+  const getDashboardUrl = () => {
+    // For now, we'll use a default since we don't have role info in session
+    // This will be improved when we add role to the session
+    return '/user-dashboard'; // Default fallback
+  };
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -95,7 +102,7 @@ const Navigation = () => {
                   Sign Out
                 </button>
                 <Link 
-                  href="/dashboard" 
+                  href={getDashboardUrl()} 
                   className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-xl hover:shadow-lg transition-all duration-200"
                 >
                   Dashboard
@@ -185,7 +192,7 @@ const Navigation = () => {
                       Sign Out
                     </button>
                     <Link 
-                      href="/dashboard" 
+                      href={getDashboardUrl()} 
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:shadow-lg transition-all duration-200 text-lg font-medium block"
                     >
