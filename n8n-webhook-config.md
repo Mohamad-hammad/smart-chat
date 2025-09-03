@@ -213,7 +213,7 @@ GITHUB_TOKEN=your_github_token
 SUPPORT_EMAIL=support@yourcompany.com
 
 # OpenAI
-OPENAI_API_KEY=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
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 ## Database Schema

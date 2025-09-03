@@ -32,7 +32,7 @@ export default function RootLayout({
       >
         <SessionProvider>
           {children}
-          <ChatBot apiKey="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" />
+          <ChatBot apiKey={process.env.NEXT_PUBLIC_OPENAI_API_KEY || ""} />
           <CustomCursor />
         </SessionProvider>
       </body>
