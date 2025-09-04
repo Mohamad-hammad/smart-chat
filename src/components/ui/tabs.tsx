@@ -13,7 +13,7 @@ const Tabs = React.forwardRef<
     onValueChange?: (value: string) => void
     defaultValue?: string
   }
->(({ className, value, onValueChange, defaultValue, children, ...props }, ref) => {
+>(({ className, onValueChange, defaultValue, children, ...props }, ref) => {
   const [internalValue, setInternalValue] = React.useState(defaultValue || "")
   const currentValue = value !== undefined ? value : internalValue
   const handleValueChange = onValueChange || setInternalValue

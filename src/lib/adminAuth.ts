@@ -22,8 +22,7 @@ export async function isAdmin(): Promise<boolean> {
     });
 
     return user?.role === 'admin';
-  } catch (error) {
-    console.error('Error checking admin status:', error);
+  } catch {
     return false;
   }
 }
@@ -47,8 +46,7 @@ export async function isManager(): Promise<boolean> {
     });
 
     return user?.role === 'manager' || user?.role === 'admin';
-  } catch (error) {
-    console.error('Error checking manager status:', error);
+  } catch {
     return false;
   }
 }
@@ -72,8 +70,7 @@ export async function getCurrentUser() {
     });
 
     return user;
-  } catch (error) {
-    console.error('Error getting current user:', error);
+  } catch {
     return null;
   }
 }

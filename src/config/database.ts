@@ -57,11 +57,7 @@ const getDatabaseConfig = () => {
 
 // Create data source with environment-specific config
 const config = getDatabaseConfig();
-console.log('Database config:', {
-  nodeEnv: process.env.NODE_ENV,
-  synchronize: config.synchronize,
-  url: config.url ? 'Set' : 'Not set'
-});
+// Database config logging removed for production
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -81,12 +77,8 @@ export const initializeDatabase = async () => {
   try {
     if (!AppDataSource.isInitialized) {
       await AppDataSource.initialize();
-      console.log("Database connection established successfully");
-    } else {
-      console.log("Database connection already established");
     }
   } catch (error) {
-    console.error("Error connecting to database:", error);
     throw error;
   }
 };
