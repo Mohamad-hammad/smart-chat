@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import {
   Plus,
   Search,
@@ -23,13 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+// Removed Radix UI dropdown imports - using custom implementation
 
 // Mock data
 const mockBots = [
@@ -103,6 +99,7 @@ const mockConversations = [
 ];
 
 export default function BotsPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedBot, setSelectedBot] = useState<{
@@ -111,6 +108,7 @@ export default function BotsPage() {
     assignedUsers: string[];
   } | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showConversationHistory, setShowConversationHistory] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -120,13 +118,27 @@ export default function BotsPage() {
     domain: "",
     status: "active"
   });
+  const [editBot, setEditBot] = useState({
+    id: "",
+    name: "",
+    description: "",
+    domain: "",
+    status: "active"
+  });
   const [inviteData, setInviteData] = useState({
     email: "",
-    name: "",
-    role: "user"
+    name: ""
   });
+  const [emailError, setEmailError] = useState("");
   const [bots, setBots] = useState(mockBots);
   const [loading, setLoading] = useState(true);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
+  const [users, setUsers] = useState<any[]>([]);
+  const [botAssignments, setBotAssignments] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [assigningUser, setAssigningUser] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Fetch bots from API
   useEffect(() => {
@@ -151,6 +163,71 @@ export default function BotsPage() {
 
     fetchBots();
   }, []);
+
+  // Fetch users and assignments when modal opens
+  const fetchUsersAndAssignments = async (botId: string) => {
+    setLoadingUsers(true);
+    try {
+      // Fetch users invited by manager
+      console.log('Fetching users from /api/manager/users...');
+      const usersResponse = await fetch('/api/manager/users');
+      console.log('Users response status:', usersResponse.status);
+      
+      if (usersResponse.ok) {
+        const usersData = await usersResponse.json();
+        console.log('Users data received:', usersData);
+        setUsers(usersData.users || []);
+      } else {
+        const errorData = await usersResponse.json();
+        console.error('Error fetching users:', errorData);
+      }
+
+      // Fetch assignments for this bot
+      console.log('Fetching assignments for bot:', botId);
+      const assignmentsResponse = await fetch(`/api/manager/bot-assignments?botId=${botId}`);
+      console.log('Assignments response status:', assignmentsResponse.status);
+      
+      if (assignmentsResponse.ok) {
+        const assignmentsData = await assignmentsResponse.json();
+        console.log('Assignments data received:', assignmentsData);
+        setBotAssignments(assignmentsData.assignments || []);
+      } else {
+        const errorData = await assignmentsResponse.json();
+        console.error('Error fetching assignments:', errorData);
+      }
+    } catch (error) {
+      console.error('Error fetching users and assignments:', error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  // Close dropdown when clicking outside or scrolling
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openDropdown) {
+        setOpenDropdown(null);
+        setDropdownPosition(null);
+      }
+    };
+
+    const handleScroll = () => {
+      if (openDropdown) {
+        setOpenDropdown(null);
+        setDropdownPosition(null);
+      }
+    };
+
+    if (openDropdown) {
+      document.addEventListener('click', handleClickOutside);
+      window.addEventListener('scroll', handleScroll, true); // Use capture phase
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [openDropdown]);
 
   const filteredBots = bots.filter(bot => {
     const matchesSearch = bot.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -210,12 +287,160 @@ export default function BotsPage() {
     setShowCreateModal(false);
   };
 
-  const handleAssignUser = (botId: string, userEmail: string) => {
-    console.log(`Assigning user ${userEmail} to bot ${botId}`);
+  const handleAssignUser = async (botId: string, userId: string) => {
+    console.log('Assigning user:', { botId, userId });
+    setAssigningUser(userId);
+    try {
+      const response = await fetch('/api/manager/assign-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          botId,
+          userId,
+          action: 'assign'
+        }),
+      });
+
+      console.log('Assign user response status:', response.status);
+      const responseData = await response.json();
+      console.log('Assign user response data:', responseData);
+
+      if (response.ok) {
+        // Refresh assignments
+        await fetchUsersAndAssignments(botId);
+        console.log('User assigned successfully, refreshing assignments');
+        
+        // Refresh the main bots list to update totalUsers count
+        const refreshResponse = await fetch('/api/manager/bots');
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          setBots(refreshData.bots || []);
+        }
+        
+        setSuccessMessage('User assigned successfully!');
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        console.error('Failed to assign user:', responseData);
+        alert(`Failed to assign user: ${responseData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error assigning user:', error);
+      alert('Error assigning user. Please try again.');
+    } finally {
+      setAssigningUser(null);
+    }
   };
 
-  const handleUnassignUser = (botId: string, userEmail: string) => {
-    console.log(`Unassigning user ${userEmail} from bot ${botId}`);
+  const handleUnassignUser = async (botId: string, userId: string) => {
+    try {
+      const response = await fetch('/api/manager/assign-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          botId,
+          userId,
+          action: 'unassign'
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh assignments
+        await fetchUsersAndAssignments(botId);
+        
+        // Refresh the main bots list to update totalUsers count
+        const refreshResponse = await fetch('/api/manager/bots');
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          setBots(refreshData.bots || []);
+        }
+      } else {
+        console.error('Failed to unassign user');
+      }
+    } catch (error) {
+      console.error('Error unassigning user:', error);
+    }
+  };
+
+  const handleEditBot = (bot: any) => {
+    setEditBot({
+      id: bot.id,
+      name: bot.name,
+      description: bot.description,
+      domain: bot.domain,
+      status: bot.status
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateBot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const response = await fetch('/api/manager/update-bot', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editBot),
+      });
+
+      if (response.ok) {
+        // Refresh the bots list
+        const refreshResponse = await fetch('/api/manager/bots');
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          setBots(refreshData.bots || []);
+        }
+        setShowEditModal(false);
+        setEditBot({ id: "", name: "", description: "", domain: "", status: "active" });
+      } else {
+        const error = await response.json();
+        console.error('Failed to update bot:', error.message || 'Unknown error');
+      }
+    } catch (error) {
+      console.error('Error updating bot:', error);
+    }
+  };
+
+  const handleTestBot = (bot: any) => {
+    // Navigate to test bot page in manager dashboard (same layout) without page reload
+    router.push(`/manager-dashboard/test-bot?botId=${bot.id}`);
+  };
+
+  const handleBotSettings = (bot: any) => {
+    console.log('Bot settings:', bot);
+    // TODO: Implement bot settings functionality
+    alert('Bot settings functionality will be implemented soon');
+  };
+
+  const handleDeleteBot = async (bot: any) => {
+    try {
+      const response = await fetch(`/api/manager/delete-bot`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ botId: bot.id }),
+      });
+
+      if (response.ok) {
+        // Refresh the bots list
+        const refreshResponse = await fetch('/api/manager/bots');
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          setBots(refreshData.bots || []);
+        }
+      } else {
+        const error = await response.json();
+        console.error('Failed to delete bot:', error.message || 'Unknown error');
+      }
+    } catch (error) {
+      console.error('Error deleting bot:', error);
+    }
   };
 
   const handleViewConversations = (bot: { id: string; name: string; assignedUsers: string[]; }) => {
@@ -236,19 +461,35 @@ export default function BotsPage() {
     console.log(`Toggling bot ${botId} status from ${currentStatus} to ${newStatus}`);
   };
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleInviteUser = async () => {
+    // Validate email format
+    if (!validateEmail(inviteData.email)) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+    
+    setEmailError('');
+    
     try {
       const response = await fetch('/api/admin/invite-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(inviteData),
+        body: JSON.stringify({
+          ...inviteData,
+          role: 'user' // Always set role to 'user' for manager invitations
+        }),
       });
 
       if (response.ok) {
         alert('Invitation sent successfully!');
-        setInviteData({ email: '', name: '', role: 'user' });
+        setInviteData({ email: '', name: '' });
         setShowInviteModal(false);
       } else {
         alert('Failed to send invitation. Please try again.');
@@ -260,7 +501,7 @@ export default function BotsPage() {
   };
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className="p-6 space-y-6 bg-gray-50 min-h-screen overflow-visible">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -278,10 +519,10 @@ export default function BotsPage() {
             <div className="w-10 h-10 bg-gradient-to-br from-[#6566F1] to-[#5A5BD9] rounded-xl flex items-center justify-center shadow-lg">
               <Bot className="h-5 w-5 text-white" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Bot Management</h1>
-              <p className="text-sm text-gray-600 mt-1">Create, manage, and assign users to your AI chatbots</p>
-            </div>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Bot Management</h1>
+          <p className="text-sm text-gray-600 mt-1">Create, manage, and assign users to your AI chatbots</p>
+        </div>
           </div>
         </div>
         <div className="flex space-x-3">
@@ -298,9 +539,9 @@ export default function BotsPage() {
             className="bg-[#6566F1] hover:bg-[#5A5BD9] text-white rounded-2xl"
             onClick={() => setShowCreateModal(true)}
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Create Bot
-          </Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Bot
+            </Button>
         </div>
       </div>
 
@@ -309,10 +550,10 @@ export default function BotsPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Invite New User</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Invite New User</h2>
               <button
                 onClick={() => setShowInviteModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-900 hover:text-gray-700"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -320,37 +561,31 @@ export default function BotsPage() {
             <p className="text-sm text-gray-600 mb-6">Send an invitation to a new user to join your team</p>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="invite-name">Full Name</Label>
+                <Label htmlFor="invite-name" className="text-gray-900 font-medium">Full Name</Label>
                 <Input
                   id="invite-name"
                   placeholder="Enter full name"
                   value={inviteData.name}
                   onChange={(e) => setInviteData({ ...inviteData, name: e.target.value })}
-                  className="mt-1"
+                  className="mt-1 text-gray-900"
                 />
               </div>
               <div>
-                <Label htmlFor="invite-email">Email Address</Label>
+                <Label htmlFor="invite-email" className="text-gray-900 font-medium">Email Address</Label>
                 <Input
                   id="invite-email"
                   type="email"
                   placeholder="Enter email address"
                   value={inviteData.email}
-                  onChange={(e) => setInviteData({ ...inviteData, email: e.target.value })}
-                  className="mt-1"
+                  onChange={(e) => {
+                    setInviteData({ ...inviteData, email: e.target.value });
+                    if (emailError) setEmailError(''); // Clear error when user types
+                  }}
+                  className={`mt-1 text-gray-900 ${emailError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                 />
-              </div>
-              <div>
-                <Label htmlFor="invite-role">Role</Label>
-                <select
-                  id="invite-role"
-                  value={inviteData.role}
-                  onChange={(e) => setInviteData({ ...inviteData, role: e.target.value })}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-[#6566F1] focus:ring-[#6566F1]"
-                >
-                  <option value="user">User</option>
-                  <option value="manager">Manager</option>
-                </select>
+                {emailError && (
+                  <p className="mt-1 text-sm text-red-600">{emailError}</p>
+                )}
               </div>
             </div>
             <div className="flex justify-end space-x-3 mt-6">
@@ -382,7 +617,7 @@ export default function BotsPage() {
               <h2 className="text-2xl font-bold text-gray-900">Create New Bot</h2>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-900 hover:text-gray-700 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -453,78 +688,181 @@ export default function BotsPage() {
                 onClick={() => setShowCreateModal(false)}
                 className="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl"
               >
-                Cancel
-              </Button>
+                  Cancel
+                </Button>
               <Button
                 onClick={handleCreateBot}
                 disabled={!newBot.name || !newBot.description || !newBot.domain}
                 className="px-6 py-2 bg-[#6566F1] hover:bg-[#5A5BD9] text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Create Bot
-              </Button>
+                  Create Bot
+                </Button>
+              </div>
             </div>
+      </div>
+      )}
+
+      {/* Edit Bot Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Edit Bot</h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-900 hover:text-gray-700 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleUpdateBot} className="space-y-4">
+              <div>
+                <Label htmlFor="edit-bot-name" className="text-sm font-medium text-gray-700 mb-2 block">
+                  Bot Name
+                </Label>
+                <Input
+                  id="edit-bot-name"
+                  type="text"
+                  value={editBot.name}
+                  onChange={(e) => setEditBot({ ...editBot, name: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-[#6566F1] text-gray-900"
+                  placeholder="Enter bot name"
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-bot-domain" className="text-sm font-medium text-gray-700 mb-2 block">
+                  Domain
+                </Label>
+                <Input
+                  id="edit-bot-domain"
+                  type="text"
+                  value={editBot.domain}
+                  onChange={(e) => setEditBot({ ...editBot, domain: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-[#6566F1] text-gray-900"
+                  placeholder="Enter domain (e.g., Real Estate)"
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-bot-description" className="text-sm font-medium text-gray-700 mb-2 block">
+                  Description
+                </Label>
+                <textarea
+                  id="edit-bot-description"
+                  value={editBot.description}
+                  onChange={(e) => setEditBot({ ...editBot, description: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-[#6566F1] text-gray-900 resize-none"
+                  placeholder="Enter bot description"
+                  rows={3}
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-bot-status" className="text-sm font-medium text-gray-700 mb-2 block">
+                  Status
+                </Label>
+                <select
+                  id="edit-bot-status"
+                  value={editBot.status}
+                  onChange={(e) => setEditBot({ ...editBot, status: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-[#6566F1] text-gray-900"
+                >
+                  <option value="active">Active</option>
+                  <option value="paused">Paused</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              
+              <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="px-6 py-2 bg-[#6566F1] hover:bg-[#5A5BD9] text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Update Bot
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
       {/* Search and Filters */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search bots by name or domain..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 border-gray-300 focus:border-[#6566F1] focus:ring-[#6566F1] rounded-xl h-11"
-            />
-          </div>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-xl focus:border-[#6566F1] focus:ring-[#6566F1] bg-white h-11"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="paused">Paused</option>
-            <option value="inactive">Inactive</option>
-          </select>
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Input
+            placeholder="Search bots by name or domain..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 border-gray-300 focus:border-[#6566F1] focus:ring-[#6566F1] rounded-xl h-11 text-gray-900"
+          />
+        </div>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-xl focus:border-[#6566F1] focus:ring-2 focus:ring-[#6566F1]/20 bg-white h-11 text-gray-900 font-medium shadow-sm hover:border-gray-400 transition-colors duration-200 appearance-none cursor-pointer text-center"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+            backgroundPosition: 'right 0.5rem center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: '1.5em 1.5em',
+            paddingRight: '2.5rem'
+          }}
+        >
+          <option value="all" className="text-gray-900 py-2">All</option>
+          <option value="active" className="text-gray-900 py-2">Active</option>
+          <option value="paused" className="text-gray-900 py-2">Paused</option>
+          <option value="inactive" className="text-gray-900 py-2">Inactive</option>
+        </select>
         </div>
         
         {/* Quick Stats */}
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-lg">
+          <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-blue-400 rounded-lg flex items-center justify-center">
                 <Bot className="w-4 h-4 text-white" />
               </div>
               <div>
                 <p className="text-xs text-gray-600">Total Bots</p>
-                <p className="text-lg font-bold text-blue-700">{filteredBots.length}</p>
+                <p className="text-lg font-bold text-blue-600">{filteredBots.length}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-lg">
+          <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-green-400 rounded-lg flex items-center justify-center">
                 <MessageSquare className="w-4 h-4 text-white" />
               </div>
               <div>
                 <p className="text-xs text-gray-600">Total Conversations</p>
-                <p className="text-lg font-bold text-green-700">{filteredBots.reduce((sum, bot) => sum + bot.conversations, 0)}</p>
+                <p className="text-lg font-bold text-green-600">{filteredBots.reduce((sum, bot) => sum + bot.conversations, 0)}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-3 rounded-lg">
+          <div className="bg-[#F0F0FE] border border-[#E0E0FE] p-3 rounded-lg">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#6566F1] rounded-lg flex items-center justify-center">
                 <Users className="w-4 h-4 text-white" />
               </div>
               <div>
                 <p className="text-xs text-gray-600">Assigned Users</p>
-                <p className="text-lg font-bold text-purple-700">{filteredBots.reduce((sum, bot) => sum + bot.totalUsers, 0)}</p>
+                <p className="text-lg font-bold text-[#4A4BC8]">{filteredBots.reduce((sum, bot) => sum + bot.totalUsers, 0)}</p>
               </div>
             </div>
           </div>
@@ -532,11 +870,11 @@ export default function BotsPage() {
       </div>
 
       {/* Bots Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-visible">
         {loading ? (
           // Loading skeleton
           Array.from({ length: 6 }).map((_, index) => (
-            <Card key={index} className="border border-gray-200 bg-white rounded-2xl overflow-hidden">
+            <Card key={index} className="border border-gray-300 bg-white rounded-2xl overflow-hidden">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
@@ -584,17 +922,10 @@ export default function BotsPage() {
           </div>
         ) : (
           filteredBots.map((bot) => (
-          <Card key={bot.id} className="group relative border border-gray-200 bg-white hover:shadow-xl hover:shadow-[#6566F1]/10 transition-all duration-300 rounded-2xl overflow-hidden hover:-translate-y-1">
+          <Card key={bot.id} className="group relative border border-gray-300 bg-white hover:shadow-xl hover:shadow-[#6566F1]/10 transition-all duration-300 rounded-2xl overflow-visible hover:-translate-y-1 z-10">
             {/* Gradient Background Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#6566F1]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             
-            {/* Status Indicator */}
-            <div className="absolute top-4 right-4 z-10">
-              <div className={`w-3 h-3 rounded-full ${
-                bot.status === 'active' ? 'bg-green-500 animate-pulse' : 
-                bot.status === 'paused' ? 'bg-yellow-500' : 'bg-gray-400'
-              }`}></div>
-            </div>
 
             <CardHeader className="pb-4 relative z-10">
               <div className="flex items-start justify-between">
@@ -603,48 +934,40 @@ export default function BotsPage() {
                     <div className="w-12 h-12 bg-gradient-to-br from-[#6566F1] to-[#5A5BD9] rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-[#6566F1]/25 transition-shadow duration-300">
                       <Bot className="h-6 w-6 text-white" />
                     </div>
-                    {/* Online indicator */}
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                    {/* Status indicator */}
+                    <div className={`absolute -bottom-1 -right-1 w-4 h-4 border-2 border-white rounded-full ${
+                      bot.status === 'active' ? 'bg-green-500' : 
+                      bot.status === 'paused' ? 'bg-yellow-500' : 'bg-gray-400'
+                    }`}></div>
                   </div>
                   <div className="min-w-0 flex-1">
                     <CardTitle className="text-lg font-semibold truncate group-hover:text-[#6566F1] transition-colors duration-200">{bot.name}</CardTitle>
                     <p className="text-sm text-gray-500 truncate">{bot.domain}</p>
                   </div>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[#6566F1]/10 hover:text-[#6566F1] transition-colors duration-200">
+                <div className="relative">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 hover:bg-[#6566F1]/10 hover:text-[#6566F1] transition-colors duration-200"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Button clicked for bot:', bot.id);
+                      
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setDropdownPosition({
+                        top: rect.bottom + 5,
+                        left: rect.left
+                      });
+                      
+                      setOpenDropdown(openDropdown === bot.id ? null : bot.id);
+                    }}
+                    title="Bot options"
+                  >
                       <MoreHorizontal className="w-4 h-4" />
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-48">
-                    <DropdownMenuItem onClick={() => handleViewConversations(bot)}>
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      View Conversations
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setShowAssignModal(true)}>
-                      <Users className="w-4 h-4 mr-2" />
-                      Manage Users
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Bot
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <PlayCircle className="w-4 h-4 mr-2" />
-                      Test Bot
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Settings className="w-4 h-4 mr-2" />
-                      Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600">
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete Bot
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                </div>
               </div>
             </CardHeader>
             
@@ -653,53 +976,36 @@ export default function BotsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Badge className={`${getStatusColor(bot.status)} font-medium px-3 py-1`}>
-                    {bot.status}
-                  </Badge>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleStatusToggle(bot.id, bot.status)}
-                    className={`h-6 w-6 p-0 hover:bg-opacity-20 ${
-                      bot.status === 'active' 
-                        ? 'hover:bg-yellow-500 text-yellow-600' 
-                        : 'hover:bg-green-500 text-green-600'
-                    }`}
-                    title={bot.status === 'active' ? 'Pause Bot' : 'Activate Bot'}
-                  >
-                    {bot.status === 'active' ? (
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    ) : (
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    )}
-                  </Button>
+                  {bot.status}
+                </Badge>
                 </div>
                 <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{bot.lastActive}</span>
               </div>
 
               {/* Metrics Grid */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-lg group-hover:from-blue-100 group-hover:to-blue-200 transition-colors duration-200">
+                             <div className="grid grid-cols-2 gap-3">
+                 <div className="bg-green-50 border border-green-200 p-3 rounded-lg group-hover:bg-green-100 transition-colors duration-200">
                   <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                      <MessageSquare className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-600">Conversations</p>
-                      <p className="text-lg font-bold text-blue-700">{bot.conversations}</p>
-                    </div>
+                     <div className="w-8 h-8 bg-green-400 rounded-lg flex items-center justify-center">
+                       <MessageSquare className="w-4 h-4 text-white" />
                   </div>
+                     <div>
+                       <p className="text-xs text-gray-600">Conversations</p>
+                       <p className="text-lg font-bold text-green-600">{bot.conversations}</p>
+                     </div>
+                   </div>
+                 </div>
+                 
+                 <div className="bg-[#F0F0FE] border border-[#E0E0FE] p-3 rounded-lg group-hover:bg-[#E8E8FE] transition-colors duration-200">
+                  <div className="flex items-center space-x-2">
+                     <div className="w-8 h-8 bg-[#6566F1] rounded-lg flex items-center justify-center">
+                       <Users className="w-4 h-4 text-white" />
+                  </div>
+                     <div>
+                       <p className="text-xs text-gray-600">Assigned</p>
+                       <p className="text-lg font-bold text-[#4A4BC8]">{bot.totalUsers}</p>
                 </div>
-                
-                <div className="bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-lg group-hover:from-green-100 group-hover:to-green-200 transition-colors duration-200">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                      <Users className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-600">Assigned</p>
-                      <p className="text-lg font-bold text-green-700">{bot.totalUsers}</p>
-                    </div>
-                  </div>
+                   </div>
                 </div>
               </div>
 
@@ -721,8 +1027,12 @@ export default function BotsPage() {
                 </Button>
                 <Button 
                   size="sm" 
-                  className="flex-1 bg-gradient-to-r from-[#6566F1] to-[#5A5BD9] hover:from-[#5A5BD9] hover:to-[#4A4BC8] text-white rounded-xl transition-all duration-200 shadow-lg hover:shadow-[#6566F1]/25 group/btn"
-                  onClick={() => setShowAssignModal(true)}
+                  className="flex-1 bg-[#5A5BD9] hover:bg-[#4A4BC8] text-white rounded-xl transition-all duration-200 shadow-lg hover:shadow-[#6566F1]/25 group/btn"
+                  onClick={() => {
+                    setSelectedBot(bot);
+                    setShowAssignModal(true);
+                    fetchUsersAndAssignments(bot.id);
+                  }}
                 >
                   <Users className="w-4 h-4 mr-2 group-hover/btn:animate-pulse" />
                   Manage Users
@@ -744,78 +1054,127 @@ export default function BotsPage() {
 
       {/* User Assignment Modal */}
       {showAssignModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Manage Bot Users</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-[#6566F1] flex items-center space-x-2">
+                <Users className="w-5 h-5" />
+                <span>Manage Bot Users</span>
+              </h2>
               <button
-                onClick={() => setShowAssignModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                onClick={() => {
+                  setShowAssignModal(false);
+                  setSuccessMessage(null);
+                }}
+                className="text-gray-900 hover:text-gray-700 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Assigned Users */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Assigned Users</h3>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {mockUsers.filter(user => selectedBot?.assignedUsers?.includes(user.email) || false).map((user) => (
-                      <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          {getStatusIcon(user.status)}
-                          <div>
-                            <p className="font-medium text-sm">{user.name}</p>
-                            <p className="text-xs text-gray-500">{user.email}</p>
-                          </div>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleUnassignUser(selectedBot?.id || '', user.email)}
-                          className="text-red-600 border-red-200 hover:bg-red-50"
-                        >
-                          <UserMinus className="w-3 h-3 mr-1" />
-                          Remove
-                        </Button>
+            
+            {/* Success Message */}
+            {successMessage && (
+              <div className="mx-6 mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                {successMessage}
+              </div>
+            )}
+            {/* Modal Content */}
+            <div className="flex-1 p-6 overflow-y-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Assigned Users */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Assigned Users</h3>
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {loadingUsers ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto mb-2"></div>
+                        Loading...
                       </div>
-                    ))}
-                  </div>
+                    ) : botAssignments.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                        <Users className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                        No users assigned to this bot
+                      </div>
+                    ) : (
+                      botAssignments.map((assignment) => (
+                        <div key={assignment.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="flex items-center space-x-3 flex-1 min-w-0">
+                            {getStatusIcon(assignment.userStatus)}
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-sm text-gray-900 truncate">{assignment.userName}</p>
+                              <p className="text-xs text-gray-500 truncate">{assignment.userEmail}</p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                            onClick={() => handleUnassignUser(selectedBot?.id || '', assignment.userId)}
+                            className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400 flex-shrink-0 ml-3"
+                      >
+                            <UserMinus className="w-3 h-3 mr-1" />
+                            Unassign
+                      </Button>
+                    </div>
+                      ))
+                    )}
                 </div>
+              </div>
 
-                {/* Available Users */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Available Users</h3>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {mockUsers.filter(user => !selectedBot?.assignedUsers?.includes(user.email) || true).map((user) => (
-                      <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          {getStatusIcon(user.status)}
-                          <div>
-                            <p className="font-medium text-sm">{user.name}</p>
-                            <p className="text-xs text-gray-500">{user.email}</p>
-                          </div>
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => handleAssignUser(selectedBot?.id || '', user.email)}
-                          className="bg-[#6566F1] hover:bg-[#5A5BD9] text-white"
-                        >
-                          <UserPlus className="w-3 h-3 mr-1" />
-                          Assign
-                        </Button>
+              {/* Available Users */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Available Users</h3>
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {loadingUsers ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto mb-2"></div>
+                        Loading...
                       </div>
-                    ))}
-                  </div>
+                    ) : (
+                      <>
+                        {users.filter(user => !botAssignments.some(assignment => assignment.userId === user.id)).length === 0 ? (
+                          <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                            <UserPlus className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                            No available users to assign
+                          </div>
+                        ) : (
+                          users.filter(user => !botAssignments.some(assignment => assignment.userId === user.id)).map((user) => (
+                            <div key={user.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                              <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        {getStatusIcon(user.status)}
+                                <div className="min-w-0 flex-1">
+                                  <p className="font-medium text-sm text-gray-900 truncate">{user.name}</p>
+                                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                                onClick={() => handleAssignUser(selectedBot?.id || '', user.id)}
+                                disabled={assigningUser === user.id}
+                                className="bg-[#6566F1] hover:bg-[#5A5BD9] text-white disabled:opacity-50 flex-shrink-0 ml-3 min-w-[80px]"
+                              >
+                                {assigningUser === user.id ? (
+                                  <>
+                                    <div className="w-3 h-3 mr-1 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                                    <span className="text-xs">Assigning...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <UserPlus className="w-3 h-3 mr-1" />
+                                    Assign
+                                  </>
+                                )}
+                      </Button>
+                    </div>
+                          ))
+                        )}
+                      </>
+                    )}
                 </div>
               </div>
             </div>
-            <div className="flex justify-end pt-4">
-              <Button onClick={() => setShowAssignModal(false)}>
-                Close
-              </Button>
             </div>
+
           </div>
         </div>
       )}
@@ -825,64 +1184,182 @@ export default function BotsPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-4xl mx-4 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold flex items-center space-x-2">
-                <MessageSquare className="w-5 h-5" />
-                <span>Conversation History - {selectedBot?.name}</span>
+              <h2 className="text-xl font-semibold text-[#6566F1] flex items-center space-x-2">
+              <MessageSquare className="w-5 h-5" />
+              <span>Conversation History</span>
               </h2>
               <button
                 onClick={() => setShowConversationHistory(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-900 hover:text-gray-700"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              {getBotConversations(selectedBot?.id || '').map((conversation) => (
-                <Card key={conversation.id} className="border border-gray-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-semibold">{conversation.customerName}</h4>
-                        <p className="text-sm text-gray-500">{conversation.customerEmail}</p>
-                      </div>
-                      <div className="text-right">
-                        <Badge className={conversation.status === 'resolved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                          {conversation.status}
-                        </Badge>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formatTime(conversation.startTime)} - {formatTime(conversation.endTime)}
+            
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+              {getBotConversations(selectedBot?.id || '').length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <h3 className="text-lg font-medium mb-2">No Conversations Yet</h3>
+                  <p className="text-sm">This bot hasn't had any conversations yet.</p>
+                </div>
+              ) : (
+                getBotConversations(selectedBot?.id || '').map((conversation) => (
+              <Card key={conversation.id} className="border border-gray-300">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold">{conversation.customerName}</h4>
+                      <p className="text-sm text-gray-500">{conversation.customerEmail}</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge className={conversation.status === 'resolved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                        {conversation.status}
+                      </Badge>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {formatTime(conversation.startTime)} - {formatTime(conversation.endTime)}
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {conversation.messages.map((message) => (
+                    <div key={message.id} className={`flex ${message.sender === 'customer' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                        message.sender === 'customer' 
+                          ? 'bg-[#6566F1] text-white' 
+                          : 'bg-gray-100 text-gray-900'
+                      }`}>
+                        <p className="text-sm">{message.content}</p>
+                        <p className={`text-xs mt-1 ${
+                          message.sender === 'customer' ? 'text-blue-100' : 'text-gray-500'
+                        }`}>
+                          {formatTime(message.timestamp)}
                         </p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {conversation.messages.map((message) => (
-                      <div key={message.id} className={`flex ${message.sender === 'customer' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          message.sender === 'customer' 
-                            ? 'bg-[#6566F1] text-white' 
-                            : 'bg-gray-100 text-gray-900'
-                        }`}>
-                          <p className="text-sm">{message.content}</p>
-                          <p className={`text-xs mt-1 ${
-                            message.sender === 'customer' ? 'text-blue-100' : 'text-gray-500'
-                          }`}>
-                            {formatTime(message.timestamp)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            <div className="flex justify-end pt-4">
-              <Button onClick={() => setShowConversationHistory(false)}>
-                Close
-              </Button>
+                  ))}
+                </CardContent>
+              </Card>
+                ))
+              )}
+          </div>
+          </div>
+    </div>
+      )}
+
+      {/* Portal-based Dropdown Menu */}
+      {openDropdown && dropdownPosition && typeof window !== 'undefined' && createPortal(
+        <>
+          {/* Backdrop to close dropdown */}
+          <div 
+            className="fixed inset-0 z-[9999998]" 
+            onClick={() => {
+              setOpenDropdown(null);
+              setDropdownPosition(null);
+            }}
+          />
+          
+          {/* Dropdown Menu */}
+          <div 
+            className="fixed w-48 bg-white border border-gray-200 shadow-xl rounded-lg z-[9999999]"
+            style={{
+              top: dropdownPosition.top,
+              left: dropdownPosition.left
+            }}
+          >
+            <div className="py-1">
+              <button
+                onClick={() => {
+                  const bot = bots.find(b => b.id === openDropdown);
+                  if (bot) {
+                    handleViewConversations(bot);
+                  }
+                  setOpenDropdown(null);
+                  setDropdownPosition(null);
+                }}
+                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
+                View Conversations
+              </button>
+              <button
+                onClick={() => {
+                  const bot = bots.find(b => b.id === openDropdown);
+                  if (bot) {
+                    setSelectedBot(bot);
+                    setShowAssignModal(true);
+                    fetchUsersAndAssignments(bot.id);
+                  }
+                  setOpenDropdown(null);
+                  setDropdownPosition(null);
+                }}
+                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Manage Users
+              </button>
+              <button
+                onClick={() => {
+                  const bot = bots.find(b => b.id === openDropdown);
+                  if (bot) {
+                    handleEditBot(bot);
+                  }
+                  setOpenDropdown(null);
+                  setDropdownPosition(null);
+                }}
+                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Bot
+              </button>
+              <button
+                onClick={() => {
+                  const bot = bots.find(b => b.id === openDropdown);
+                  if (bot) {
+                    handleTestBot(bot);
+                  }
+                  setOpenDropdown(null);
+                  setDropdownPosition(null);
+                }}
+                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+              >
+                <PlayCircle className="w-4 h-4 mr-2" />
+                Test Bot
+              </button>
+              <button
+                onClick={() => {
+                  const bot = bots.find(b => b.id === openDropdown);
+                  if (bot) {
+                    handleBotSettings(bot);
+                  }
+                  setOpenDropdown(null);
+                  setDropdownPosition(null);
+                }}
+                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </button>
+              <div className="border-t border-gray-200 my-1"></div>
+              <button
+                onClick={() => {
+                  const bot = bots.find(b => b.id === openDropdown);
+                  if (bot) {
+                    handleDeleteBot(bot);
+                  }
+                  setOpenDropdown(null);
+                  setDropdownPosition(null);
+                }}
+                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:text-red-700 hover:bg-red-50 flex items-center"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Bot
+              </button>
             </div>
           </div>
-        </div>
+        </>,
+        document.body
       )}
     </div>
   );

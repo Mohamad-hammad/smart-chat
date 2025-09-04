@@ -114,11 +114,29 @@ export const authOptions = {
       if (account?.provider === "google" && user) {
         token.provider = "google";
         token.email = user.email;
+        
+        // Get user role from database for Google users
+        try {
+          if (!AppDataSource.isInitialized) {
+            await AppDataSource.initialize();
+          }
+          const userRepository = AppDataSource.getRepository(User);
+          const dbUser = await userRepository.findOne({
+            where: { email: user.email! }
+          });
+          if (dbUser) {
+            token.role = dbUser.role;
+            token.id = dbUser.id;
+          }
+        } catch (error) {
+          console.error('Error fetching user role for Google sign-in:', error);
+        }
       }
       
       // Add role to token for credentials provider
       if (user && 'role' in user && user.role) {
         token.role = user.role;
+        token.id = user.id;
       }
       
       return token;
@@ -129,9 +147,12 @@ export const authOptions = {
         (session.user as { provider?: string }).provider = "google";
       }
       
-      // Add role to session for credentials provider
+      // Add role and id to session
       if (token.role && session.user) {
         (session.user as { role?: string }).role = token.role as string;
+      }
+      if (token.id && session.user) {
+        (session.user as { id?: string }).id = token.id as string;
       }
       
       return session;

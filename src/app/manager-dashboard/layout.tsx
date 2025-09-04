@@ -105,6 +105,7 @@ const ManagerDashboardLayout: React.FC<ManagerDashboardLayoutProps> = ({
     if (pathname.includes('/analytics')) return 'analytics';
     if (pathname.includes('/billing')) return 'billing';
     if (pathname.includes('/manager-bots')) return 'manager-bots';
+    if (pathname.includes('/test-bot')) return 'manager-bots'; // Test bot is part of manager-bots section
     if (pathname.includes('/bots')) return 'bots';
     if (pathname.includes('/chatbot-analytics')) return 'chatbot-analytics';
     if (pathname.includes('/settings')) return 'settings';

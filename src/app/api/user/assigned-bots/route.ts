@@ -14,6 +14,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Initialize database connection
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+
     // Get user from database
     const userRepository = AppDataSource.getRepository(User);
     const user = await userRepository.findOne({ 

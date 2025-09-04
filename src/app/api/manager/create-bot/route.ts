@@ -13,6 +13,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Initialize database connection
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+
     // Get user from database
     const userRepository = AppDataSource.getRepository(User);
     const user = await userRepository.findOne({ 
@@ -36,11 +41,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ 
         error: 'Missing required fields: name, description, and domain are required' 
       }, { status: 400 });
-    }
-
-    // Initialize database connection
-    if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize();
     }
 
     // Create the bot in database
