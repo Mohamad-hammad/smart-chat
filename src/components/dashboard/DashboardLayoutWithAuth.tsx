@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, 
@@ -101,6 +101,10 @@ const DashboardLayoutWithAuth: React.FC<DashboardLayoutProps> = ({
   const handleNavigation = (path: string) => {
     router.push(path);
     setMobileMenuOpen(false);
+  };
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: '/' });
   };
 
   const toggleSidebar = () => {
@@ -204,7 +208,7 @@ const DashboardLayoutWithAuth: React.FC<DashboardLayoutProps> = ({
                 </div>
               </button>
               <button
-                onClick={() => router.push('/api/auth/signout')}
+                onClick={handleSignOut}
                 className={`w-full flex items-center ${
                   sidebarCollapsed ? 'justify-center px-2' : 'px-3'
                 } py-2 text-sm font-medium rounded-lg transition-colors text-gray-700 hover:bg-gray-50`}
@@ -278,7 +282,7 @@ const DashboardLayoutWithAuth: React.FC<DashboardLayoutProps> = ({
                 </span>
               </div>
               <button
-                onClick={() => router.push('/api/auth/signout')}
+                onClick={handleSignOut}
                 className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <LogOut className="w-4 h-4" />

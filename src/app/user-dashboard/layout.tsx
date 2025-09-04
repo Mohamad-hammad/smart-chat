@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, 
@@ -51,6 +51,10 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
 
   const handleNavigation = (href: string) => {
     router.push(href);
+  };
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: '/' });
   };
 
   if (status === 'loading') {
@@ -151,13 +155,13 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
                 {session?.user?.name || session?.user?.email || 'User'}
               </span>
             </div>
-            <button
-              onClick={() => router.push('/api/auth/signout')}
-              className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Logout</span>
-            </button>
+                      <button
+            onClick={handleSignOut}
+            className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Logout</span>
+          </button>
           </div>
         </div>
       </div>
