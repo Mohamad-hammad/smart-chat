@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index, OneToMany } from "typeorm";
 import { UserRole } from "../types/UserRole";
+import { BotAssignment } from "./BotAssignment";
 
 @Entity("users")
 export class User {
@@ -61,7 +62,7 @@ export class User {
 
   // Relations
   @OneToMany('BotAssignment', 'user')
-  botAssignments?: any[];
+  botAssignments?: BotAssignment[];
 
   // Virtual property for full name
   get fullName(): string {

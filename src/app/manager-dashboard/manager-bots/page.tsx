@@ -134,8 +134,8 @@ export default function BotsPage() {
   const [loading, setLoading] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
-  const [users, setUsers] = useState<any[]>([]);
-  const [botAssignments, setBotAssignments] = useState<any[]>([]);
+  const [users, setUsers] = useState<Array<{id: string; firstName: string; lastName: string; email: string; role: string; createdAt: string}>>([]);
+  const [botAssignments, setBotAssignments] = useState<Array<{id: string; userId: string; botId: string; assignedBy: string; createdAt: string}>>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [assigningUser, setAssigningUser] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -365,7 +365,7 @@ export default function BotsPage() {
     }
   };
 
-  const handleEditBot = (bot: any) => {
+  const handleEditBot = (bot: {id: string; name: string; description: string; domain: string; status: string}) => {
     setEditBot({
       id: bot.id,
       name: bot.name,
@@ -406,18 +406,18 @@ export default function BotsPage() {
     }
   };
 
-  const handleTestBot = (bot: any) => {
+  const handleTestBot = (bot: {id: string; name: string}) => {
     // Navigate to test bot page in manager dashboard (same layout) without page reload
     router.push(`/manager-dashboard/test-bot?botId=${bot.id}`);
   };
 
-  const handleBotSettings = (bot: any) => {
+  const handleBotSettings = (bot: {id: string; name: string}) => {
     console.log('Bot settings:', bot);
     // TODO: Implement bot settings functionality
     alert('Bot settings functionality will be implemented soon');
   };
 
-  const handleDeleteBot = async (bot: any) => {
+  const handleDeleteBot = async (bot: {id: string; name: string}) => {
     try {
       const response = await fetch(`/api/manager/delete-bot`, {
         method: 'DELETE',
@@ -1201,7 +1201,7 @@ export default function BotsPage() {
                 <div className="text-center py-12 text-gray-500">
                   <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                   <h3 className="text-lg font-medium mb-2">No Conversations Yet</h3>
-                  <p className="text-sm">This bot hasn't had any conversations yet.</p>
+                  <p className="text-sm">This bot hasn&apos;t had any conversations yet.</p>
                 </div>
               ) : (
                 getBotConversations(selectedBot?.id || '').map((conversation) => (

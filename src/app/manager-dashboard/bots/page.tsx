@@ -146,7 +146,7 @@ const BotsPage = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [selectedBot, setSelectedBot] = useState<any>(null);
+  const [selectedBot, setSelectedBot] = useState<{id: string; name: string} | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showConversationHistory, setShowConversationHistory] = useState(false);
@@ -199,7 +199,7 @@ const BotsPage = () => {
     console.log("Unassigning user", userEmail, "from bot", botId);
   };
 
-  const handleViewConversations = (bot: any) => {
+  const handleViewConversations = (bot: {id: string; name: string}) => {
     setSelectedBot(bot);
     setShowConversationHistory(true);
   };

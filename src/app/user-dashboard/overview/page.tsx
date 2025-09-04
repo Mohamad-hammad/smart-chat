@@ -25,7 +25,7 @@ export default function UserOverviewPage() {
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-[#6566F1] to-[#5A5BD9] rounded-2xl p-6 text-white">
         <h1 className="text-2xl font-bold mb-2">Welcome back!</h1>
-        <p className="text-[#6566F1]/80">Here's what's happening with your assigned bots today.</p>
+        <p className="text-[#6566F1]/80">Here&apos;s what&apos;s happening with your assigned bots today.</p>
       </div>
 
       {/* Stats Grid */}

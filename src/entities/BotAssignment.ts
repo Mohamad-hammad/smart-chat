@@ -1,4 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { User } from './User';
+import { Bot } from './Bot';
 
 @Entity('bot_assignments')
 @Index(['userId', 'botId'], { unique: true }) // Ensure a user can only be assigned to a bot once
@@ -34,13 +36,13 @@ export class BotAssignment {
   // Relations
   @ManyToOne('User', 'botAssignments')
   @JoinColumn({ name: 'userId' })
-  user?: any;
+  user?: User;
 
   @ManyToOne('Bot', 'assignments')
   @JoinColumn({ name: 'botId' })
-  bot?: any;
+  bot?: Bot;
 
   @ManyToOne('User')
   @JoinColumn({ name: 'assignedBy' })
-  assignedByUser?: any;
+  assignedByUser?: User;
 }
