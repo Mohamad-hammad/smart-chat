@@ -7,7 +7,7 @@ import { Bot } from '@/entities/Bot';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { botId: string } }
+  { params }: { params: Promise<{ botId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -36,7 +36,7 @@ export async function GET(
       return NextResponse.json({ error: 'Only managers can access bot details' }, { status: 403 });
     }
 
-    const { botId } = params;
+    const { botId } = await params;
 
     // Get the bot from database
     const botRepository = AppDataSource.getRepository(Bot);
