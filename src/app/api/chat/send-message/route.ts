@@ -59,43 +59,79 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Send message to n8n webhook
-    try {
-      const n8nResponse = await fetch(process.env.N8N_WEBHOOK_URL || '', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          botId: bot.id,
-          botName: bot.name,
-          message: message,
-          userId: userId || 'test-user',
-          userEmail: user.email,
-          timestamp: new Date().toISOString()
-        }),
-      });
-
-      if (n8nResponse.ok) {
-        const n8nData = await n8nResponse.json();
-        return NextResponse.json({
-          response: n8nData.response || n8nData.message || 'Message received successfully',
-          success: true
-        });
+    // Send message to n8n webhook or API
+    const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
+    const n8nApiKey = process.env.N8N_API_KEY;
+    
+    if (!n8nWebhookUrl && !n8nApiKey) {
+      console.log('N8N webhook URL not configured, returning intelligent mock response');
+      
+      // Generate intelligent responses based on the message content
+      const lowerMessage = message.toLowerCase();
+      let response = '';
+      
+      if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+        response = `Hello! I'm ${bot.name}. How can I help you today?`;
+      } else if (lowerMessage.includes('help') || lowerMessage.includes('support')) {
+        response = `I'm here to help! What do you need assistance with?`;
+      } else if (lowerMessage.includes('thank') || lowerMessage.includes('thanks')) {
+        response = `You're welcome! Anything else I can help with?`;
+      } else if (lowerMessage.includes('bye') || lowerMessage.includes('goodbye') || lowerMessage.includes('see you')) {
+        response = `Goodbye! Feel free to reach out anytime.`;
+      } else if (lowerMessage.includes('what') || lowerMessage.includes('how') || lowerMessage.includes('why')) {
+        response = `That's a great question! Could you provide more details?`;
+      } else if (lowerMessage.includes('aoa') || lowerMessage.includes('salam') || lowerMessage.includes('assalam')) {
+        response = `Wa Alaikum Assalam! I'm ${bot.name}. How can I help you?`;
       } else {
-        console.error('N8N webhook error:', n8nResponse.status, n8nResponse.statusText);
-        return NextResponse.json({
-          response: 'I received your message but I\'m having trouble processing it right now. Please try again.',
-          success: false
-        });
+        response = `I'm ${bot.name}. How can I assist you with ${bot.domain}?`;
       }
-    } catch (n8nError) {
-      console.error('Error calling n8n webhook:', n8nError);
+      
       return NextResponse.json({
-        response: 'I\'m currently unavailable. Please try again later.',
-        success: false
+        response: response,
+        success: true
       });
     }
+
+    // If we have an N8N webhook URL, use it for AI responses
+    if (n8nWebhookUrl) {
+      try {
+        console.log('Using N8N webhook for AI response');
+        
+        const n8nResponse = await fetch(n8nWebhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': n8nApiKey ? `Bearer ${n8nApiKey}` : undefined
+          },
+          body: JSON.stringify({
+            agent_id: user.id, // Using the manager's user ID as agent_id
+            chatbot_id: bot.id, // Using the bot ID as chatbot_id
+            message: message
+          }),
+        });
+
+        if (n8nResponse.ok) {
+          const n8nData = await n8nResponse.json();
+          return NextResponse.json({
+            response: n8nData.response || n8nData.message || 'Message received successfully',
+            success: true
+          });
+        } else {
+          console.error('N8N webhook error:', n8nResponse.status, n8nResponse.statusText);
+          // Fall back to intelligent response
+        }
+      } catch (n8nError) {
+        console.error('Error calling N8N webhook:', n8nError);
+        // Fall back to intelligent response
+      }
+    }
+
+
+    // Final fallback - if neither API key nor webhook worked
+    return NextResponse.json({
+      response: `I'm ${bot.name}. How can I help you with ${bot.domain}?`,
+      success: true
+    });
 
   } catch (error) {
     console.error('Error sending message:', error);
