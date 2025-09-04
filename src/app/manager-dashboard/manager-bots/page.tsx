@@ -135,7 +135,7 @@ export default function BotsPage() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
   const [users, setUsers] = useState<Array<{id: string; firstName: string; lastName: string; email: string; role: string; createdAt: string; name: string; status: string}>>([]);
-  const [botAssignments, setBotAssignments] = useState<Array<{id: string; userId: string; botId: string; assignedBy: string; createdAt: string}>>([]);
+  const [botAssignments, setBotAssignments] = useState<Array<{id: string; userId: string; botId: string; assignedBy: string; createdAt: string; userEmail: string; userName: string; userStatus: string}>>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [assigningUser, setAssigningUser] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -173,11 +173,13 @@ export default function BotsPage() {
       const usersResponse = await fetch('/api/manager/users');
       console.log('Users response status:', usersResponse.status);
       
+      let transformedUsers: any[] = [];
+      
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
         console.log('Users data received:', usersData);
         // Transform users to include name and status properties
-        const transformedUsers = (usersData.users || []).map((user: any) => ({
+        transformedUsers = (usersData.users || []).map((user: any) => ({
           ...user,
           name: `${user.firstName} ${user.lastName}`.trim(),
           status: 'online' // Default status, could be enhanced later
@@ -196,7 +198,19 @@ export default function BotsPage() {
       if (assignmentsResponse.ok) {
         const assignmentsData = await assignmentsResponse.json();
         console.log('Assignments data received:', assignmentsData);
-        setBotAssignments(assignmentsData.assignments || []);
+        
+        // Transform assignments to include user information
+        const transformedAssignments = (assignmentsData.assignments || []).map((assignment: any) => {
+          // Find the user for this assignment
+          const user = transformedUsers.find(u => u.id === assignment.userId);
+          return {
+            ...assignment,
+            userEmail: user?.email || 'Unknown',
+            userName: user?.name || 'Unknown User',
+            userStatus: user?.status || 'offline'
+          };
+        });
+        setBotAssignments(transformedAssignments);
       } else {
         const errorData = await assignmentsResponse.json();
         console.error('Error fetching assignments:', errorData);
