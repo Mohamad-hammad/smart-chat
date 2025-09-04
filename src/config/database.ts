@@ -67,8 +67,15 @@ export const AppDataSource = new DataSource({
   entities: [User, Bot, BotAssignment],
   migrations: [],
   subscribers: [],
-  ssl: {
-    rejectUnauthorized: false // Required for Supabase
+  ssl: process.env.NODE_ENV === 'production' ? {
+    rejectUnauthorized: false // Required for managed databases like Supabase
+  } : false,
+  extra: {
+    // Connection pool settings for production
+    max: process.env.NODE_ENV === 'production' ? 20 : 10,
+    min: process.env.NODE_ENV === 'production' ? 5 : 2,
+    acquire: 30000,
+    idle: 10000,
   }
 });
 

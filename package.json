@@ -19,7 +19,14 @@
     "migration:generate": "npm run typeorm -- migration:generate -d typeorm.config.js",
     "migration:run": "npm run typeorm -- migration:run -d typeorm.config.js",
     "migration:revert": "npm run typeorm -- migration:revert -d typeorm.config.js",
-    "schema:sync": "npm run typeorm -- schema:sync -d typeorm.config.js"
+    "schema:sync": "npm run typeorm -- schema:sync -d typeorm.config.js",
+    "docker:build": "docker build -t smart-chat .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env.local smart-chat",
+    "docker:dev": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "deploy:vercel": "vercel --prod",
+    "deploy:build": "npm run lint && npm run build",
+    "health": "curl -f http://localhost:3000/api/health || exit 1"
   },
   "dependencies": {
     "@auth/core": "^0.34.2",
