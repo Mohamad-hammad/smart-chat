@@ -98,12 +98,10 @@ export class EmailVerificationService {
         html: emailHtml
       };
 
-      const info = await transporter.sendMail(mailOptions);
-      console.log('Verification email sent:', info.messageId);
+      await transporter.sendMail(mailOptions);
       return true;
 
-    } catch (error) {
-      console.error('Error sending verification email:', error);
+    } catch {
       return false;
     }
   }
@@ -144,8 +142,7 @@ export class EmailVerificationService {
         message: 'Email verified successfully! Your account is now active.',
         user
       };
-    } catch (error) {
-      console.error('Error verifying email:', error);
+    } catch {
       return {
         success: false,
         message: 'An error occurred while verifying your email'
@@ -197,8 +194,7 @@ export class EmailVerificationService {
           message: 'Failed to send verification email'
         };
       }
-    } catch (error) {
-      console.error('Error resending verification email:', error);
+    } catch {
       return {
         success: false,
         message: 'An error occurred while resending verification email'
@@ -213,9 +209,8 @@ export class EmailVerificationService {
     try {
       // You can implement token expiration logic here
       // For now, we'll keep tokens until verified
-      console.log('Token cleanup completed');
-    } catch (error) {
-      console.error('Error cleaning up expired tokens:', error);
+    } catch {
+      // Silent error handling for cleanup
     }
   }
 }

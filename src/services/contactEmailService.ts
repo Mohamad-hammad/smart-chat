@@ -223,12 +223,10 @@ export class ContactEmailService {
         html: emailHtml
       };
 
-      const info = await transporter.sendMail(mailOptions);
-      console.log('Contact form email sent:', info.messageId);
+      await transporter.sendMail(mailOptions);
       return true;
 
-    } catch (error) {
-      console.error('Error sending contact form email:', error);
+    } catch {
       return false;
     }
   }
