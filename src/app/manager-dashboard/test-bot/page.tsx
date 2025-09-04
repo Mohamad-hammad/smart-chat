@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Bot, Send, MessageSquare, User, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -134,9 +133,11 @@ export default function TestBotPage() {
   const sendMessage = async () => {
     if (!inputMessage.trim() || !bot) return;
 
+    const messageToSend = inputMessage; // Store the message before clearing input
+
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: inputMessage,
+      content: messageToSend,
       sender: 'user',
       timestamp: new Date()
     };
@@ -153,7 +154,7 @@ export default function TestBotPage() {
         },
         body: JSON.stringify({
           botId: bot.id,
-          message: inputMessage,
+          message: messageToSend,
           userId: 'test-user' // For testing purposes
         }),
       });
@@ -191,9 +192,15 @@ export default function TestBotPage() {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+    if (e.key === 'Enter') {
+      if (e.shiftKey) {
+        // Allow Shift + Enter for new line (default behavior)
+        return;
+      } else {
+        // Enter without Shift sends the message
+        e.preventDefault();
+        sendMessage();
+      }
     }
   };
 
@@ -354,7 +361,7 @@ export default function TestBotPage() {
                           ? 'bg-gradient-to-br from-[#6566F1] to-[#7B68EE] text-white' 
                           : 'bg-white border border-gray-200 text-gray-900'
                       }`}>
-                        <p className="text-sm leading-relaxed">{message.content}</p>
+                        <div className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</div>
                         <p className={`text-xs mt-2 ${
                           message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
                         }`}>
@@ -388,17 +395,18 @@ export default function TestBotPage() {
             <div className="bg-white/80 backdrop-blur-sm border-t border-gray-200/50 p-6">
               <div className="flex space-x-3">
                 <div className="flex-1 relative">
-                  <Input
+                  <textarea
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Type your message here..."
-                    className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 rounded-2xl focus:border-[#6566F1] focus:ring-4 focus:ring-[#6566F1]/20 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                    className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 rounded-2xl focus:border-2 focus:border-[#6566F1] focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none focus:outline-none transition-all duration-200 bg-white/80 backdrop-blur-sm text-gray-900 placeholder-gray-500 resize-none min-h-[48px] max-h-32"
                     disabled={isLoading}
+                    rows={1}
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <div className="w-6 h-6 bg-gradient-to-br from-[#6566F1] to-[#7B68EE] rounded-lg flex items-center justify-center">
-                      <MessageSquare className="w-3 h-3 text-white" />
+                    <div className="w-7 h-7 bg-gradient-to-br from-[#6566F1] to-[#7B68EE] rounded-lg flex items-center justify-center">
+                      <MessageSquare className="w-3.5 h-3.5 text-white" />
                     </div>
                   </div>
                 </div>
