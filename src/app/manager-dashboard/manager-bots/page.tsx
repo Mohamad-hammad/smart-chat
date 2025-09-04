@@ -134,7 +134,7 @@ export default function BotsPage() {
   const [loading, setLoading] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
-  const [users, setUsers] = useState<Array<{id: string; firstName: string; lastName: string; email: string; role: string; createdAt: string}>>([]);
+  const [users, setUsers] = useState<Array<{id: string; firstName: string; lastName: string; email: string; role: string; createdAt: string; name: string; status: string}>>([]);
   const [botAssignments, setBotAssignments] = useState<Array<{id: string; userId: string; botId: string; assignedBy: string; createdAt: string}>>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [assigningUser, setAssigningUser] = useState<string | null>(null);
@@ -176,7 +176,13 @@ export default function BotsPage() {
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
         console.log('Users data received:', usersData);
-        setUsers(usersData.users || []);
+        // Transform users to include name and status properties
+        const transformedUsers = (usersData.users || []).map((user: any) => ({
+          ...user,
+          name: `${user.firstName} ${user.lastName}`.trim(),
+          status: 'online' // Default status, could be enhanced later
+        }));
+        setUsers(transformedUsers);
       } else {
         const errorData = await usersResponse.json();
         console.error('Error fetching users:', errorData);
