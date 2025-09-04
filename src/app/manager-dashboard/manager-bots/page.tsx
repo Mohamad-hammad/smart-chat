@@ -173,13 +173,13 @@ export default function BotsPage() {
       const usersResponse = await fetch('/api/manager/users');
       console.log('Users response status:', usersResponse.status);
       
-      let transformedUsers: any[] = [];
+      let transformedUsers: Array<{id: string; firstName: string; lastName: string; email: string; role: string; createdAt: string; name: string; status: string}> = [];
       
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
         console.log('Users data received:', usersData);
         // Transform users to include name and status properties
-        transformedUsers = (usersData.users || []).map((user: any) => ({
+        transformedUsers = (usersData.users || []).map((user: {id: string; firstName: string; lastName: string; email: string; role: string; createdAt: string}) => ({
           ...user,
           name: `${user.firstName} ${user.lastName}`.trim(),
           status: 'online' // Default status, could be enhanced later
@@ -200,7 +200,7 @@ export default function BotsPage() {
         console.log('Assignments data received:', assignmentsData);
         
         // Transform assignments to include user information
-        const transformedAssignments = (assignmentsData.assignments || []).map((assignment: any) => {
+        const transformedAssignments = (assignmentsData.assignments || []).map((assignment: {id: string; userId: string; botId: string; assignedBy: string; createdAt: string}) => {
           // Find the user for this assignment
           const user = transformedUsers.find(u => u.id === assignment.userId);
           return {

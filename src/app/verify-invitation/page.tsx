@@ -39,7 +39,7 @@ export default function VerifyInvitationPage() {
           const errorData = await response.json();
           setError(errorData.error || 'Invalid or expired invitation link');
         }
-      } catch (error) {
+      } catch {
         setError('Failed to verify invitation link');
       }
     };
@@ -84,7 +84,7 @@ export default function VerifyInvitationPage() {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to set up account');
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
