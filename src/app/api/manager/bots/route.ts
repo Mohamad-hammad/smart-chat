@@ -1,0 +1,72 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { AppDataSource } from '@/config/database';
+import { User } from '@/entities/User';
+import { Bot } from '@/entities/Bot';
+import { BotAssignment } from '@/entities/BotAssignment';
+
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get user from database
+    const userRepository = AppDataSource.getRepository(User);
+    const user = await userRepository.findOne({ 
+      where: { email: session.user.email } 
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Check if user is a manager
+    if (user.role !== 'manager') {
+      return NextResponse.json({ error: 'Only managers can view bots' }, { status: 403 });
+    }
+
+    // Initialize database connection
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+
+    // Get bots created by this manager
+    const botRepository = AppDataSource.getRepository(Bot);
+    const bots = await botRepository.find({
+      where: { createdBy: user.id },
+      relations: ['assignments', 'assignments.user'],
+      order: { createdAt: 'DESC' }
+    });
+
+    // Transform the data to match the expected format
+    const formattedBots = bots.map(bot => ({
+      id: bot.id,
+      name: bot.name,
+      description: bot.description,
+      domain: bot.domain,
+      status: bot.status,
+      conversations: bot.totalConversations,
+      totalUsers: bot.assignments?.length || 0,
+      lastActive: bot.lastActive ? new Date(bot.lastActive).toLocaleString() : 'Never',
+      assignedUsers: bot.assignments?.map(assignment => assignment.user?.email).filter(Boolean) || [],
+      createdAt: bot.createdAt.toISOString().split('T')[0],
+      lastConversation: bot.lastActive ? new Date(bot.lastActive).toISOString().split('T')[0] : null
+    }));
+
+    return NextResponse.json({ 
+      bots: formattedBots,
+      totalCount: formattedBots.length 
+    });
+
+  } catch (error) {
+    console.error('Error fetching bots:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' }, 
+      { status: 500 }
+    );
+  }
+}
