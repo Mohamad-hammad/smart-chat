@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { AppDataSource } from '@/config/database';
 import { User } from '@/entities/User';
+import { UserRole } from '@/types/UserRole';
 import { EmailVerificationService } from '@/services/emailVerificationService';
 
 export async function POST(request: NextRequest) {
@@ -41,6 +42,10 @@ export async function POST(request: NextRequest) {
     // Generate verification token
     const verificationToken = EmailVerificationService.generateVerificationToken();
 
+    // Check if this is the first user (should be manager)
+    const userCount = await userRepository.count();
+    const isFirstUser = userCount === 0;
+
     // Create user (not verified yet)
     const user = new User();
     user.email = email;
@@ -50,6 +55,7 @@ export async function POST(request: NextRequest) {
     user.isEmailVerified = false;
     user.emailVerificationToken = verificationToken;
     user.isActive = false; // User is inactive until email is verified
+    user.role = isFirstUser ? UserRole.MANAGER : UserRole.USER; // First user becomes manager
 
     // Save user to database
     await userRepository.save(user);
