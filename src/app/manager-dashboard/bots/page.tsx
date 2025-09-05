@@ -434,7 +434,7 @@ const BotsPage = () => {
               <div>
                 <h3 className="text-lg font-semibold mb-3">Assigned Users</h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {mockUsers.filter(user => (selectedBot as any)?.assignedUsers?.includes(user.email)).map((user) => (
+                  {mockUsers.filter(user => (selectedBot as { assignedUsers?: string[] })?.assignedUsers?.includes(user.email)).map((user) => (
                     <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div className="flex items-center space-x-3">
                         {getStatusIcon(user.status)}
