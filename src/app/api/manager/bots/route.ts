@@ -5,6 +5,7 @@ import { AppDataSource } from '@/config/database';
 import { User } from '@/entities/User';
 import { Bot } from '@/entities/Bot';
 import { BotAssignment } from '@/entities/BotAssignment';
+import { Conversation } from '@/entities/Conversation';
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,11 +37,28 @@ export async function GET(request: NextRequest) {
 
     // Get bots created by this manager
     const botRepository = AppDataSource.getRepository(Bot);
+    const conversationRepository = AppDataSource.getRepository(Conversation);
     const bots = await botRepository.find({
       where: { createdBy: user.id },
       relations: ['assignments', 'assignments.user'],
       order: { createdAt: 'DESC' }
     });
+
+    // Get real conversation counts for each bot
+    const botIds = bots.map(bot => bot.id);
+    const conversationCounts = await conversationRepository
+      .createQueryBuilder('conversation')
+      .select('conversation.botId')
+      .addSelect('COUNT(*)', 'count')
+      .where('conversation.botId IN (:...botIds)', { botIds })
+      .groupBy('conversation.botId')
+      .getRawMany();
+
+    // Create a map of botId to conversation count
+    const conversationCountMap = conversationCounts.reduce((acc, item) => {
+      acc[item.conversation_botId] = parseInt(item.count);
+      return acc;
+    }, {} as Record<string, number>);
 
     // Transform the data to match the expected format
     const formattedBots = bots.map(bot => ({
@@ -49,7 +67,7 @@ export async function GET(request: NextRequest) {
       description: bot.description,
       domain: bot.domain,
       status: bot.status,
-      conversations: bot.totalConversations,
+      conversations: conversationCountMap[bot.id] || 0, // Use real conversation count
       totalUsers: bot.assignments?.length || 0,
       lastActive: bot.lastActive ? new Date(bot.lastActive).toLocaleString() : 'Never',
       assignedUsers: bot.assignments?.map(assignment => assignment.user?.email).filter(Boolean) || [],

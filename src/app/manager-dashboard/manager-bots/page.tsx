@@ -130,12 +130,24 @@ export default function BotsPage() {
     name: ""
   });
   const [emailError, setEmailError] = useState("");
-  const [bots, setBots] = useState(mockBots);
+  const [bots, setBots] = useState<Array<{
+    id: string;
+    name: string;
+    description: string;
+    domain: string;
+    status: string;
+    conversations: number;
+    totalUsers: number;
+    lastActive: string;
+    assignedUsers: string[];
+    createdAt: string;
+    lastConversation: string | null;
+  }>>([]);
   const [loading, setLoading] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
   const [users, setUsers] = useState<Array<{id: string; firstName: string; lastName: string; email: string; role: string; createdAt: string; name: string; status: string}>>([]);
-  const [botAssignments, setBotAssignments] = useState<Array<{id: string; userId: string; botId: string; assignedBy: string; createdAt: string; userEmail: string; userName: string; userStatus: string}>>([]);
+  const [botAssignments, setBotAssignments] = useState<Array<{id: string; userId: string; botId: string; assignedAt: string; userEmail: string; userName: string; userStatus: string; userRole: string; botName: string}>>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [assigningUser, setAssigningUser] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -167,11 +179,11 @@ export default function BotsPage() {
           setBots(data.bots || []);
         } else {
           console.error('Failed to fetch bots');
-          // Keep using mock data as fallback
+          setBots([]); // Set empty array instead of mock data
         }
       } catch (error) {
         console.error('Error fetching bots:', error);
-        // Keep using mock data as fallback
+        setBots([]); // Set empty array instead of mock data
       } finally {
         setLoading(false);
       }
@@ -215,18 +227,8 @@ export default function BotsPage() {
         const assignmentsData = await assignmentsResponse.json();
         console.log('Assignments data received:', assignmentsData);
         
-        // Transform assignments to include user information
-        const transformedAssignments = (assignmentsData.assignments || []).map((assignment: {id: string; userId: string; botId: string; assignedBy: string; createdAt: string}) => {
-          // Find the user for this assignment
-          const user = transformedUsers.find(u => u.id === assignment.userId);
-          return {
-            ...assignment,
-            userEmail: user?.email || 'Unknown',
-            userName: user?.name || 'Unknown User',
-            userStatus: user?.status || 'offline'
-          };
-        });
-        setBotAssignments(transformedAssignments);
+        // Use the assignments data directly from API (it already includes user info)
+        setBotAssignments(assignmentsData.assignments || []);
       } else {
         const errorData = await assignmentsResponse.json();
         console.error('Error fetching assignments:', errorData);
@@ -1216,7 +1218,7 @@ export default function BotsPage() {
               <div className="pt-3 border-t border-gray-100">
                 <div className="flex items-center justify-between text-xs text-gray-500">
                   <span>Created: {new Date(bot.createdAt).toLocaleDateString()}</span>
-                  <span>Last: {new Date(bot.lastConversation).toLocaleDateString()}</span>
+                  <span>Last: {bot.lastConversation ? new Date(bot.lastConversation).toLocaleDateString() : 'Never'}</span>
                 </div>
               </div>
             </CardContent>

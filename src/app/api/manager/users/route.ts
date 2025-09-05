@@ -33,28 +33,28 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Access denied. Manager role required.' }, { status: 403 });
     }
 
-    // Fetch users invited by this manager who have accepted their invitations
+    // Fetch all users invited by this manager (both accepted and pending)
     const invitedUsers = await userRepository
       .createQueryBuilder('user')
       .where('user.invitedBy = :managerId', { managerId: currentUser.id })
-      .andWhere('user.password IS NOT NULL') // Only users who have set a password (accepted invitation)
       .select([
         'user.id',
         'user.firstName',
         'user.lastName',
         'user.email',
         'user.role',
+        'user.password',
         'user.createdAt'
       ])
       .getMany();
 
-    // Transform the data to include status
+    // Transform the data to include status based on whether they have a password
     const usersWithStatus = invitedUsers.map(user => ({
       id: user.id,
       name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
       email: user.email,
       role: user.role,
-      status: 'active', // All users in this list are active since they have passwords
+      status: user.password ? 'accepted' : 'pending', // accepted if they have password, pending if not
       createdAt: user.createdAt
     }));
 
