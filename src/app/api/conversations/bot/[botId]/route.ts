@@ -50,7 +50,7 @@ export async function GET(
       id: conv.id,
       message: conv.message,
       sender: conv.sender,
-      timestamp: conv.createdAt,
+      timestamp: conv.createdAt.toISOString(),
       isTestMessage: conv.isTestMessage,
       metadata: conv.metadata ? JSON.parse(conv.metadata) : null
     }));
