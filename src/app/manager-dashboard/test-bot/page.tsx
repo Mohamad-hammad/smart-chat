@@ -58,6 +58,7 @@ export default function TestBotPage() {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingBot, setIsLoadingBot] = useState(true);
+  const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
@@ -106,7 +107,34 @@ export default function TestBotPage() {
     }
   }, [isLoadingBot, bot]);
 
-  // Fetch bot information
+  // Load previous conversations
+  const loadConversations = async () => {
+    if (!botId) return;
+    
+    try {
+      const response = await fetch(`/api/conversations/bot/${botId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.conversations) {
+          const formattedMessages = data.conversations.map((conv: any) => ({
+            id: conv.id,
+            content: conv.message,
+            sender: conv.sender,
+            timestamp: new Date(conv.timestamp)
+          }));
+          setMessages(formattedMessages);
+        }
+      } else {
+        console.error('Failed to fetch conversations');
+      }
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+    } finally {
+      setIsLoadingConversations(false);
+    }
+  };
+
+  // Fetch bot information and conversations
   useEffect(() => {
     const fetchBot = async () => {
       if (!botId) return;
@@ -127,6 +155,7 @@ export default function TestBotPage() {
     };
 
     fetchBot();
+    loadConversations();
   }, [botId]);
 
   // Send message to bot via n8n
@@ -155,7 +184,8 @@ export default function TestBotPage() {
         body: JSON.stringify({
           botId: bot.id,
           message: messageToSend,
-          userId: 'test-user' // For testing purposes
+          userId: 'test-user', // For testing purposes
+          isTestMessage: true // Flag to identify test messages
         }),
       });
 
@@ -204,13 +234,13 @@ export default function TestBotPage() {
     }
   };
 
-  if (isLoadingBot) {
+  if (isLoadingBot || isLoadingConversations) {
     return (
       <div className="p-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6566F1] mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading bot...</p>
+            <p className="text-gray-600">Loading bot and conversations...</p>
           </div>
         </div>
       </div>

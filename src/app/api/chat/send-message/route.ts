@@ -4,6 +4,28 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { AppDataSource } from '@/config/database';
 import { User } from '@/entities/User';
 import { Bot } from '@/entities/Bot';
+import { Conversation } from '@/entities/Conversation';
+
+// Helper function to save conversation
+async function saveConversation(botId: string, userId: string, message: string, sender: 'user' | 'bot', isTestMessage: boolean = false, metadata?: any) {
+  try {
+    const conversationRepository = AppDataSource.getRepository(Conversation);
+    
+    const conversation = new Conversation();
+    conversation.botId = botId;
+    conversation.userId = userId;
+    conversation.message = message;
+    conversation.sender = sender;
+    conversation.isTestMessage = isTestMessage;
+    conversation.metadata = metadata ? JSON.stringify(metadata) : null;
+
+    await conversationRepository.save(conversation);
+    return conversation;
+  } catch (error) {
+    console.error('Error saving conversation:', error);
+    return null;
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { botId, message, userId } = body;
+    const { botId, message, userId, isTestMessage = false } = body;
 
     if (!botId || !message) {
       return NextResponse.json({ 
@@ -59,6 +81,9 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Save user message to conversation
+    await saveConversation(botId, user.id, message, 'user', isTestMessage);
+
     // Send message to n8n webhook or API
     const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
     const n8nApiKey = process.env.N8N_API_KEY;
@@ -85,6 +110,9 @@ export async function POST(request: NextRequest) {
       } else {
         response = `I'm ${bot.name}. How can I assist you with ${bot.domain}?`;
       }
+      
+      // Save bot response to conversation
+      await saveConversation(botId, user.id, response, 'bot', isTestMessage);
       
       return NextResponse.json({
         response: response,
@@ -117,8 +145,13 @@ export async function POST(request: NextRequest) {
 
         if (n8nResponse.ok) {
           const n8nData = await n8nResponse.json();
+          const botResponse = n8nData.response || n8nData.message || 'Message received successfully';
+          
+          // Save bot response to conversation
+          await saveConversation(botId, user.id, botResponse, 'bot', isTestMessage, n8nData);
+          
           return NextResponse.json({
-            response: n8nData.response || n8nData.message || 'Message received successfully',
+            response: botResponse,
             success: true
           });
         } else {
@@ -133,8 +166,13 @@ export async function POST(request: NextRequest) {
 
 
     // Final fallback - if neither API key nor webhook worked
+    const fallbackResponse = `I'm ${bot.name}. How can I help you with ${bot.domain}?`;
+    
+    // Save bot response to conversation
+    await saveConversation(botId, user.id, fallbackResponse, 'bot', isTestMessage);
+    
     return NextResponse.json({
-      response: `I'm ${bot.name}. How can I help you with ${bot.domain}?`,
+      response: fallbackResponse,
       success: true
     });
 

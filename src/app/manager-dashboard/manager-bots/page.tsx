@@ -139,6 +139,14 @@ export default function BotsPage() {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [assigningUser, setAssigningUser] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<Array<{
+    id: string;
+    message: string;
+    sender: 'user' | 'bot';
+    timestamp: string;
+    isTestMessage: boolean;
+  }>>([]);
+  const [loadingConversations, setLoadingConversations] = useState(false);
 
   // Fetch bots from API
   useEffect(() => {
@@ -466,10 +474,33 @@ export default function BotsPage() {
   const handleViewConversations = (bot: { id: string; name: string; assignedUsers: string[]; }) => {
     setSelectedBot(bot);
     setShowConversationHistory(true);
+    fetchBotConversations(bot.id);
+  };
+
+  // Fetch conversations for a specific bot
+  const fetchBotConversations = async (botId: string) => {
+    setLoadingConversations(true);
+    try {
+      const response = await fetch(`/api/conversations/bot/${botId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.conversations) {
+          setConversations(data.conversations);
+        }
+      } else {
+        console.error('Failed to fetch conversations');
+        setConversations([]);
+      }
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+      setConversations([]);
+    } finally {
+      setLoadingConversations(false);
+    }
   };
 
   const getBotConversations = (botId: string) => {
-    return mockConversations.filter(conv => conv.botId === botId);
+    return conversations.filter(conv => conv.sender === 'user' || conv.sender === 'bot');
   };
 
   const formatTime = (timestamp: string) => {
@@ -1217,54 +1248,49 @@ export default function BotsPage() {
             </div>
             
           <div className="space-y-4 max-h-96 overflow-y-auto">
-              {getBotConversations(selectedBot?.id || '').length === 0 ? (
+              {loadingConversations ? (
+                <div className="text-center py-12 text-gray-500">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6566F1] mx-auto mb-4"></div>
+                  <p className="text-sm">Loading conversations...</p>
+                    </div>
+              ) : getBotConversations(selectedBot?.id || '').length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                   <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                   <h3 className="text-lg font-medium mb-2">No Conversations Yet</h3>
                   <p className="text-sm">This bot hasn&apos;t had any conversations yet.</p>
-                </div>
+                    </div>
               ) : (
-                getBotConversations(selectedBot?.id || '').map((conversation) => (
-              <Card key={conversation.id} className="border border-gray-300">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold">{conversation.customerName}</h4>
-                      <p className="text-sm text-gray-500">{conversation.customerEmail}</p>
-                    </div>
-                    <div className="text-right">
-                      <Badge className={conversation.status === 'resolved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                        {conversation.status}
-                      </Badge>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {formatTime(conversation.startTime)} - {formatTime(conversation.endTime)}
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {conversation.messages.map((message) => (
-                    <div key={message.id} className={`flex ${message.sender === 'customer' ? 'justify-end' : 'justify-start'}`}>
+                <div className="space-y-3">
+                  {getBotConversations(selectedBot?.id || '').map((message) => (
+                    <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        message.sender === 'customer' 
+                        message.sender === 'user' 
                           ? 'bg-[#6566F1] text-white' 
-                          : 'bg-gray-100 text-gray-900'
+                          : 'bg-gray-200 text-gray-800'
                       }`}>
-                        <p className="text-sm">{message.content}</p>
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="text-xs font-medium">
+                            {message.sender === 'user' ? 'You' : 'Bot'}
+                          </span>
+                          {message.isTestMessage && (
+                            <Badge className="bg-yellow-100 text-yellow-800 text-xs">
+                              Test
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm whitespace-pre-wrap">{message.message}</p>
                         <p className={`text-xs mt-1 ${
-                          message.sender === 'customer' ? 'text-blue-100' : 'text-gray-500'
+                          message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
                         }`}>
                           {formatTime(message.timestamp)}
                         </p>
                       </div>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
-                ))
+            ))}
+          </div>
               )}
           </div>
-          </div>
+    </div>
     </div>
       )}
 
