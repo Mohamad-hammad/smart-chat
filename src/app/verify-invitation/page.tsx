@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, XCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 
-export default function VerifyInvitationPage() {
+function VerifyInvitationContent() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -228,5 +228,24 @@ export default function VerifyInvitationPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function VerifyInvitationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 text-[#6566F1] mx-auto mb-4 animate-spin" />
+              <p className="text-gray-600">Loading...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <VerifyInvitationContent />
+    </Suspense>
   );
 }

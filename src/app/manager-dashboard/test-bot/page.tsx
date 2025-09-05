@@ -116,7 +116,7 @@ export default function TestBotPage() {
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.conversations) {
-          const formattedMessages = data.conversations.map((conv: any) => ({
+          const formattedMessages = data.conversations.map((conv: { id: string; message: string; sender: 'user' | 'bot'; timestamp: string }) => ({
             id: conv.id,
             content: conv.message,
             sender: conv.sender,

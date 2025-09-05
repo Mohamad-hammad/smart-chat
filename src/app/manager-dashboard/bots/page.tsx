@@ -446,7 +446,7 @@ const BotsPage = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleUnassignUser(selectedBot?.id, user.email)}
+                        onClick={() => selectedBot?.id && handleUnassignUser(selectedBot.id, user.email)}
                         className="text-red-600 border-red-300 hover:bg-red-50"
                       >
                         <UserMinus className="w-4 h-4" />
@@ -460,7 +460,7 @@ const BotsPage = () => {
               <div>
                 <h3 className="text-lg font-semibold mb-3">Available Users</h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {mockUsers.filter(user => !selectedBot?.assignedUsers?.includes(user.email)).map((user) => (
+                  {mockUsers.filter(user => !(selectedBot as { assignedUsers?: string[] })?.assignedUsers?.includes(user.email)).map((user) => (
                     <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div className="flex items-center space-x-3">
                         {getStatusIcon(user.status)}
@@ -471,7 +471,7 @@ const BotsPage = () => {
                       </div>
                       <Button
                         size="sm"
-                        onClick={() => handleAssignUser(selectedBot?.id, user.email)}
+                        onClick={() => selectedBot?.id && handleAssignUser(selectedBot.id, user.email)}
                         className="bg-[#6566F1] hover:bg-[#5A5BD9] text-white"
                       >
                         <UserPlus className="w-4 h-4" />
@@ -491,7 +491,7 @@ const BotsPage = () => {
       </Dialog>
 
       {/* Conversation History Modal */}
-      <Dialog open={showConversationHistory} onOpenChange={setShowConversationHistory}>
+      <Dialog>
         <DialogContent className="sm:max-w-4xl max-h-[80vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
@@ -500,7 +500,7 @@ const BotsPage = () => {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 max-h-96 overflow-y-auto">
-            {getBotConversations(selectedBot?.id).map((conversation) => (
+            {getBotConversations(selectedBot?.id || '').map((conversation) => (
               <Card key={conversation.id} className="border border-gray-200">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">

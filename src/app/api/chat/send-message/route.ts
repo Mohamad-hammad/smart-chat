@@ -7,7 +7,7 @@ import { Bot } from '@/entities/Bot';
 import { Conversation } from '@/entities/Conversation';
 
 // Helper function to save conversation
-async function saveConversation(botId: string, userId: string, message: string, sender: 'user' | 'bot', isTestMessage: boolean = false, metadata?: any) {
+async function saveConversation(botId: string, userId: string, message: string, sender: 'user' | 'bot', isTestMessage: boolean = false, metadata?: Record<string, unknown>) {
   try {
     const conversationRepository = AppDataSource.getRepository(Conversation);
     
@@ -17,7 +17,7 @@ async function saveConversation(botId: string, userId: string, message: string, 
     conversation.message = message;
     conversation.sender = sender;
     conversation.isTestMessage = isTestMessage;
-    conversation.metadata = metadata ? JSON.stringify(metadata) : null;
+    conversation.metadata = metadata ? JSON.stringify(metadata) : undefined;
 
     await conversationRepository.save(conversation);
     return conversation;

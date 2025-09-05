@@ -291,7 +291,7 @@ const UserBots = () => {
                     </div>
                   </div>
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                    <DropdownMenuTrigger>
                       <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[#6566F1]/10 hover:text-[#6566F1] transition-colors duration-200">
                         <MoreHorizontal className="w-4 h-4" />
                       </Button>

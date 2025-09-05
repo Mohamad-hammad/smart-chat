@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     conversation.message = message;
     conversation.sender = sender;
     conversation.isTestMessage = isTestMessage;
-    conversation.metadata = metadata ? JSON.stringify(metadata) : null;
+    conversation.metadata = metadata ? JSON.stringify(metadata) : undefined;
 
     await conversationRepository.save(conversation);
 

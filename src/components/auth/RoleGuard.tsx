@@ -33,7 +33,7 @@ const RoleGuard: React.FC<RoleGuardProps> = ({
     if (session?.user) {
       const userRole = 'role' in session.user ? session.user.role : 'user';
       
-      if (allowedRoles.includes(userRole)) {
+      if (allowedRoles.includes(userRole as string)) {
         setIsAuthorized(true);
       } else {
         // Redirect to appropriate dashboard based on user role

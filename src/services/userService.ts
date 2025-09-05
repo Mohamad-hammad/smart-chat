@@ -62,7 +62,7 @@ export class UserService {
         throw new Error("Account is deactivated");
       }
 
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      const isPasswordValid = user.password ? await bcrypt.compare(password, user.password) : false;
       if (!isPasswordValid) {
         throw new Error("Invalid email or password");
       }
@@ -141,10 +141,10 @@ export class UserService {
         throw new Error("User not found");
       }
 
-      const isCurrentPasswordValid = await bcrypt.compare(
+      const isCurrentPasswordValid = user.password ? await bcrypt.compare(
         currentPassword,
         user.password
-      );
+      ) : false;
       if (!isCurrentPasswordValid) {
         throw new Error("Current password is incorrect");
       }
