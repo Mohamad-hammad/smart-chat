@@ -64,13 +64,13 @@ export async function GET(request: NextRequest) {
     // Transform the data
     const assignmentsWithStatus = assignments.map(assignment => ({
       id: assignment.id,
-      userId: assignment.user.id,
-      userName: `${assignment.user.firstName || ''} ${assignment.user.lastName || ''}`.trim(),
-      userEmail: assignment.user.email,
-      userRole: assignment.user.role,
-      userStatus: assignment.user.password ? 'active' : 'pending',
-      botId: assignment.bot.id,
-      botName: assignment.bot.name,
+      userId: assignment.user?.id || '',
+      userName: assignment.user ? `${assignment.user.firstName || ''} ${assignment.user.lastName || ''}`.trim() : '',
+      userEmail: assignment.user?.email || '',
+      userRole: assignment.user?.role || '',
+      userStatus: assignment.user?.password ? 'active' : 'pending',
+      botId: assignment.bot?.id || '',
+      botName: assignment.bot?.name || '',
       assignedAt: assignment.assignedAt
     }));
 

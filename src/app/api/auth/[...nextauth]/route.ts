@@ -1,4 +1,4 @@
-import NextAuth from "next-auth"
+import NextAuth, { type NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { AppDataSource } from "@/config/database"
@@ -6,7 +6,7 @@ import { User } from "@/entities/User"
 import { UserRole } from "@/types/UserRole"
 import bcrypt from "bcryptjs"
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -38,7 +38,7 @@ export const authOptions = {
             return null;
           }
 
-          const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+          const isPasswordValid = user.password ? await bcrypt.compare(credentials.password, user.password) : false;
           if (!isPasswordValid) {
             return null;
           }

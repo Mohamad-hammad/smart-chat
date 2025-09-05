@@ -97,12 +97,17 @@ export async function POST(request: NextRequest) {
       try {
         console.log('Using N8N webhook for AI response');
         
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json'
+        };
+        
+        if (n8nApiKey) {
+          headers['Authorization'] = `Bearer ${n8nApiKey}`;
+        }
+        
         const n8nResponse = await fetch(n8nWebhookUrl, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': n8nApiKey ? `Bearer ${n8nApiKey}` : undefined
-          },
+          headers,
           body: JSON.stringify({
             agent_id: user.id, // Using the manager's user ID as agent_id
             chatbot_id: bot.id, // Using the bot ID as chatbot_id

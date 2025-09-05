@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ 
           message: 'Re-invitation created successfully, but email sending failed. Check server logs.',
           userId: existingUser.id,
-          emailError: emailError.message
+          emailError: emailError instanceof Error ? emailError.message : 'Unknown error'
         });
       }
     }
@@ -261,7 +261,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ 
         message: 'User created successfully, but email sending failed. Check server logs.',
         userId: newUser.id,
-        emailError: emailError.message
+        emailError: emailError instanceof Error ? emailError.message : 'Unknown error'
       });
     }
 

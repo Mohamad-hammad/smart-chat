@@ -3,10 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Production optimizations
   output: 'standalone', // For Docker deployment
-  experimental: {
-    // Enable server components
-    serverComponentsExternalPackages: ['typeorm', 'pg'],
-  },
+  // External packages for server components
+  serverExternalPackages: ['typeorm', 'pg'],
+  
+  // Transpile packages that need to be processed
+  transpilePackages: ['recharts'],
   
   // Environment variables validation
   env: {

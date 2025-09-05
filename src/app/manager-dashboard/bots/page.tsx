@@ -230,8 +230,8 @@ const BotsPage = () => {
           <h1 className="text-2xl font-bold text-gray-900">Bot Management</h1>
           <p className="text-sm text-gray-600 mt-1">Create, manage, and assign users to your AI chatbots</p>
         </div>
-        <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-          <DialogTrigger asChild>
+        <Dialog>
+          <DialogTrigger>
             <Button className="bg-[#6566F1] hover:bg-[#5A5BD9] text-white rounded-2xl">
               <Plus className="w-4 h-4 mr-2" />
               Create Bot
@@ -423,7 +423,7 @@ const BotsPage = () => {
       </div>
 
       {/* User Assignment Modal */}
-      <Dialog open={showAssignModal} onOpenChange={setShowAssignModal}>
+      <Dialog>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Manage Bot Users</DialogTitle>
@@ -434,7 +434,7 @@ const BotsPage = () => {
               <div>
                 <h3 className="text-lg font-semibold mb-3">Assigned Users</h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {mockUsers.filter(user => selectedBot?.assignedUsers?.includes(user.email)).map((user) => (
+                  {mockUsers.filter(user => (selectedBot as any)?.assignedUsers?.includes(user.email)).map((user) => (
                     <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div className="flex items-center space-x-3">
                         {getStatusIcon(user.status)}
