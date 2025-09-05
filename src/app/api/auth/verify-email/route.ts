@@ -30,7 +30,8 @@ export async function GET(request: NextRequest) {
           id: result.user?.id,
           email: result.user?.email,
           firstName: result.user?.firstName,
-          lastName: result.user?.lastName
+          lastName: result.user?.lastName,
+          role: result.user?.role
         }
       });
     } else {

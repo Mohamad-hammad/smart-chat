@@ -3,6 +3,7 @@
 import React from 'react';
 import { Bot, MessageSquare, BarChart3, Clock, TrendingUp, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import RoleGuard from '@/components/auth/RoleGuard';
 
 export default function UserOverviewPage() {
   // Mock data - in real app, this would come from API
@@ -21,7 +22,8 @@ export default function UserOverviewPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <RoleGuard allowedRoles={['user']}>
+      <div className="p-6 space-y-6">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-[#6566F1] to-[#5A5BD9] rounded-2xl p-6 text-white">
         <h1 className="text-2xl font-bold mb-2">Welcome back!</h1>
@@ -143,6 +145,7 @@ export default function UserOverviewPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </RoleGuard>
   );
 }

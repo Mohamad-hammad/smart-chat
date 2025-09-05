@@ -13,6 +13,7 @@ interface VerificationResult {
     email: string;
     firstName: string | null;
     lastName: string | null;
+    role: string;
   };
 }
 
@@ -23,6 +24,19 @@ function VerifyEmailContent() {
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>('loading');
   const [result, setResult] = useState<VerificationResult | null>(null);
   const [isResending, setIsResending] = useState(false);
+
+  // Get the correct dashboard URL based on user role
+  const getDashboardUrl = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return '/admin-dashboard';
+      case 'manager':
+        return '/manager-dashboard';
+      case 'user':
+      default:
+        return '/user-dashboard';
+    }
+  };
 
   useEffect(() => {
     const token = searchParams.get('token');
@@ -93,6 +107,10 @@ function VerifyEmailContent() {
       );
 
     case 'success':
+      const dashboardUrl = result?.user?.role ? getDashboardUrl(result.user.role) : '/user-dashboard';
+      const roleDisplayName = result?.user?.role === 'manager' ? 'Manager' : 
+                             result?.user?.role === 'admin' ? 'Admin' : 'User';
+      
       return (
         <div className="text-center">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -103,14 +121,14 @@ function VerifyEmailContent() {
           
           <div className="space-y-4">
             <Link
-              href="/login"
+              href={dashboardUrl}
               className="inline-flex items-center bg-[#6566F1] text-white px-8 py-3 rounded-2xl font-semibold hover:bg-[#5A5BD9] transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
             >
-              Continue to Login
+              Continue to {roleDisplayName} Dashboard
               <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
             <div className="text-sm text-gray-500">
-              <p>You can now log in to your account and start using ChatBot Pro!</p>
+              <p>You can now access your {roleDisplayName.toLowerCase()} dashboard and start using ChatBot Pro!</p>
             </div>
           </div>
         </div>

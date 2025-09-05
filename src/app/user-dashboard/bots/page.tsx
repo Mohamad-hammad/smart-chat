@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import RoleGuard from '@/components/auth/RoleGuard';
 import {
   Plus,
   Search,
@@ -84,7 +85,8 @@ const BotsPage = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <RoleGuard allowedRoles={['user']}>
+      <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -236,7 +238,8 @@ const BotsPage = () => {
             ))}
           </div>
         )}
-    </div>
+      </div>
+    </RoleGuard>
   );
 };
 
