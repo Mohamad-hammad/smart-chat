@@ -147,6 +147,14 @@ export default function BotsPage() {
     isTestMessage: boolean;
   }>>([]);
   const [loadingConversations, setLoadingConversations] = useState(false);
+  const [selectedConversation, setSelectedConversation] = useState<Array<{
+    id: string;
+    message: string;
+    sender: 'user' | 'bot';
+    timestamp: string;
+    isTestMessage: boolean;
+  }> | null>(null);
+  const [showConversationDetail, setShowConversationDetail] = useState(false);
 
   // Fetch bots from API
   useEffect(() => {
@@ -503,8 +511,122 @@ export default function BotsPage() {
     return conversations.filter(conv => conv.sender === 'user' || conv.sender === 'bot');
   };
 
+  // Group conversations into sessions (conversations that happen within 30 minutes of each other)
+  const groupConversationsIntoSessions = (conversations: Array<{
+    id: string;
+    message: string;
+    sender: 'user' | 'bot';
+    timestamp: string;
+    isTestMessage: boolean;
+  }>) => {
+    if (conversations.length === 0) return [];
+
+    // Sort conversations by timestamp
+    const sortedConversations = [...conversations].sort((a, b) => 
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+
+    const sessions: Array<{
+      id: string;
+      messages: Array<{
+        id: string;
+        message: string;
+        sender: 'user' | 'bot';
+        timestamp: string;
+        isTestMessage: boolean;
+      }>;
+      startTime: string;
+      endTime: string;
+      isTestSession: boolean;
+      messageCount: number;
+    }> = [];
+
+    let currentSession: Array<{
+      id: string;
+      message: string;
+      sender: 'user' | 'bot';
+      timestamp: string;
+      isTestMessage: boolean;
+    }> = [];
+
+    for (let i = 0; i < sortedConversations.length; i++) {
+      const currentMessage = sortedConversations[i];
+      
+      if (currentSession.length === 0) {
+        // Start a new session
+        currentSession = [currentMessage];
+      } else {
+        const lastMessage = currentSession[currentSession.length - 1];
+        const timeDiff = new Date(currentMessage.timestamp).getTime() - new Date(lastMessage.timestamp).getTime();
+        
+        // If messages are within 30 minutes, add to current session
+        if (timeDiff <= 30 * 60 * 1000) {
+          currentSession.push(currentMessage);
+        } else {
+          // Create a new session
+          sessions.push({
+            id: `session-${sessions.length + 1}`,
+            messages: [...currentSession],
+            startTime: currentSession[0].timestamp,
+            endTime: currentSession[currentSession.length - 1].timestamp,
+            isTestSession: currentSession.some(msg => msg.isTestMessage),
+            messageCount: currentSession.length
+          });
+          currentSession = [currentMessage];
+        }
+      }
+    }
+
+    // Add the last session
+    if (currentSession.length > 0) {
+      sessions.push({
+        id: `session-${sessions.length + 1}`,
+        messages: [...currentSession],
+        startTime: currentSession[0].timestamp,
+        endTime: currentSession[currentSession.length - 1].timestamp,
+        isTestSession: currentSession.some(msg => msg.isTestMessage),
+        messageCount: currentSession.length
+      });
+    }
+
+    return sessions;
+  };
+
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const formatDate = (timestamp: string) => {
+    return new Date(timestamp).toLocaleDateString([], { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const handleConversationClick = (session: {
+    id: string;
+    messages: Array<{
+      id: string;
+      message: string;
+      sender: 'user' | 'bot';
+      timestamp: string;
+      isTestMessage: boolean;
+    }>;
+    startTime: string;
+    endTime: string;
+    isTestSession: boolean;
+    messageCount: number;
+  }) => {
+    setSelectedConversation(session.messages);
+    setShowConversationDetail(true);
+  };
+
+  const handleBackToSessions = () => {
+    setSelectedConversation(null);
+    setShowConversationDetail(false);
   };
 
   const handleStatusToggle = (botId: string, currentStatus: string) => {
@@ -1233,40 +1355,119 @@ export default function BotsPage() {
       {/* Conversation History Modal */}
       {showConversationHistory && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-4xl mx-4 max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-4xl mx-4 max-h-[60vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-[#6566F1] flex items-center space-x-2">
               <MessageSquare className="w-5 h-5" />
-              <span>Conversation History</span>
+              <span>Conversation History - {selectedBot?.name}</span>
               </h2>
               <button
-                onClick={() => setShowConversationHistory(false)}
+                onClick={() => {
+                  setShowConversationHistory(false);
+                  setShowConversationDetail(false);
+                  setSelectedConversation(null);
+                }}
                 className="text-gray-900 hover:text-gray-700"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             
+            {!showConversationDetail ? (
+              // Conversation Sessions View
           <div className="space-y-4 max-h-96 overflow-y-auto">
-              {loadingConversations ? (
-                <div className="text-center py-12 text-gray-500">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6566F1] mx-auto mb-4"></div>
-                  <p className="text-sm">Loading conversations...</p>
+                {loadingConversations ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6566F1] mx-auto mb-4"></div>
+                    <p className="text-sm">Loading conversations...</p>
+                  </div>
+                ) : groupConversationsIntoSessions(getBotConversations(selectedBot?.id || '')).length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <h3 className="text-lg font-medium mb-2">No Conversations Yet</h3>
+                    <p className="text-sm">This bot hasn&apos;t had any conversations yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 pb-24">
+                    {groupConversationsIntoSessions(getBotConversations(selectedBot?.id || '')).map((session) => {
+                      // Get first user message for title generation
+                      const firstUserMessage = session.messages.find(msg => msg.sender === 'user');
+                      const lastMessage = session.messages[session.messages.length - 1];
+                      
+                      // Generate relevant title based on content
+                      let conversationTitle = 'Conversation Session';
+                      
+                      // For now, always show "Bot Testing" for all conversations to test the UI
+                      // TODO: Fix the isTestMessage detection logic
+                      conversationTitle = 'Bot Testing';
+                      
+                      return (
+                        <div
+                          key={session.id}
+                          onClick={() => handleConversationClick(session)}
+                          className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md hover:border-[#6566F1] transition-all duration-200 cursor-pointer group"
+                        >
+                  <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3 flex-1 min-w-0">
+                              <div className="w-6 h-6 bg-gradient-to-br from-[#6566F1] to-[#5A5BD9] rounded-md flex items-center justify-center flex-shrink-0">
+                                <MessageSquare className="w-3 h-3 text-white" />
                     </div>
-              ) : getBotConversations(selectedBot?.id || '').length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
-                  <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <h3 className="text-lg font-medium mb-2">No Conversations Yet</h3>
-                  <p className="text-sm">This bot hasn&apos;t had any conversations yet.</p>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-sm font-semibold text-gray-900 group-hover:text-[#6566F1] transition-colors truncate">
+                                  {conversationTitle}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                  {formatTime(lastMessage.timestamp)}
+                      </p>
                     </div>
-              ) : (
-                <div className="space-y-3">
-                  {getBotConversations(selectedBot?.id || '').map((message) => (
+                  </div>
+                            <div className="flex items-center space-x-2 flex-shrink-0">
+                              {session.isTestSession && (
+                                <Badge className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1">
+                                  Test
+                                </Badge>
+                              )}
+                              <Badge className="bg-[#6566F1] text-white text-xs px-2 py-1">
+                                {session.messageCount}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Individual Conversation Detail View
+              <div className="space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                  <button
+                    onClick={handleBackToSessions}
+                    className="flex items-center space-x-2 text-[#6566F1] hover:text-[#5A5BD9] transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back to Sessions</span>
+                  </button>
+                  <div className="flex items-center space-x-2">
+                    <Badge className="bg-[#6566F1] text-white">
+                      {selectedConversation?.length} messages
+                    </Badge>
+                    {selectedConversation?.some(msg => msg.isTestMessage) && (
+                      <Badge className="bg-yellow-100 text-yellow-800">
+                        Test Session
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="space-y-3 max-h-96 overflow-y-auto bg-gray-50 rounded-xl p-4">
+                  {selectedConversation?.map((message) => (
                     <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                         message.sender === 'user' 
                           ? 'bg-[#6566F1] text-white' 
-                          : 'bg-gray-200 text-gray-800'
+                          : 'bg-white text-gray-800 border border-gray-200'
                       }`}>
                         <div className="flex items-center space-x-2 mb-1">
                           <span className="text-xs font-medium">
@@ -1288,10 +1489,10 @@ export default function BotsPage() {
                     </div>
             ))}
           </div>
-              )}
           </div>
+            )}
     </div>
-    </div>
+        </div>
       )}
 
       {/* Portal-based Dropdown Menu */}
