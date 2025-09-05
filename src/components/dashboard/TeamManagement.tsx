@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,11 +16,13 @@ import {
   CheckCircle,
   Clock,
   ArrowLeft,
-  X
+  X,
+  UserCheck,
+  AlertCircle
 } from 'lucide-react';
 
 const TeamManagement = () => {
-  const [selectedAgent, setSelectedAgent] = useState(1); // Mike Johnson is selected by default
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newMember, setNewMember] = useState({
     firstName: '',
@@ -29,77 +31,171 @@ const TeamManagement = () => {
     phone: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: ''
+  });
+  const [teamMembers, setTeamMembers] = useState<Array<{
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    status: 'accepted' | 'pending';
+    createdAt: string;
+    rating: number;
+    totalChats: number;
+    onlineStatus: 'online' | 'busy' | 'offline';
+    specialties: string[];
+    currentStatus: string;
+  }>>([]);
+  const [loadingMembers, setLoadingMembers] = useState(true);
 
-  // Mock data for team members
-  const teamMembers = [
-    {
-      id: 0,
-      name: "Sarah Chen",
-      email: "sarah.chen@company.com",
-      initials: "SC",
-      role: "Senior Agent",
-      status: "online",
-      statusColor: "bg-[#6566F1] text-white",
-      rating: "4.9",
-      chats: "1247",
-      phone: "+1 (555) 123-4567",
-      joinedDate: "2023-01-15",
-      specialties: ["Customer Service", "Technical Support"],
-      currentStatus: "Available"
-    },
-    {
-      id: 1,
-      name: "Mike Johnson",
-      email: "mike.johnson@company.com",
-      initials: "MJ",
-      role: "Agent",
-      status: "busy",
-      statusColor: "bg-orange-500 text-white",
-      rating: "4.8",
-      chats: "892",
-      phone: "+1 (555) 234-5678",
-      joinedDate: "2023-03-20",
-      specialties: ["Customer Service", "Returns"],
-      currentStatus: "Currently in chat with 2 customers"
-    },
-    {
-      id: 2,
-      name: "Lisa Wang",
-      email: "lisa.wang@company.com",
-      initials: "LW",
-      role: "Agent",
-      status: "offline",
-      statusColor: "bg-red-500 text-white",
-      rating: "4.7",
-      chats: "634",
-      phone: "+1 (555) 345-6789",
-      joinedDate: "2023-05-10",
-      specialties: ["Sales", "Billing"],
-      currentStatus: "Offline"
+  // Validation functions
+  const validateField = (name: string, value: string): string => {
+    switch (name) {
+      case 'firstName':
+        if (!value.trim()) return 'First name is required';
+        if (value.trim().length < 2) return 'First name must be at least 2 characters';
+        return '';
+      
+      case 'lastName':
+        if (!value.trim()) return 'Last name is required';
+        if (value.trim().length < 2) return 'Last name must be at least 2 characters';
+        return '';
+      
+      case 'email':
+        if (!value.trim()) return 'Email is required';
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) return 'Please enter a valid email address';
+        return '';
+      
+      case 'phone':
+        if (!value.trim()) return 'Phone number is required';
+        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        if (!phoneRegex.test(value.replace(/[\s\-\(\)]/g, ''))) {
+          return 'Please enter a valid phone number';
+        }
+        return '';
+      
+      default:
+        return '';
     }
-  ];
+  };
 
-  // Mock data for bot assignments
-  const botAssignments = [
-    {
-      name: "Support Bot",
-      description: "Customer Support",
-      status: "assigned",
-      statusColor: "bg-[#6566F1] text-white"
-    },
-    {
-      name: "Sales Bot",
-      description: "Sales Assistant",
-      status: "unassigned",
-      statusColor: "bg-gray-100 text-gray-600"
+  const handleInputChange = (name: string, value: string) => {
+    setNewMember({...newMember, [name]: value});
+    const error = validateField(name, value);
+    setErrors({...errors, [name]: error});
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors = {
+      firstName: validateField('firstName', newMember.firstName),
+      lastName: validateField('lastName', newMember.lastName),
+      email: validateField('email', newMember.email),
+      phone: validateField('phone', newMember.phone)
+    };
+    
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== '');
+  };
+
+  // Fetch team members from API
+  const fetchTeamMembers = async () => {
+    try {
+      setLoadingMembers(true);
+      const response = await fetch('/api/manager/users');
+      if (response.ok) {
+        const data = await response.json();
+        // Add additional stats for each team member
+        const membersWithStats = (data.users || []).map((user: {id: string; name: string; email: string; role: string; status: string; createdAt: string}) => ({
+          ...user,
+          rating: 5.0, // Default 5-star rating for new members
+          totalChats: 0, // Will be updated when we have chat data
+          onlineStatus: user.status === 'accepted' ? 'online' : 'offline',
+          specialties: ['Customer Service'], // Default specialty
+          currentStatus: user.status === 'accepted' ? 'Available' : 'Pending invitation'
+        }));
+        setTeamMembers(membersWithStats);
+      } else {
+        console.error('Failed to fetch team members');
+      }
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+    } finally {
+      setLoadingMembers(false);
     }
-  ];
+  };
 
-  const selectedAgentData = teamMembers[selectedAgent];
+  // Load team members on component mount
+  useEffect(() => {
+    fetchTeamMembers();
+  }, []);
+
+  // Helper function to get status icon and color
+  const getStatusIcon = (status: 'accepted' | 'pending') => {
+    if (status === 'accepted') {
+      return <UserCheck className="w-5 h-5 text-green-600" />;
+    } else {
+      return <AlertCircle className="w-5 h-5 text-orange-500" />;
+    }
+  };
+
+  const getStatusColor = (status: 'accepted' | 'pending') => {
+    if (status === 'accepted') {
+      return "bg-green-100 text-green-800 border-green-200";
+    } else {
+      return "bg-orange-100 text-orange-800 border-orange-200";
+    }
+  };
+
+  // Helper function to get online status icon and color
+  const getOnlineStatusIcon = (onlineStatus: 'online' | 'busy' | 'offline') => {
+    switch (onlineStatus) {
+      case 'online':
+        return <div className="w-3 h-3 bg-green-500 rounded-full shadow-sm"></div>;
+      case 'busy':
+        return <div className="w-3 h-3 bg-orange-500 rounded-full shadow-sm"></div>;
+      case 'offline':
+        return <div className="w-3 h-3 bg-gray-400 rounded-full shadow-sm"></div>;
+      default:
+        return <div className="w-3 h-3 bg-gray-400 rounded-full shadow-sm"></div>;
+    }
+  };
+
+  const getOnlineStatusColor = (onlineStatus: 'online' | 'busy' | 'offline') => {
+    switch (onlineStatus) {
+      case 'online':
+        return "bg-green-500 text-white border-green-600";
+      case 'busy':
+        return "bg-orange-500 text-white border-orange-600";
+      case 'offline':
+        return "bg-gray-400 text-white border-gray-500";
+      default:
+        return "bg-gray-400 text-white border-gray-500";
+    }
+  };
+
+  const getOnlineStatusHoverColor = (onlineStatus: 'online' | 'busy' | 'offline') => {
+    switch (onlineStatus) {
+      case 'online':
+        return "bg-green-600 text-white border-green-700";
+      case 'busy':
+        return "bg-orange-600 text-white border-orange-700";
+      case 'offline':
+        return "bg-gray-500 text-white border-gray-600";
+      default:
+        return "bg-gray-500 text-white border-gray-600";
+    }
+  };
+
+
+  const selectedAgentData = selectedAgent ? teamMembers.find(member => member.id === selectedAgent) : null;
 
   const handleAddMember = async () => {
-    if (!newMember.firstName || !newMember.lastName || !newMember.email) {
-      alert('Please fill in all required fields (First Name, Last Name, Email)');
+    if (!validateForm()) {
       return;
     }
 
@@ -124,6 +220,9 @@ const TeamManagement = () => {
         console.log('Invitation response:', data);
         setIsAddModalOpen(false);
         setNewMember({ firstName: '', lastName: '', email: '', phone: '' });
+        setErrors({ firstName: '', lastName: '', email: '', phone: '' });
+        // Refresh team members list
+        fetchTeamMembers();
       } else {
         const errorData = await response.json();
         alert(`Failed to send invitation: ${errorData.error || 'Unknown error'}`);
@@ -168,56 +267,78 @@ const TeamManagement = () => {
           <CardHeader className="p-6 pb-4">
             <div className="flex items-center space-x-2">
               <Users className="w-5 h-5 text-gray-600" />
-              <CardTitle className="text-lg font-bold text-gray-900">Team Members (3)</CardTitle>
+              <CardTitle className="text-lg font-bold text-gray-900">
+                Team Members ({teamMembers.length})
+              </CardTitle>
             </div>
             <p className="text-sm text-gray-600">Manage your support team and their assignments.</p>
           </CardHeader>
           <CardContent className="p-6 pt-0">
-            <div className="space-y-4">
-              {teamMembers.map((member) => (
-                <div 
-                  key={member.id}
-                  className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer hover:shadow-md ${
-                    selectedAgent === member.id 
-                      ? 'border-[#6566F1] bg-[#6566F1]/10' 
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}
-                  onClick={() => setSelectedAgent(member.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      {/* Avatar */}
-                      <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-600">{member.initials}</span>
+            {loadingMembers ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto mb-2"></div>
+                <p className="text-sm text-gray-500">Loading team members...</p>
+              </div>
+            ) : teamMembers.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-sm">No team members yet</p>
+                <p className="text-xs text-gray-400">Invite users to get started</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {teamMembers.map((member) => (
+                  <div 
+                    key={member.id}
+                    className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer hover:shadow-md ${
+                      selectedAgent === member.id 
+                        ? 'border-[#6566F1] bg-[#6566F1]/10' 
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                    onClick={() => setSelectedAgent(member.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        {/* Avatar */}
+                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-medium text-gray-600">
+                            {member.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                          </span>
+                        </div>
+                        
+                        {/* Member Info */}
+                        <div className="space-y-1">
+                          <h3 className="text-sm font-semibold text-gray-900">{member.name}</h3>
+                          <p className="text-xs text-gray-600">{member.email}</p>
+                          <div className="flex items-center space-x-2">
+                            <Badge className="text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200">
+                              {member.role}
+                            </Badge>
+                            <Badge className={`text-xs font-medium px-2 py-1 transition-colors duration-200 shadow-sm ${
+                              member.onlineStatus === 'online' 
+                                ? 'bg-green-500 text-white border-green-600 hover:bg-green-600 hover:border-green-700'
+                                : member.onlineStatus === 'busy'
+                                ? 'bg-orange-500 text-white border-orange-600 hover:bg-orange-600 hover:border-orange-700'
+                                : 'bg-gray-400 text-white border-gray-500 hover:bg-gray-500 hover:border-gray-600'
+                            }`}>
+                              {member.onlineStatus}
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
-                      
-                      {/* Member Info */}
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-semibold text-gray-900">{member.name}</h3>
-                        <p className="text-xs text-gray-600">{member.email}</p>
+
+                      <div className="flex items-center space-x-4">
+                        {/* Performance Stats */}
+                        <div className="text-right">
+                          <div className="flex items-center space-x-1">
+                            <Star className="w-4 h-4 text-yellow-500" />
+                            <span className="text-xs font-medium text-gray-900">{member.rating}</span>
+                          </div>
+                          <p className="text-xs text-gray-600">{member.totalChats} chats</p>
+                        </div>
+
+                        {/* Actions */}
                         <div className="flex items-center space-x-2">
-                          <Badge className="text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200">
-                            {member.role}
-                          </Badge>
-                          <Badge className={`text-xs ${member.statusColor} ${member.status === 'online' ? 'hover:bg-[#5A5BD9]' : member.status === 'busy' ? 'hover:bg-orange-600' : 'hover:bg-red-600'} transition-colors duration-200`}>
-                            {member.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-4">
-                      {/* Performance */}
-                      <div className="text-right">
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4 text-yellow-500" />
-                          <span className="text-xs font-medium text-gray-900">{member.rating}</span>
-                        </div>
-                        <p className="text-xs text-gray-600">{member.chats} chats</p>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex items-center space-x-2">
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -237,98 +358,116 @@ const TeamManagement = () => {
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Right Panel - Agent Details */}
+        {/* Right Panel - Member Details */}
         <div className="space-y-6">
-          {/* Agent Profile */}
+          {/* Member Profile */}
           <Card className="bg-white rounded-2xl shadow-sm border-0">
             <CardHeader className="p-6 pb-4">
               <div className="flex items-center space-x-2">
                 <Users className="w-5 h-5 text-gray-600" />
-                <CardTitle className="text-lg font-bold text-gray-900">{selectedAgentData.name}</CardTitle>
+                <CardTitle className="text-lg font-bold text-gray-900">
+                  {selectedAgentData ? selectedAgentData.name : 'Select a member'}
+                </CardTitle>
               </div>
             </CardHeader>
             <CardContent className="p-6 pt-0 space-y-4">
-              {/* Role */}
-              <div>
-                <p className="text-sm font-medium text-gray-600">Role</p>
-                <p className="text-gray-900">{selectedAgentData.role}</p>
-              </div>
-
-              {/* Contact Info */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <Mail className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-900">{selectedAgentData.email}</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Phone className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-900">{selectedAgentData.phone}</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Calendar className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-900">Joined {selectedAgentData.joinedDate}</span>
-                </div>
-              </div>
-
-              {/* Performance */}
-              <div className="flex items-center space-x-3">
-                <Star className="w-4 h-4 text-yellow-500" />
-                <span className="text-gray-900">{selectedAgentData.rating} rating • {selectedAgentData.chats} total chats</span>
-              </div>
-
-              {/* Specialties */}
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-2">Specialties</p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedAgentData.specialties.map((specialty, index) => (
-                    <Badge key={index} className="text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200">
-                      {specialty}
+              {selectedAgentData ? (
+                <>
+                  {/* Status */}
+                  <div className="flex items-center space-x-2">
+                    {getOnlineStatusIcon(selectedAgentData.onlineStatus)}
+                    <Badge className={`text-xs font-medium px-2 py-1 transition-colors duration-200 shadow-sm ${
+                      selectedAgentData.onlineStatus === 'online' 
+                        ? 'bg-green-500 text-white border-green-600 hover:bg-green-600 hover:border-green-700'
+                        : selectedAgentData.onlineStatus === 'busy'
+                        ? 'bg-orange-500 text-white border-orange-600 hover:bg-orange-600 hover:border-orange-700'
+                        : 'bg-gray-400 text-white border-gray-500 hover:bg-gray-500 hover:border-gray-600'
+                    }`}>
+                      {selectedAgentData.onlineStatus}
                     </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Current Status */}
-              <div>
-                <p className="text-sm font-medium text-gray-600">Current Status</p>
-                <p className="text-gray-900">{selectedAgentData.currentStatus}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Bot Assignment */}
-          <Card className="bg-white rounded-2xl shadow-sm border-0">
-            <CardHeader className="p-6 pb-4">
-              <div className="flex items-center space-x-2">
-                <Bot className="w-5 h-5 text-gray-600" />
-                <CardTitle className="text-lg font-bold text-gray-900">Bot Assignment</CardTitle>
-              </div>
-              <p className="text-sm text-gray-600">Manage which bots this agent can handle.</p>
-            </CardHeader>
-            <CardContent className="p-6 pt-0">
-              <div className="space-y-4">
-                {botAssignments.map((bot, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                    <div>
-                      <h4 className="font-medium text-gray-900">{bot.name}</h4>
-                      <p className="text-sm text-gray-600">{bot.description}</p>
-                    </div>
-                    <Button 
-                      className={`rounded-xl px-4 py-2 text-sm ${
-                        bot.status === 'assigned' 
-                          ? 'bg-[#6566F1] text-white hover:bg-[#5A5BD9]' 
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      } transition-colors duration-200`}
-                    >
-                      {bot.status === 'assigned' ? 'Assigned' : 'Assign'}
-                    </Button>
                   </div>
-                ))}
-              </div>
+
+                  {/* Role */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Role</p>
+                    <p className="text-gray-900 capitalize">{selectedAgentData.role}</p>
+                  </div>
+
+                  {/* Contact Info */}
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <Mail className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-900">{selectedAgentData.email}</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Calendar className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-900">
+                        {selectedAgentData.status === 'accepted' ? 'Joined' : 'Invited'} {new Date(selectedAgentData.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Performance */}
+                  <div className="flex items-center space-x-3">
+                    <Star className="w-4 h-4 text-yellow-500" />
+                    <span className="text-gray-900">{selectedAgentData.rating} rating • {selectedAgentData.totalChats} total chats</span>
+                  </div>
+
+                  {/* Specialties */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-2">Specialties</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedAgentData.specialties.map((specialty, index) => (
+                        <Badge key={index} className="text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200">
+                          {specialty}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Current Status */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Current Status</p>
+                    <p className="text-gray-900">{selectedAgentData.currentStatus}</p>
+                  </div>
+
+                  {/* Status-specific information */}
+                  {selectedAgentData.status === 'pending' && (
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                      <div className="flex items-center space-x-2">
+                        <AlertCircle className="w-5 h-5 text-orange-600" />
+                        <p className="text-sm font-medium text-orange-800">Pending Invitation</p>
+                      </div>
+                      <p className="text-xs text-orange-700 mt-1">
+                        This user has been invited but hasn&apos;t accepted the invitation yet. They will appear as &ldquo;Active&rdquo; once they set up their password.
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedAgentData.status === 'accepted' && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center space-x-2">
+                        <UserCheck className="w-5 h-5 text-green-600" />
+                        <p className="text-sm font-medium text-green-800">Active Member</p>
+                      </div>
+                      <p className="text-xs text-green-700 mt-1">
+                        This user has accepted their invitation and can now access the system.
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-sm">Select a team member to view details</p>
+                </div>
+              )}
+
             </CardContent>
           </Card>
         </div>
@@ -356,10 +495,15 @@ const TeamManagement = () => {
                 <input
                   type="text"
                   value={newMember.firstName}
-                  onChange={(e) => setNewMember({...newMember, firstName: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6566F1] focus:border-transparent text-gray-900"
+                  onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6566F1] focus:border-transparent text-gray-900 ${
+                    errors.firstName ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Enter first name"
                 />
+                {errors.firstName && (
+                  <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
+                )}
               </div>
               
               <div>
@@ -367,10 +511,15 @@ const TeamManagement = () => {
                 <input
                   type="text"
                   value={newMember.lastName}
-                  onChange={(e) => setNewMember({...newMember, lastName: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6566F1] focus:border-transparent text-gray-900"
+                  onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6566F1] focus:border-transparent text-gray-900 ${
+                    errors.lastName ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Enter last name"
                 />
+                {errors.lastName && (
+                  <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>
+                )}
               </div>
               
               <div>
@@ -378,10 +527,15 @@ const TeamManagement = () => {
                 <input
                   type="email"
                   value={newMember.email}
-                  onChange={(e) => setNewMember({...newMember, email: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6566F1] focus:border-transparent text-gray-900"
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6566F1] focus:border-transparent text-gray-900 ${
+                    errors.email ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Enter email address"
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                )}
               </div>
               
               <div>
@@ -389,18 +543,27 @@ const TeamManagement = () => {
                 <input
                   type="tel"
                   value={newMember.phone}
-                  onChange={(e) => setNewMember({...newMember, phone: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6566F1] focus:border-transparent text-gray-900"
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6566F1] focus:border-transparent text-gray-900 ${
+                    errors.phone ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Enter phone number"
                 />
+                {errors.phone && (
+                  <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                )}
               </div>
             </div>
             
             <div className="flex justify-end space-x-3 mt-6">
               <Button
                 variant="outline"
-                onClick={() => setIsAddModalOpen(false)}
-                className="px-4 py-2"
+                onClick={() => {
+                  setIsAddModalOpen(false);
+                  setNewMember({ firstName: '', lastName: '', email: '', phone: '' });
+                  setErrors({ firstName: '', lastName: '', email: '', phone: '' });
+                }}
+                className="px-4 py-2 text-gray-700 border-gray-300 hover:bg-gray-50"
               >
                 Cancel
               </Button>
