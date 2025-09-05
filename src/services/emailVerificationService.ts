@@ -126,8 +126,9 @@ export class EmailVerificationService {
       // Check if already verified
       if (user.isEmailVerified) {
         return {
-          success: false,
-          message: 'Email is already verified'
+          success: true,
+          message: 'Email is already verified. You can proceed to your dashboard.',
+          user
         };
       }
 
