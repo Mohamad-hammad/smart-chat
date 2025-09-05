@@ -52,6 +52,8 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             name: `${user.firstName} ${user.lastName}`.trim(),
             role: user.role,
+            isEmailVerified: user.isEmailVerified,
+            isActive: user.isActive,
           };
         } catch (error) {
           console.error('Error in credentials authorization:', error);
@@ -131,16 +133,20 @@ export const authOptions: NextAuthOptions = {
           if (dbUser) {
             token.role = dbUser.role;
             token.id = dbUser.id;
+            token.isEmailVerified = dbUser.isEmailVerified;
+            token.isActive = dbUser.isActive;
           }
         } catch (error) {
           console.error('Error fetching user role for Google sign-in:', error);
         }
       }
       
-      // Add role to token for credentials provider
+      // Add role and verification status to token for credentials provider
       if (user && 'role' in user && user.role) {
         token.role = user.role;
         token.id = user.id;
+        token.isEmailVerified = (user as { isEmailVerified?: boolean }).isEmailVerified;
+        token.isActive = (user as { isActive?: boolean }).isActive;
       }
       
       return token;
@@ -151,12 +157,18 @@ export const authOptions: NextAuthOptions = {
         (session.user as { provider?: string }).provider = "google";
       }
       
-      // Add role and id to session
+      // Add role, id, and verification status to session
       if (token.role && session.user) {
         (session.user as { role?: string }).role = token.role as string;
       }
       if (token.id && session.user) {
         (session.user as { id?: string }).id = token.id as string;
+      }
+      if (token.isEmailVerified !== undefined && session.user) {
+        (session.user as { isEmailVerified?: boolean }).isEmailVerified = token.isEmailVerified as boolean;
+      }
+      if (token.isActive !== undefined && session.user) {
+        (session.user as { isActive?: boolean }).isActive = token.isActive as boolean;
       }
       
       return session;

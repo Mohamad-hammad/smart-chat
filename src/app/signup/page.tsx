@@ -70,10 +70,8 @@ const SignupComponent = () => {
         acceptTerms: false
       });
       
-      // Redirect to dashboard after successful signup
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 2000);
+      // Don't redirect - user needs to verify email first
+      // The message will show them to check their email
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Something went wrong";
       setError(errorMessage);

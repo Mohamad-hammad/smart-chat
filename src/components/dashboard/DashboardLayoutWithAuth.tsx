@@ -43,6 +43,15 @@ const DashboardLayoutWithAuth: React.FC<DashboardLayoutProps> = ({
   // Check if user is admin or manager
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
+      // Check if user is verified (additional safety check)
+      const isVerified = 'isEmailVerified' in session.user ? session.user.isEmailVerified : true;
+      const isActive = 'isActive' in session.user ? session.user.isActive : true;
+      
+      if (!isVerified || !isActive) {
+        router.push('/login?message=Please verify your email before accessing the dashboard');
+        return;
+      }
+      
       // Check role from session
       const userRole = 'role' in session.user ? session.user.role : 'user';
       setIsAdmin(userRole === 'admin');
