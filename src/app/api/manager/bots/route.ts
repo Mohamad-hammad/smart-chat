@@ -46,13 +46,18 @@ export async function GET(request: NextRequest) {
 
     // Get real conversation counts for each bot
     const botIds = bots.map(bot => bot.id);
-    const conversationCounts = await conversationRepository
-      .createQueryBuilder('conversation')
-      .select('conversation.botId')
-      .addSelect('COUNT(*)', 'count')
-      .where('conversation.botId IN (:...botIds)', { botIds })
-      .groupBy('conversation.botId')
-      .getRawMany();
+    let conversationCounts = [];
+    
+    // Only query conversations if there are bots
+    if (botIds.length > 0) {
+      conversationCounts = await conversationRepository
+        .createQueryBuilder('conversation')
+        .select('conversation.botId')
+        .addSelect('COUNT(*)', 'count')
+        .where('conversation.botId IN (:...botIds)', { botIds })
+        .groupBy('conversation.botId')
+        .getRawMany();
+    }
 
     // Create a map of botId to conversation count
     const conversationCountMap = conversationCounts.reduce((acc, item) => {
