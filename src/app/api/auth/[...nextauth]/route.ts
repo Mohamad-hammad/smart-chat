@@ -80,10 +80,6 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!existingUser) {
-            // Check if this is the first user (should be manager)
-            const userCount = await userRepository.count();
-            const isFirstUser = userCount === 0;
-
             // Create new user with Google info
             const newUser = new User();
             newUser.email = user.email!;
@@ -91,7 +87,7 @@ export const authOptions: NextAuthOptions = {
             newUser.lastName = user.name?.split(' ').slice(1).join(' ') || null;
             newUser.isEmailVerified = true; // Google accounts are pre-verified
             newUser.isActive = true;
-            newUser.role = isFirstUser ? UserRole.MANAGER : UserRole.USER; // First user becomes manager
+            newUser.role = UserRole.MANAGER; // All users who sign up become managers by default
             
             // Generate a random password for Google users
             const randomPassword = Math.random().toString(36).slice(-10);

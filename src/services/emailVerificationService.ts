@@ -135,7 +135,7 @@ export class EmailVerificationService {
       // Verify the email
       user.isEmailVerified = true;
       user.isActive = true; // Activate the account
-      user.emailVerificationToken = null; // Clear the token
+      // Keep the token so already verified users can still use the same link
       await this.userRepository.save(user);
 
       return {
@@ -143,7 +143,8 @@ export class EmailVerificationService {
         message: 'Email verified successfully! Your account is now active.',
         user
       };
-    } catch {
+    } catch (error) {
+      console.error('EmailVerificationService: Error during verification:', error);
       return {
         success: false,
         message: 'An error occurred while verifying your email'

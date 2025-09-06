@@ -35,8 +35,12 @@ export async function GET(request: NextRequest) {
         }
       });
     } else {
+      // Return 400 for invalid/expired tokens, but include the specific error message
       return NextResponse.json(
-        { error: result.message },
+        { 
+          success: false,
+          error: result.message 
+        },
         { status: 400 }
       );
     }

@@ -51,11 +51,8 @@ export async function POST(request: NextRequest) {
       existingUser.emailVerificationToken = verificationToken;
       existingUser.isActive = false;
       
-      // Check if this is the first user (should be manager)
-      // Count only verified users to determine if this should be the first manager
-      const verifiedUserCount = await userRepository.count({ where: { isEmailVerified: true } });
-      const isFirstUser = verifiedUserCount === 0; // No verified users exist yet
-      existingUser.role = isFirstUser ? UserRole.MANAGER : UserRole.USER;
+      // All users who sign up become managers by default
+      existingUser.role = UserRole.MANAGER;
       
       // Save updated user
       await userRepository.save(existingUser);
@@ -88,10 +85,6 @@ export async function POST(request: NextRequest) {
     // Generate verification token
     const verificationToken = EmailVerificationService.generateVerificationToken();
 
-    // Check if this is the first user (should be manager)
-    const userCount = await userRepository.count();
-    const isFirstUser = userCount === 0;
-
     // Create user (not verified yet)
     const user = new User();
     user.email = email;
@@ -101,7 +94,7 @@ export async function POST(request: NextRequest) {
     user.isEmailVerified = false;
     user.emailVerificationToken = verificationToken;
     user.isActive = false; // User is inactive until email is verified
-    user.role = isFirstUser ? UserRole.MANAGER : UserRole.USER; // First user becomes manager
+    user.role = UserRole.MANAGER; // All users who sign up become managers by default
 
     // Save user to database
     await userRepository.save(user);

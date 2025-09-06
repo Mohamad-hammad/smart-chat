@@ -57,7 +57,10 @@ function VerifyEmailContent() {
         setResult(data);
       } else {
         setVerificationStatus('error');
-        setResult(data);
+        setResult({
+          success: false,
+          message: data.error || data.message || 'An error occurred during verification'
+        });
       }
     } catch {
       setVerificationStatus('error');
