@@ -86,12 +86,12 @@ function VerifyEmailContent() {
 
       const data = await response.json();
       if (response.ok && data.success) {
-        alert('Verification email sent successfully! Please check your inbox.');
+        console.log('Verification email sent successfully');
       } else {
-        alert(data.error || 'Failed to resend verification email');
+        console.error('Failed to resend verification email:', data.error || 'Unknown error');
       }
-    } catch {
-      alert('An error occurred while resending the verification email');
+    } catch (error) {
+      console.error('An error occurred while resending the verification email:', error);
     } finally {
       setIsResending(false);
     }
