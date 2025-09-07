@@ -207,9 +207,9 @@ export default function BotsPage() {
         const usersData = await usersResponse.json();
         console.log('Users data received:', usersData);
         // Transform users to include name and status properties
-        transformedUsers = (usersData.users || []).map((user: {id: string; firstName: string; lastName: string; email: string; role: string; createdAt: string}) => ({
+        transformedUsers = (usersData.users || []).map((user: {id: string; firstName: string; lastName: string; email: string; role: string; createdAt: string; name: string}) => ({
           ...user,
-          name: `${user.firstName} ${user.lastName}`.trim(),
+          name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0] || 'Unknown User',
           status: 'online' // Default status, could be enhanced later
         }));
         setUsers(transformedUsers);
