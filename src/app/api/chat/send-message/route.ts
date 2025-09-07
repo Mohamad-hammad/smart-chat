@@ -137,9 +137,13 @@ export async function POST(request: NextRequest) {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            agent_id: user.id, // Using the manager's user ID as agent_id
-            chatbot_id: bot.id, // Using the bot ID as chatbot_id
-            message: message
+            body: {
+              message: message,
+              agent_id: user.id, // Using the manager's user ID as agent_id
+              chatbot_id: bot.id, // Using the bot ID as chatbot_id
+              bot_name: bot.name,
+              bot_domain: bot.domain
+            }
           }),
         });
 
