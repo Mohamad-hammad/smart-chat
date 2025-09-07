@@ -219,8 +219,7 @@ const TeamManagement = () => {
 
       if (response.ok) {
         const data = await response.json();
-        alert('Invitation sent successfully! Check the server console for details.');
-        console.log('Invitation response:', data);
+        console.log('Invitation sent successfully:', data);
         setIsAddModalOpen(false);
         setNewMember({ firstName: '', lastName: '', email: '', phone: '' });
         setErrors({ firstName: '', lastName: '', email: '', phone: '' });
@@ -228,11 +227,10 @@ const TeamManagement = () => {
         fetchTeamMembers();
       } else {
         const errorData = await response.json();
-        alert(`Failed to send invitation: ${errorData.error || 'Unknown error'}`);
+        console.error('Failed to send invitation:', errorData.error || 'Unknown error');
       }
     } catch (error) {
       console.error('Error sending invitation:', error);
-      alert('Error sending invitation. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -255,7 +253,7 @@ const TeamManagement = () => {
       });
 
       if (response.ok) {
-        alert('User deleted successfully!');
+        console.log('User deleted successfully');
         setIsDeleteModalOpen(false);
         setUserToDelete(null);
         // Refresh team members list
@@ -266,11 +264,10 @@ const TeamManagement = () => {
         }
       } else {
         const errorData = await response.json();
-        alert(`Failed to delete user: ${errorData.error || 'Unknown error'}`);
+        console.error('Failed to delete user:', errorData.error || 'Unknown error');
       }
     } catch (error) {
       console.error('Error deleting user:', error);
-      alert('Error deleting user. Please try again.');
     } finally {
       setIsDeleting(false);
     }

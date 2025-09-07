@@ -314,11 +314,9 @@ export default function BotsPage() {
       } else {
         const error = await response.json();
         console.error('Failed to create bot:', error);
-        alert('Failed to create bot: ' + (error.message || 'Unknown error'));
       }
     } catch (error) {
       console.error('Error creating bot:', error);
-      alert('Error creating bot. Please try again.');
     }
     
     setNewBot({ name: "", description: "", domain: "", status: "active" });
@@ -361,11 +359,9 @@ export default function BotsPage() {
         setTimeout(() => setSuccessMessage(null), 3000);
       } else {
         console.error('Failed to assign user:', responseData);
-        alert(`Failed to assign user: ${responseData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error assigning user:', error);
-      alert('Error assigning user. Please try again.');
     } finally {
       setAssigningUser(null);
     }
@@ -452,7 +448,7 @@ export default function BotsPage() {
   const handleBotSettings = (bot: {id: string; name: string}) => {
     console.log('Bot settings:', bot);
     // TODO: Implement bot settings functionality
-    alert('Bot settings functionality will be implemented soon');
+    console.log('Bot settings functionality will be implemented soon');
   };
 
   const handleDeleteBot = async (bot: {id: string; name: string}) => {
@@ -663,15 +659,14 @@ export default function BotsPage() {
       });
 
       if (response.ok) {
-        alert('Invitation sent successfully!');
+        console.log('Invitation sent successfully');
         setInviteData({ email: '', name: '' });
         setShowInviteModal(false);
       } else {
-        alert('Failed to send invitation. Please try again.');
+        console.error('Failed to send invitation');
       }
     } catch (error) {
       console.error('Error sending invitation:', error);
-      alert('Error sending invitation. Please try again.');
     }
   };
 
