@@ -50,7 +50,10 @@ export async function GET(request: NextRequest) {
 
     // Transform the data to include status based on whether they have a password
     const usersWithStatus = invitedUsers.map(user => {
-      const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+      // Properly handle undefined/null values
+      const firstName = user.firstName || '';
+      const lastName = user.lastName || '';
+      const fullName = `${firstName} ${lastName}`.trim();
       return {
         id: user.id,
         name: fullName || user.email.split('@')[0] || 'Unknown User', // Fallback to email username or 'Unknown User'
