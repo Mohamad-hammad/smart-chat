@@ -63,7 +63,13 @@ export async function GET(request: NextRequest) {
 
     // Transform the data
     const assignmentsWithStatus = assignments.map(assignment => {
-      const fullName = assignment.user ? `${assignment.user.firstName || ''} ${assignment.user.lastName || ''}`.trim() : '';
+      let fullName = '';
+      if (assignment.user) {
+        // Properly handle undefined/null values
+        const firstName = assignment.user.firstName || '';
+        const lastName = assignment.user.lastName || '';
+        fullName = `${firstName} ${lastName}`.trim();
+      }
       return {
         id: assignment.id,
         userId: assignment.user?.id || '',
