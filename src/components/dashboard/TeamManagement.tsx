@@ -24,6 +24,8 @@ import {
 const TeamManagement = () => {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<{id: string; name: string} | null>(null);
   const [newMember, setNewMember] = useState({
     firstName: '',
     lastName: '',
@@ -31,6 +33,7 @@ const TeamManagement = () => {
     phone: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [errors, setErrors] = useState({
     firstName: '',
     lastName: '',
@@ -235,6 +238,49 @@ const TeamManagement = () => {
     }
   };
 
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    setIsDeleting(true);
+    
+    try {
+      const response = await fetch('/api/manager/delete-user', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userToDelete.id
+        }),
+      });
+
+      if (response.ok) {
+        alert('User deleted successfully!');
+        setIsDeleteModalOpen(false);
+        setUserToDelete(null);
+        // Refresh team members list
+        fetchTeamMembers();
+        // Clear selection if deleted user was selected
+        if (selectedAgent === userToDelete.id) {
+          setSelectedAgent(null);
+        }
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to delete user: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Error deleting user. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const openDeleteModal = (member: {id: string; name: string}) => {
+    setUserToDelete(member);
+    setIsDeleteModalOpen(true);
+  };
+
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       {/* Header */}
@@ -349,6 +395,10 @@ const TeamManagement = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDeleteModal({ id: member.id, name: member.name });
+                          }}
                           className="p-2 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors duration-200"
                         >
                           <Trash2 className="w-4 h-4 text-gray-600" />
@@ -573,6 +623,67 @@ const TeamManagement = () => {
                 className="bg-[#6566F1] hover:bg-[#5A5BD9] text-white px-4 py-2 disabled:opacity-50"
               >
                 {isLoading ? 'Sending...' : 'Add Member'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && userToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Delete User</h2>
+              <button
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setUserToDelete(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <Trash2 className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Are you sure you want to delete this user?</p>
+                  <p className="text-sm text-gray-600">This action cannot be undone.</p>
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">User:</span> {userToDelete.name}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  This will permanently remove the user and all their data from the system.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setUserToDelete(null);
+                }}
+                className="px-4 py-2 text-gray-700 border-gray-300 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeleteUser}
+                disabled={isDeleting}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete User'}
               </Button>
             </div>
           </div>
