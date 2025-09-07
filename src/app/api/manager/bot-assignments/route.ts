@@ -62,17 +62,20 @@ export async function GET(request: NextRequest) {
     });
 
     // Transform the data
-    const assignmentsWithStatus = assignments.map(assignment => ({
-      id: assignment.id,
-      userId: assignment.user?.id || '',
-      userName: assignment.user ? `${assignment.user.firstName || ''} ${assignment.user.lastName || ''}`.trim() : '',
-      userEmail: assignment.user?.email || '',
-      userRole: assignment.user?.role || '',
-      userStatus: assignment.user?.password ? 'active' : 'pending',
-      botId: assignment.bot?.id || '',
-      botName: assignment.bot?.name || '',
-      assignedAt: assignment.assignedAt
-    }));
+    const assignmentsWithStatus = assignments.map(assignment => {
+      const fullName = assignment.user ? `${assignment.user.firstName || ''} ${assignment.user.lastName || ''}`.trim() : '';
+      return {
+        id: assignment.id,
+        userId: assignment.user?.id || '',
+        userName: fullName || assignment.user?.email?.split('@')[0] || 'Unknown User', // Fallback to email username or 'Unknown User'
+        userEmail: assignment.user?.email || '',
+        userRole: assignment.user?.role || '',
+        userStatus: assignment.user?.password ? 'active' : 'pending',
+        botId: assignment.bot?.id || '',
+        botName: assignment.bot?.name || '',
+        assignedAt: assignment.assignedAt
+      };
+    });
 
     return NextResponse.json({ assignments: assignmentsWithStatus });
 

@@ -49,14 +49,17 @@ export async function GET(request: NextRequest) {
       .getMany();
 
     // Transform the data to include status based on whether they have a password
-    const usersWithStatus = invitedUsers.map(user => ({
-      id: user.id,
-      name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-      email: user.email,
-      role: user.role,
-      status: user.password ? 'accepted' : 'pending', // accepted if they have password, pending if not
-      createdAt: user.createdAt
-    }));
+    const usersWithStatus = invitedUsers.map(user => {
+      const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+      return {
+        id: user.id,
+        name: fullName || user.email.split('@')[0] || 'Unknown User', // Fallback to email username or 'Unknown User'
+        email: user.email,
+        role: user.role,
+        status: user.password ? 'accepted' : 'pending', // accepted if they have password, pending if not
+        createdAt: user.createdAt
+      };
+    });
 
     return NextResponse.json({ users: usersWithStatus });
 
