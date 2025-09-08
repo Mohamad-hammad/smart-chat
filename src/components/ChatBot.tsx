@@ -256,7 +256,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ apiKey }) => {
                       ? 'bg-[#6566F1] text-white'
                       : 'bg-gray-100 text-gray-900'
                   }`}>
-                    <p className="text-sm text-gray-900">{message.text}</p>
+                    <p className={`text-sm ${
+                      message.sender === 'user' ? 'text-white' : 'text-gray-900'
+                    }`}>{message.text}</p>
                   </div>
                 </div>
               </div>
