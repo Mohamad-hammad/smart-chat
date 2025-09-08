@@ -29,29 +29,40 @@ async function saveConversation(botId: string, userId: string, message: string, 
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Initialize database connection
-    if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize();
-    }
-
-    // Get user from database
-    const userRepository = AppDataSource.getRepository(User);
-    const user = await userRepository.findOne({ 
-      where: { email: session.user.email } 
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
     const body = await request.json();
     const { botId, message, userId, isTestMessage = false } = body;
+
+    // Handle guest users for general assistant
+    let user;
+    if (userId === 'guest-user') {
+      // Create a mock user for guest users
+      user = {
+        id: 'guest-user',
+        email: 'guest@example.com',
+        role: 'user'
+      } as any;
+    } else {
+      const session = await getServerSession(authOptions);
+      
+      if (!session?.user?.email) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+
+      // Initialize database connection
+      if (!AppDataSource.isInitialized) {
+        await AppDataSource.initialize();
+      }
+
+      // Get user from database
+      const userRepository = AppDataSource.getRepository(User);
+      user = await userRepository.findOne({ 
+        where: { email: session.user.email } 
+      });
+
+      if (!user) {
+        return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      }
+    }
 
     if (!botId || !message) {
       return NextResponse.json({ 
@@ -59,8 +70,8 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Check if user is assigned to this bot (unless it's a test message from manager)
-    if (!isTestMessage) {
+    // Check if user is assigned to this bot (unless it's a test message from manager or guest user)
+    if (!isTestMessage && userId !== 'guest-user') {
       const { BotAssignment } = await import('@/entities/BotAssignment');
       const assignmentRepository = AppDataSource.getRepository(BotAssignment);
       const assignment = await assignmentRepository.findOne({
@@ -80,9 +91,18 @@ export async function POST(request: NextRequest) {
     const botRepository = AppDataSource.getRepository(Bot);
     let bot;
     
-    console.log('Bot lookup:', { botId, userId: user.id, isTestMessage, userRole: user.role });
-    
-    if (isTestMessage) {
+    // Handle special case for general assistant (main chatbot)
+    if (botId === 'general-assistant') {
+      // Create a mock bot for the general assistant
+      bot = {
+        id: 'general-assistant',
+        name: 'AI Assistant',
+        description: 'General purpose AI assistant',
+        domain: 'general',
+        status: 'active',
+        createdBy: 'system'
+      } as any;
+    } else if (isTestMessage) {
       // For test messages, check if the user is a manager and owns the bot
       bot = await botRepository.findOne({
         where: { 
@@ -90,7 +110,6 @@ export async function POST(request: NextRequest) {
           createdBy: user.id
         }
       });
-      console.log('Test message bot lookup result:', bot ? { id: bot.id, name: bot.name, status: bot.status, createdBy: bot.createdBy } : 'null');
     } else {
       // For regular messages, just check if bot exists
       bot = await botRepository.findOne({
@@ -98,7 +117,6 @@ export async function POST(request: NextRequest) {
           id: botId
         }
       });
-      console.log('Regular message bot lookup result:', bot ? { id: bot.id, name: bot.name, status: bot.status } : 'null');
     }
 
     if (!bot) {
@@ -108,17 +126,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if bot is active
-    console.log('Bot status check:', { 
-      botId, 
-      botStatus: bot.status, 
-      userId: user.id, 
-      isTestMessage,
-      botName: bot.name 
-    });
-    
     if (bot.status !== 'active') {
       return NextResponse.json({ 
-        error: `Bot is not active. Current status: ${bot.status}` 
+        error: 'Bot is not active' 
       }, { status: 400 });
     }
 
