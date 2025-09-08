@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
         id: 'guest-user',
         email: 'guest@example.com',
         role: 'user'
-      } as any;
+      } as { id: string; email: string; role: string };
     } else {
       const session = await getServerSession(authOptions);
       
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
         domain: 'general',
         status: 'active',
         createdBy: 'system'
-      } as any;
+      } as { id: string; name: string; description: string; domain: string; status: string; createdBy: string };
     } else if (isTestMessage) {
       // For test messages, check if the user is a manager and owns the bot
       bot = await botRepository.findOne({
