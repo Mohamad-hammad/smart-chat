@@ -193,16 +193,30 @@ export async function POST(request: NextRequest) {
         });
 
         if (n8nResponse.ok) {
-          const n8nData = await n8nResponse.json();
-          const botResponse = n8nData.response || n8nData.message || 'Message received successfully';
-          
-          // Save bot response to conversation
-          await saveConversation(botId, user.id, botResponse, 'bot', isTestMessage, n8nData);
-          
-          return NextResponse.json({
-            response: botResponse,
-            success: true
-          });
+          try {
+            const responseText = await n8nResponse.text();
+            let n8nData;
+            
+            if (responseText.trim()) {
+              n8nData = JSON.parse(responseText);
+            } else {
+              console.log('N8N returned empty response, using fallback');
+              n8nData = { response: 'I received your message. How can I help you further?' };
+            }
+            
+            const botResponse = n8nData.response || n8nData.message || 'Message received successfully';
+            
+            // Save bot response to conversation
+            await saveConversation(botId, user.id, botResponse, 'bot', isTestMessage, n8nData);
+            
+            return NextResponse.json({
+              response: botResponse,
+              success: true
+            });
+          } catch (parseError) {
+            console.error('Error parsing N8N response:', parseError);
+            // Fall back to intelligent response
+          }
         } else {
           console.error('N8N webhook error:', n8nResponse.status, n8nResponse.statusText);
           // Fall back to intelligent response
@@ -215,7 +229,21 @@ export async function POST(request: NextRequest) {
 
 
     // Final fallback - if neither API key nor webhook worked
-    const fallbackResponse = `I'm ${bot.name}. How can I help you with ${bot.domain}?`;
+    let fallbackResponse;
+    
+    // Generate intelligent fallback based on message content
+    const lowerMessage = message.toLowerCase();
+    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+      fallbackResponse = `Hello! I'm ${bot.name}. How can I assist you today?`;
+    } else if (lowerMessage.includes('help')) {
+      fallbackResponse = `I'm here to help! I'm ${bot.name} and I specialize in ${bot.domain}. What would you like to know?`;
+    } else if (lowerMessage.includes('thank')) {
+      fallbackResponse = `You're welcome! Is there anything else I can help you with?`;
+    } else if (lowerMessage.includes('bye') || lowerMessage.includes('goodbye')) {
+      fallbackResponse = `Goodbye! Feel free to reach out if you need any assistance. Have a great day!`;
+    } else {
+      fallbackResponse = `I received your message: "${message}". I'm ${bot.name} and I'm here to help with ${bot.domain}. Could you please provide more details about what you need?`;
+    }
     
     // Save bot response to conversation
     await saveConversation(botId, user.id, fallbackResponse, 'bot', isTestMessage);
