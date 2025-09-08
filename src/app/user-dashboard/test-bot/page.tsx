@@ -146,7 +146,7 @@ export default function UserTestBotPage() {
         const assignedBotsResponse = await fetch('/api/user/assigned-bots');
         if (assignedBotsResponse.ok) {
           const assignedBotsData = await assignedBotsResponse.json();
-          const hasAccess = assignedBotsData.bots?.some((assignedBot: any) => assignedBot.id === botId);
+          const hasAccess = assignedBotsData.bots?.some((assignedBot: { id: string }) => assignedBot.id === botId);
           
           if (!hasAccess) {
             setError('You do not have access to test this bot. Only bots assigned to you by your manager can be tested.');
@@ -159,7 +159,7 @@ export default function UserTestBotPage() {
         const assignedBotsResponse2 = await fetch('/api/user/assigned-bots');
         if (assignedBotsResponse2.ok) {
           const assignedBotsData = await assignedBotsResponse2.json();
-          const assignedBot = assignedBotsData.bots?.find((bot: any) => bot.id === botId);
+          const assignedBot = assignedBotsData.bots?.find((bot: { id: string; name: string; description?: string; domain?: string }) => bot.id === botId);
           
           if (assignedBot) {
             setBot({
@@ -286,7 +286,7 @@ export default function UserTestBotPage() {
             <div className="text-center py-12">
               <Bot className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-gray-900 mb-2">Bot Not Found</h1>
-              <p className="text-gray-600 mb-4">{error || "The bot you're looking for doesn't exist or you don't have access to it."}</p>
+              <p className="text-gray-600 mb-4">{error || "The bot you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it."}</p>
               <Button 
                 onClick={() => router.push('/user-dashboard/bots')}
                 className="bg-[#6566F1] hover:bg-[#5A5BD9] text-white"

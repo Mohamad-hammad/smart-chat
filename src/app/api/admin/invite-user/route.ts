@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
               <!-- Header -->
               <div style="background: linear-gradient(135deg, #6566F1 0%, #5A5BD9 100%); padding: 40px 30px; text-align: center;">
                 <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">ChatBot Pro</h1>
-                <p style="color: #e0e7ff; margin: 8px 0 0 0; font-size: 16px;">You've been invited to join our team!</p>
+                <p style="color: #e0e7ff; margin: 8px 0 0 0; font-size: 16px;">You&apos;ve been invited to join our team!</p>
               </div>
               
               <!-- Content -->
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
                 <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">Welcome, ${name}!</h2>
                 
                 <p style="color: #4b5563; margin: 0 0 20px 0; font-size: 16px; line-height: 1.6;">
-                  You've been invited by <strong>${currentUser.firstName} ${currentUser.lastName}</strong> to join ChatBot Pro as a <strong>${role}</strong>.
+                  You&apos;ve been invited by <strong>${currentUser.firstName} ${currentUser.lastName}</strong> to join ChatBot Pro as a <strong>${role}</strong>.
                 </p>
                 
                 <p style="color: #4b5563; margin: 0 0 30px 0; font-size: 16px; line-height: 1.6;">
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
             <!-- Header -->
             <div style="background: linear-gradient(135deg, #6566F1 0%, #5A5BD9 100%); padding: 40px 30px; text-align: center;">
               <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">ChatBot Pro</h1>
-              <p style="color: #e0e7ff; margin: 8px 0 0 0; font-size: 16px;">You've been invited to join our team!</p>
+              <p style="color: #e0e7ff; margin: 8px 0 0 0; font-size: 16px;">You&apos;ve been invited to join our team!</p>
             </div>
             
             <!-- Content -->
@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
               <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">Welcome, ${name}!</h2>
               
               <p style="color: #4b5563; margin: 0 0 20px 0; font-size: 16px; line-height: 1.6;">
-                You've been invited by <strong>${currentUser.firstName} ${currentUser.lastName}</strong> to join ChatBot Pro as a <strong>${role}</strong>.
+                You&apos;ve been invited by <strong>${currentUser.firstName} ${currentUser.lastName}</strong> to join ChatBot Pro as a <strong>${role}</strong>.
               </p>
               
               <p style="color: #4b5563; margin: 0 0 30px 0; font-size: 16px; line-height: 1.6;">

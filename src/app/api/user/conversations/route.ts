@@ -65,7 +65,21 @@ export async function GET(request: NextRequest) {
       .getMany();
 
     // Group conversations by session (assuming conversations with same bot and user within 30 minutes are same session)
-    const conversationSessions = new Map<string, any>();
+    const conversationSessions = new Map<string, { 
+      id: string; 
+      botId: string; 
+      botName: string; 
+      userId: string; 
+      userName: string; 
+      userEmail: string; 
+      startTime: Date; 
+      endTime: Date;
+      lastMessageAt: Date; 
+      messageCount: number; 
+      conversations: Conversation[];
+      status: string; 
+      messages: { id: string; content: string; timestamp: Date }[] 
+    }>();
     
     conversations.forEach(conv => {
       const sessionKey = `${conv.botId}-${conv.userId}-${Math.floor(conv.createdAt.getTime() / (30 * 60 * 1000))}`;
@@ -76,21 +90,27 @@ export async function GET(request: NextRequest) {
           botId: conv.botId,
           botName: conv.bot?.name || 'Unknown Bot',
           userId: conv.userId,
-          userEmail: conv.user?.email || 'Unknown User',
+          userName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0] : 'Unknown User',
+          userEmail: user?.email || 'Unknown',
           startTime: conv.createdAt,
           endTime: conv.createdAt,
+          lastMessageAt: conv.createdAt,
           messageCount: 0,
-          conversations: []
+          conversations: [],
+          status: 'active',
+          messages: []
         });
       }
       
       const session = conversationSessions.get(sessionKey);
-      session.conversations.push(conv);
-      session.messageCount++;
-      
-      // Update end time if this conversation is later
-      if (conv.createdAt > session.endTime) {
-        session.endTime = conv.createdAt;
+      if (session) {
+        session.conversations.push(conv);
+        session.messageCount++;
+        
+        // Update end time if this conversation is later
+        if (conv.createdAt > session.endTime) {
+          session.endTime = conv.createdAt;
+        }
       }
     });
 

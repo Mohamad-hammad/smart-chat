@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 const ManagerOverview = () => {
-  const [overviewData, setOverviewData] = useState<any>(null);
+  const [overviewData, setOverviewData] = useState<{ metrics: { totalUsers: number; activeChats: number; pendingHandoffs: number; resolvedToday: number }; stats: { acceptedUsers: number; chatChange: number }; connectedMetrics: { totalUsers: number; totalBots: number; availableAgents: number }; recentUsers: { id: string; name: string; email: string; status: string; lastActive: string }[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

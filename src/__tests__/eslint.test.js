@@ -105,8 +105,8 @@ describe('ESLint Rules', () => {
             const quoteMatch = line.match(/"[^"]*"/g)
             if (quoteMatch) {
               for (const match of quoteMatch) {
-                // Skip if it's a valid attribute value
-                if (line.includes('className=') || line.includes('id=') || line.includes('href=')) {
+                // Skip if it's a valid attribute value or CSS style
+                if (line.includes('className=') || line.includes('id=') || line.includes('href=') || line.includes('style=')) {
                   continue
                 }
                 // Check if this looks like content that should be escaped
