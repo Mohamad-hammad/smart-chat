@@ -78,12 +78,24 @@ export async function POST(request: NextRequest) {
 
     // Get the bot from database
     const botRepository = AppDataSource.getRepository(Bot);
-    const bot = await botRepository.findOne({
-      where: { 
-        id: botId,
-        createdBy: user.id // Ensure the manager owns this bot
-      }
-    });
+    let bot;
+    
+    if (isTestMessage) {
+      // For test messages, check if the user is a manager and owns the bot
+      bot = await botRepository.findOne({
+        where: { 
+          id: botId,
+          createdBy: user.id
+        }
+      });
+    } else {
+      // For regular messages, just check if bot exists
+      bot = await botRepository.findOne({
+        where: { 
+          id: botId
+        }
+      });
+    }
 
     if (!bot) {
       return NextResponse.json({ 
