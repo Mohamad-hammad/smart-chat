@@ -20,7 +20,8 @@ import {
   Shield,
   Database,
   Activity,
-  Menu
+  Menu,
+  AlertTriangle
 } from 'lucide-react';
 
 interface AdminDashboardLayoutProps {
@@ -60,6 +61,7 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
       { id: 'bots', label: 'All Bots', icon: Bot, path: `${basePath}/bots` },
       { id: 'analytics', label: 'Analytics', icon: BarChart3, path: `${basePath}/analytics` },
       { id: 'chatbot-analytics', label: 'Chatbot Analytics', icon: MessageSquare, path: `${basePath}/chatbot-analytics` },
+      { id: 'chatbot-issues', label: 'Chatbot Issues', icon: AlertTriangle, path: `${basePath}/chatbot-issues` },
       { id: 'system-health', label: 'System Health', icon: Activity, path: `${basePath}/system-health` },
       { id: 'database', label: 'Database', icon: Database, path: `${basePath}/database` },
       { id: 'settings', label: 'Settings', icon: Settings, path: `${basePath}/settings` },
@@ -78,6 +80,7 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
     if (pathname.includes('/billing')) return 'billing';
     if (pathname.includes('/bots')) return 'bots';
     if (pathname.includes('/chatbot-analytics')) return 'chatbot-analytics';
+    if (pathname.includes('/chatbot-issues')) return 'chatbot-issues';
     if (pathname.includes('/system-health')) return 'system-health';
     if (pathname.includes('/database')) return 'database';
     if (pathname.includes('/settings')) return 'settings';

@@ -140,7 +140,27 @@ const ChatBot: React.FC<ChatBotProps> = ({ apiKey }) => {
     setShowReportIssue(true);
   };
 
-  const handleEndChat = () => {
+  const handleEndChat = async () => {
+    try {
+      // Send end chat issue to API
+      await fetch('/api/chatbot/issues', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'end_chat',
+          userId: 'guest-user',
+          userEmail: 'guest@example.com',
+          userName: 'Guest User',
+          message: 'User ended chat session',
+          priority: 'low'
+        }),
+      });
+    } catch (error) {
+      console.error('Error logging end chat:', error);
+    }
+    
     setIsOpen(false);
     setMessages([{
       id: '1',
@@ -152,14 +172,22 @@ const ChatBot: React.FC<ChatBotProps> = ({ apiKey }) => {
 
   const handleAgentRequest = async () => {
     try {
-      await fetch('/api/chatbot/request-agent', {
+      // Get the description from the textarea
+      const descriptionElement = document.querySelector('textarea[placeholder*="Describe your issue"]') as HTMLTextAreaElement;
+      const description = descriptionElement?.value || 'User requested human agent assistance';
+      
+      await fetch('/api/chatbot/issues', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          apiKey: apiKey,
-          timestamp: new Date().toISOString()
+          type: 'human_request',
+          userId: 'guest-user',
+          userEmail: 'guest@example.com',
+          userName: 'Guest User',
+          message: description,
+          priority: 'high'
         }),
       });
       setAgentRequestSent(true);
@@ -174,17 +202,18 @@ const ChatBot: React.FC<ChatBotProps> = ({ apiKey }) => {
 
   const handleReportSubmit = async (issueType: string, description: string, email: string) => {
     try {
-      await fetch('/api/chatbot/report-issue', {
+      await fetch('/api/chatbot/issues', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          issueType,
-          description,
-          email,
-          apiKey: apiKey,
-          timestamp: new Date().toISOString()
+          type: 'issue_report',
+          userId: 'guest-user',
+          userEmail: email || 'guest@example.com',
+          userName: 'Guest User',
+          message: `${issueType}: ${description}`,
+          priority: 'medium'
         }),
       });
       setShowReportIssue(false);
@@ -497,7 +526,19 @@ const ChatBot: React.FC<ChatBotProps> = ({ apiKey }) => {
 
             <div className="flex space-x-3 mt-8">
               <button
-                onClick={handleReportIssue}
+                onClick={() => {
+                  const issueTypeElement = document.querySelector('select') as HTMLSelectElement;
+                  const descriptionElement = document.querySelector('textarea[placeholder*="What happened"]') as HTMLTextAreaElement;
+                  const emailElement = document.querySelector('input[type="email"]') as HTMLInputElement;
+                  
+                  const issueType = issueTypeElement?.value || 'Other';
+                  const description = descriptionElement?.value || '';
+                  const email = emailElement?.value || '';
+                  
+                  if (description.trim()) {
+                    handleReportSubmit(issueType, description, email);
+                  }
+                }}
                 className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 Report Issue
