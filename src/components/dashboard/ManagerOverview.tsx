@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,51 +15,115 @@ import {
   ArrowUp,
   ArrowDown,
   Star,
-  UserCheck
+  UserCheck,
+  Loader2
 } from 'lucide-react';
 
 const ManagerOverview = () => {
-  // Mock data for metrics
+  const [overviewData, setOverviewData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch overview data from API
+  useEffect(() => {
+    const fetchOverviewData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/manager/overview');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch overview data');
+        }
+        
+        const data = await response.json();
+        setOverviewData(data);
+      } catch (err) {
+        console.error('Error fetching overview data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch overview data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOverviewData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin text-[#6566F1] mx-auto mb-4" />
+            <p className="text-gray-600">Loading overview data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !overviewData) {
+    return (
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users className="w-8 h-8 text-red-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Overview</h3>
+            <p className="text-gray-600 mb-4">{error || 'Failed to load overview data'}</p>
+            <Button 
+              onClick={() => window.location.reload()}
+              className="bg-[#6566F1] hover:bg-[#5A5BD8] text-white"
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Use real data for metrics
   const metrics = [
     {
-      title: "Total Agents",
-      value: "12",
-      change: "+2 from last month",
+      title: "Total Users",
+      value: overviewData.metrics.totalUsers.toString(),
+      change: `${overviewData.stats.acceptedUsers} active`,
       changeType: "positive",
       icon: Users,
       iconColor: "text-gray-600"
     },
     {
       title: "Active Chats",
-      value: "8",
-      change: "-3 from last hour",
-      changeType: "negative",
+      value: overviewData.metrics.activeChats.toString(),
+      change: overviewData.stats.chatChange > 0 ? `+${overviewData.stats.chatChange}% from yesterday` : `${overviewData.stats.chatChange}% from yesterday`,
+      changeType: overviewData.stats.chatChange > 0 ? "positive" : "negative",
       icon: MessageSquare,
       iconColor: "text-gray-600"
     },
     {
-      title: "Pending Handoffs",
-      value: "3",
-      change: "Requires immediate attention",
+      title: "Pending Users",
+      value: overviewData.metrics.pendingHandoffs.toString(),
+      change: "Awaiting acceptance",
       changeType: "warning",
       icon: Clock,
       iconColor: "text-gray-600"
     },
     {
       title: "Resolved Today",
-      value: "24",
-      change: "+12% from yesterday",
+      value: overviewData.metrics.resolvedToday.toString(),
+      change: "Recent conversations",
       changeType: "positive",
       icon: CheckCircle,
       iconColor: "text-gray-600"
     }
   ];
 
-  // Mock data for connected users metrics
+  // Use real data for connected users metrics
   const connectedMetrics = [
     {
       title: "Total Users",
-      value: "8",
+      value: overviewData.connectedMetrics.totalUsers.toString(),
       icon: Users,
       bgColor: "bg-blue-50",
       iconColor: "text-blue-600",
@@ -67,15 +131,15 @@ const ManagerOverview = () => {
     },
     {
       title: "Total Bots",
-      value: "6",
+      value: overviewData.connectedMetrics.totalBots.toString(),
       icon: Bot,
       bgColor: "bg-green-50",
       iconColor: "text-green-600",
       textColor: "text-green-600"
     },
     {
-      title: "Available Agents",
-      value: "12",
+      title: "Online Users",
+      value: overviewData.connectedMetrics.availableAgents.toString(),
       icon: MessageCircle,
       bgColor: "bg-purple-50",
       iconColor: "text-purple-600",
@@ -184,33 +248,80 @@ const ManagerOverview = () => {
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       {/* Top Row - Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {metrics.map((metric, index) => (
-          <Card key={index} className="bg-white rounded-2xl shadow-sm border-0 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-gray-600">{metric.title}</p>
-                  <p className="text-3xl font-bold text-gray-900">{metric.value}</p>
-                  <div className="flex items-center space-x-1">
-                    {metric.changeType === "positive" && <ArrowUp className="w-3 h-3 text-green-600" />}
-                    {metric.changeType === "negative" && <ArrowDown className="w-3 h-3 text-red-600" />}
-                    <p className={`text-sm ${
-                      metric.changeType === "positive" ? "text-green-600" : 
-                      metric.changeType === "negative" ? "text-red-600" : 
-                      "text-gray-600"
-                    }`}>
-                      {metric.change}
-                    </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {metrics.map((metric, index) => {
+          // Define colors for each metric - avoid repetition in similar groups
+          const getMetricColors = (title: string, index: number) => {
+            if (title.includes('Total Users')) {
+              return {
+                bg: 'bg-purple-50',
+                iconBg: 'bg-purple-500',
+                textColor: 'text-purple-600'
+              };
+            } else if (title.includes('Active Chats') || title.includes('Chats') || title.includes('Conversations')) {
+              return {
+                bg: 'bg-green-50',
+                iconBg: 'bg-green-500',
+                textColor: 'text-green-600'
+              };
+            } else if (title.includes('Pending Users')) {
+              return {
+                bg: 'bg-blue-50',
+                iconBg: 'bg-blue-500',
+                textColor: 'text-blue-600'
+              };
+            } else if (title.includes('Resolved') || title.includes('Today')) {
+              return {
+                bg: 'bg-gray-50',
+                iconBg: 'bg-gray-500',
+                textColor: 'text-gray-600'
+              };
+            } else if (title.includes('Total Bots') || title.includes('Bots')) {
+              return {
+                bg: 'bg-purple-50',
+                iconBg: 'bg-purple-500',
+                textColor: 'text-purple-600'
+              };
+            } else {
+              return {
+                bg: 'bg-indigo-50',
+                iconBg: 'bg-indigo-500',
+                textColor: 'text-indigo-600'
+              };
+            }
+          };
+
+          const colors = getMetricColors(metric.title, index);
+
+          return (
+            <Card key={index} className={`${colors.bg} border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden`}>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-10 h-10 ${colors.iconBg} rounded-lg flex items-center justify-center shadow-sm flex-shrink-0`}>
+                    <metric.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-gray-900 truncate">{metric.title}</p>
+                    <p className={`text-xl font-bold ${colors.textColor}`}>{metric.value}</p>
+                    {metric.change && (
+                      <div className="flex items-center space-x-1 mt-1">
+                        {metric.changeType === "positive" && <ArrowUp className="w-2 h-2 text-green-600" />}
+                        {metric.changeType === "negative" && <ArrowDown className="w-2 h-2 text-red-600" />}
+                        <p className={`text-xs ${
+                          metric.changeType === "positive" ? "text-green-600" : 
+                          metric.changeType === "negative" ? "text-red-600" : 
+                          "text-gray-600"
+                        }`}>
+                          {metric.change}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className={`p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200`}>
-                  <metric.icon className={`w-6 h-6 ${metric.iconColor}`} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Connected Users Section */}
@@ -228,42 +339,75 @@ const ManagerOverview = () => {
 
         {/* Connected Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {connectedMetrics.map((metric, index) => (
-            <Card key={index} className={`${metric.bgColor} rounded-2xl shadow-sm border-0 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer`}>
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className={`p-3 rounded-lg ${metric.bgColor} hover:opacity-80 transition-opacity duration-200`}>
-                    <metric.icon className={`w-6 h-6 ${metric.iconColor}`} />
+          {connectedMetrics.map((metric, index) => {
+            // Define colors for connected metrics - avoid repetition with top row
+            const getConnectedMetricColors = (title: string, index: number) => {
+              if (title.includes('Total Users')) {
+                return {
+                  bg: 'bg-blue-50',
+                  iconBg: 'bg-blue-500',
+                  textColor: 'text-blue-600'
+                };
+              } else if (title.includes('Total Bots') || title.includes('Bots')) {
+                return {
+                  bg: 'bg-purple-50',
+                  iconBg: 'bg-purple-500',
+                  textColor: 'text-purple-600'
+                };
+              } else if (title.includes('Online Users') || title.includes('Online')) {
+                return {
+                  bg: 'bg-emerald-50',
+                  iconBg: 'bg-emerald-500',
+                  textColor: 'text-emerald-600'
+                };
+              } else {
+                return {
+                  bg: 'bg-cyan-50',
+                  iconBg: 'bg-cyan-500',
+                  textColor: 'text-cyan-600'
+                };
+              }
+            };
+
+            const colors = getConnectedMetricColors(metric.title, index);
+
+            return (
+              <Card key={index} className={`${colors.bg} border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden`}>
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-10 h-10 ${colors.iconBg} rounded-lg flex items-center justify-center shadow-sm flex-shrink-0`}>
+                      <metric.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-gray-900 truncate">{metric.title}</p>
+                      <p className={`text-xl font-bold ${colors.textColor}`}>{metric.value}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{metric.title}</p>
-                    <p className={`text-2xl font-bold ${metric.textColor}`}>{metric.value}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* User List */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {users.map((user, index) => (
-            <Card key={index} className="bg-white rounded-2xl shadow-sm border-0 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer">
-              <CardContent className="p-6">
+            <Card key={index} className="group relative border border-gray-200 bg-white hover:shadow-md hover:shadow-gray-200/50 transition-all duration-200 rounded-xl overflow-hidden">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3">
                     {/* Avatar */}
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors duration-200">
-                      <span className="text-sm font-medium text-gray-600">{user.initials}</span>
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors duration-200 flex-shrink-0">
+                      <span className="text-xs font-medium text-gray-600">{user.initials}</span>
                     </div>
                     
                     {/* User Info */}
-                    <div className="space-y-1">
-                      <h3 className="font-semibold text-gray-900 hover:text-gray-700 transition-colors duration-200">{user.name}</h3>
-                      <p className="text-sm text-gray-600">{user.email}</p>
-                      <div className="flex items-center space-x-2">
+                    <div className="space-y-0.5">
+                      <h3 className="text-sm font-semibold text-gray-900 hover:text-gray-700 transition-colors duration-200">{user.name}</h3>
+                      <p className="text-xs text-gray-600">{user.email}</p>
+                      <div className="flex items-center space-x-1.5">
                         {user.badges.map((badge, badgeIndex) => (
-                          <Badge key={badgeIndex} className={`text-xs ${badge.color} hover:opacity-80 transition-opacity duration-200`}>
+                          <Badge key={badgeIndex} className={`text-xs px-2 py-0.5 ${badge.color} hover:opacity-80 transition-opacity duration-200`}>
                             {badge.text}
                           </Badge>
                         ))}
@@ -271,17 +415,18 @@ const ManagerOverview = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-6">
+                  <div className="flex items-center space-x-4">
                     {/* Stats */}
-                    <div className="text-right space-y-1">
-                      <p className="text-sm text-gray-600">{user.bots}</p>
-                      <p className="text-sm text-gray-500">{user.lastActive}</p>
+                    <div className="text-right space-y-0.5">
+                      <p className="text-xs text-gray-600">{user.bots}</p>
+                      <p className="text-xs text-gray-500">{user.lastActive}</p>
                     </div>
 
                     {/* Action Button */}
                     <Button 
                       variant="outline" 
-                      className="bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 hover:scale-105 rounded-xl transition-all duration-200"
+                      size="sm"
+                      className="bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 hover:scale-105 rounded-lg transition-all duration-200 text-xs px-3 py-1.5"
                     >
                       View Details
                     </Button>

@@ -7,8 +7,6 @@ import {
   LayoutDashboard, 
   Bot, 
   BarChart3, 
-  Settings, 
-  CreditCard, 
   HelpCircle,
   PanelLeftClose,
   PanelLeftOpen,
@@ -17,7 +15,8 @@ import {
   MessageCircle,
   Home,
   LogOut,
-  User
+  User,
+  Shield
 } from 'lucide-react';
 
 interface UserDashboardLayoutProps {
@@ -32,12 +31,11 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
 
   // Navigation items for user dashboard
   const navigationItems = [
-    { id: 'overview', name: 'Overview', icon: Home, href: '/user-dashboard' },
-    { id: 'bots', name: 'My Bots', icon: Bot, href: '/user-dashboard/bots' },
-    { id: 'analytics', name: 'Analytics', icon: BarChart3, href: '/user-dashboard/analytics' },
-    { id: 'conversations', name: 'Conversations', icon: MessageSquare, href: '/user-dashboard/conversations' },
-    { id: 'settings', name: 'Settings', icon: Settings, href: '/user-dashboard/settings' },
-    { id: 'help', name: 'Help', icon: HelpCircle, href: '/user-dashboard/help' },
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/user-dashboard' },
+    { id: 'bots', label: 'My Bots', icon: Bot, path: '/user-dashboard/bots' },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/user-dashboard/analytics' },
+    { id: 'conversations', label: 'Conversations', icon: MessageSquare, path: '/user-dashboard/conversations' },
+    { id: 'help', label: 'Help', icon: HelpCircle, path: '/user-dashboard/help' },
   ];
 
   const toggleSidebar = () => {
@@ -46,11 +44,17 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
 
   const getActiveSection = () => {
     if (pathname === '/user-dashboard') return 'overview';
-    return pathname.split('/').pop() || 'overview';
+    if (pathname.includes('/bots')) return 'bots';
+    if (pathname.includes('/analytics')) return 'analytics';
+    if (pathname.includes('/conversations')) return 'conversations';
+    if (pathname.includes('/help')) return 'help';
+    return 'overview';
   };
 
-  const handleNavigation = (href: string) => {
-    router.push(href);
+  const activeSection = getActiveSection();
+
+  const handleNavigation = (path: string) => {
+    router.push(path);
   };
 
   const handleSignOut = () => {
@@ -73,56 +77,97 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-50 ${
-        sidebarCollapsed ? 'w-20' : 'w-64'
+      <div className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-40 ${
+        sidebarCollapsed ? 'w-20' : 'w-72'
       }`}>
         {/* Logo */}
         <div className="flex items-center justify-center h-16 border-b border-gray-200">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-[#6566F1] to-[#5A5BD9] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">CB</span>
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-[#7F82F3] rounded-lg flex items-center justify-center flex-shrink-0">
+              <User className="w-5 h-5 text-white" />
             </div>
-            {!sidebarCollapsed && (
-              <span className="text-lg font-bold text-gray-900">ChatBot Pro</span>
-            )}
+            <div className={`overflow-hidden transition-all duration-300 ${sidebarCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+              <span className="text-base font-bold text-gray-900 whitespace-nowrap">
+                User Portal
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2">
-          {navigationItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = getActiveSection() === item.id;
-            
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleNavigation(item.href)}
-                className={`w-full flex items-center ${
-                  sidebarCollapsed ? 'justify-center px-2' : 'px-3'
-                } py-3 text-sm font-medium rounded-lg transition-colors ${
-                  isActive
-                    ? 'border-2 border-[#6566F1] bg-[#6566F1]/10 text-[#6566F1]'
-                    : 'text-gray-700 hover:bg-gray-100 border-2 border-transparent'
-                }`}
-              >
-                <Icon className={`w-5 h-5 flex-shrink-0 ${
-                  isActive ? 'text-[#6566F1]' : 'text-gray-500'
-                }`} />
-                <div className={`overflow-hidden transition-all duration-300 ${
-                  sidebarCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
-                }`}>
-                  <span className="ml-3 whitespace-nowrap">{item.name}</span>
-                </div>
-              </button>
-            );
-          })}
+        <nav className="mt-6 px-3">
+          <div className="space-y-1">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeSection === item.id;
+              
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavigation(item.path)}
+                  className={`w-full flex items-center ${
+                    sidebarCollapsed ? 'justify-center px-2' : 'px-3'
+                  } py-2 text-xs font-medium rounded-lg transition-colors ${
+                    isActive
+                      ? 'bg-[#6566F1]/10 text-[#6566F1]'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-[#6566F1]' : 'text-[#7F82F3]'} flex-shrink-0`} />
+                  <div className={`overflow-hidden transition-all duration-300 ${sidebarCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+                    <span className="ml-3 whitespace-nowrap">{item.label}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </nav>
 
+        {/* User Access Section */}
+        <div className={`mt-8 px-3 transition-all duration-300 ${sidebarCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+          <div className="bg-[#6566F1]/10 border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-[#6566F1] rounded-lg flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
+              </div>
+              <div className="overflow-hidden">
+                <h3 className="text-sm font-semibold text-gray-900 whitespace-nowrap">User Access</h3>
+                <p className="text-xs text-gray-600 whitespace-nowrap">Personal workspace</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
+        {/* Additional Navigation */}
+        <nav className="mt-6 px-3">
+          <div className="space-y-1">
+            <button
+              onClick={() => handleNavigation('/')}
+              className={`w-full flex items-center ${
+                sidebarCollapsed ? 'justify-center px-2' : 'px-3'
+              } py-2 text-xs font-medium rounded-lg transition-colors text-gray-700 hover:bg-gray-50`}
+            >
+              <Home className="w-5 h-5 text-[#7F82F3] flex-shrink-0" />
+              <div className={`overflow-hidden transition-all duration-300 ${sidebarCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+                <span className="ml-3 whitespace-nowrap">Home</span>
+              </div>
+            </button>
+            <button
+              onClick={handleSignOut}
+              className={`w-full flex items-center ${
+                sidebarCollapsed ? 'justify-center px-2' : 'px-3'
+              } py-2 text-xs font-medium rounded-lg transition-colors text-gray-700 hover:bg-gray-50`}
+            >
+              <LogOut className="w-5 h-5 text-[#7F82F3] flex-shrink-0" />
+              <div className={`overflow-hidden transition-all duration-300 ${sidebarCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+                <span className="ml-3 whitespace-nowrap">Logout</span>
+              </div>
+            </button>
+          </div>
+        </nav>
 
         {/* Sidebar Toggle Button */}
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
           <button
             onClick={toggleSidebar}
             className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors"
@@ -136,38 +181,31 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
         </div>
       </div>
 
-      {/* Top Bar */}
-      <div className="fixed top-0 right-0 left-0 bg-white border-b border-gray-200 z-40" style={{ marginLeft: sidebarCollapsed ? '80px' : '256px' }}>
-        <div className="flex items-center justify-between px-6 py-4">
+      {/* User Top Bar */}
+      <div className="fixed top-0 right-0 left-72 bg-white border-b border-gray-200 h-16 z-30 transition-all duration-300" style={{ left: sidebarCollapsed ? '80px' : '288px' }}>
+        <div className="flex items-center justify-between h-full px-6">
+          <h1 className="text-lg font-bold text-gray-900">User Dashboard</h1>
           <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {navigationItems.find(item => item.id === getActiveSection())?.name || 'User Dashboard'}
-            </h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-[#6566F1] rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
-                  {session?.user?.name?.charAt(0) || session?.user?.email?.charAt(0) || 'U'}
-                </span>
-              </div>
-              <span className="text-sm font-medium text-gray-700">
-                {session?.user?.name || session?.user?.email || 'User'}
-              </span>
-            </div>
-                      <button
-            onClick={handleSignOut}
-            className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Logout</span>
-          </button>
+            <button
+              onClick={() => handleNavigation('/')}
+              className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
+            >
+              <Home className="w-4 h-4" />
+              <span>Home</span>
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className={`transition-all duration-300 pt-16 ${sidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
+      <div className="pt-16 transition-all duration-300" style={{ marginLeft: sidebarCollapsed ? '80px' : '288px' }}>
         <div className="min-h-screen">
           {children}
         </div>

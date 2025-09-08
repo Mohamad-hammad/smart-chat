@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import RoleGuard from '@/components/auth/RoleGuard';
 import {
@@ -13,7 +13,8 @@ import {
   Edit,
   PlayCircle,
   Settings,
-  Trash2
+  Trash2,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,44 +28,51 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-
-// Mock data
-const mockBots = [
-  {
-    id: "1",
-    name: "Customer Support Bot",
-    status: "active",
-    conversations: 1247,
-    lastActive: "2 minutes ago",
-    knowledgeBase: 23,
-    domain: "support.yoursite.com"
-  },
-  {
-    id: "2",
-    name: "Sales Assistant",
-    status: "paused",
-    conversations: 892,
-    lastActive: "1 hour ago",
-    knowledgeBase: 15,
-    domain: "shop.yoursite.com"
-  },
-  {
-    id: "3",
-    name: "FAQ Helper",
-    status: "active",
-    conversations: 534,
-    lastActive: "5 minutes ago",
-    knowledgeBase: 8,
-    domain: "help.yoursite.com"
-  }
-];
+interface AssignedBot {
+  id: string;
+  name: string;
+  description: string;
+  domain: string;
+  status: string;
+  conversations: number;
+  lastActive: string;
+  assignedBy: string;
+  assignedAt: string;
+}
 
 const BotsPage = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [bots, setBots] = useState<AssignedBot[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredBots = mockBots.filter(bot => {
+  // Fetch assigned bots from API
+  useEffect(() => {
+    const fetchAssignedBots = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/user/assigned-bots');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch assigned bots');
+        }
+        
+        const data = await response.json();
+        setBots(data.bots || []);
+      } catch (err) {
+        console.error('Error fetching assigned bots:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch bots');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAssignedBots();
+  }, []);
+
+  const filteredBots = bots.filter(bot => {
     const matchesSearch = bot.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          bot.domain.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "all" || bot.status === filterStatus;
@@ -90,59 +98,83 @@ const BotsPage = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Bots</h1>
+            <h1 className="text-3xl font-bold text-gray-900">My Assigned Bots</h1>
             <p className="text-gray-600 mt-1">
-              Create and manage your AI-powered chatbots
+              View and interact with bots assigned to you by your manager
             </p>
           </div>
-          <Button 
-            className="bg-[#6566F1] hover:bg-[#5A5BD8] text-white rounded-2xl"
-            onClick={() => handleNavigation('/dashboard/bots')}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create Bot
-          </Button>
         </div>
 
         {/* Search and Filters */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search bots by name or domain..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 border-gray-300 focus:border-[#6566F1] focus:ring-[#6566F1] rounded-2xl"
-            />
+        <div className="bg-white rounded-2xl border border-gray-300 p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search your assigned bots by name or domain..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 border-gray-300 focus:border-[#6566F1] focus:ring-[#6566F1] rounded-xl bg-gray-50 focus:bg-white transition-colors"
+              />
+            </div>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-xl focus:border-[#6566F1] focus:ring-[#6566F1] bg-white text-black font-medium"
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="paused">Paused</option>
+              <option value="inactive">Inactive</option>
+            </select>
           </div>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-2xl focus:border-[#6566F1] focus:ring-[#6566F1] bg-white"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="paused">Paused</option>
-            <option value="inactive">Inactive</option>
-          </select>
         </div>
 
-        {/* Empty State */}
-        {filteredBots.length === 0 && searchTerm === "" && (
-          <Card className="border border-gray-200 bg-white rounded-2xl">
-            <CardContent className="p-12 text-center">
-              <Bot className="h-16 w-16 text-gray-400 mx-auto mb-6" />
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Get Started?</h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                Create your first bot to start providing 24/7 customer support
-              </p>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 animate-spin text-[#6566F1] mx-auto mb-4" />
+              <p className="text-gray-600">Loading your assigned bots...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Bot className="w-8 h-8 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Bots</h3>
+              <p className="text-gray-600 mb-4">{error}</p>
               <Button 
-                className="bg-[#6566F1] hover:bg-[#5A5BD8] text-white rounded-2xl"
-                onClick={() => handleNavigation('/dashboard/bots')}
+                onClick={() => window.location.reload()}
+                className="bg-[#6566F1] hover:bg-[#5A5BD8] text-white"
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Your First Bot
+                Try Again
               </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && filteredBots.length === 0 && searchTerm === "" && (
+          <Card className="border border-gray-300 bg-white rounded-2xl shadow-sm">
+            <CardContent className="p-12 text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#6566F1]/10 to-[#5A5BD8]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Bot className="h-10 w-10 text-[#6566F1]" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">No Bots Assigned Yet</h3>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto leading-relaxed">
+                Your manager hasn&apos;t assigned any bots to you yet. Contact your manager to get started with bot assignments.
+              </p>
+              <div className="bg-blue-50 rounded-lg p-4 max-w-sm mx-auto">
+                <p className="text-sm text-blue-800">
+                  💡 <strong>Tip:</strong> Once assigned, you&apos;ll be able to test bots and view your conversation history here.
+                </p>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -151,21 +183,25 @@ const BotsPage = () => {
         {filteredBots.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredBots.map((bot) => (
-              <Card key={bot.id} className="border border-gray-200 bg-white hover:shadow-md transition-shadow rounded-2xl">
-                <CardHeader className="pb-4">
+              <Card key={bot.id} className="group relative border border-gray-300 bg-white hover:shadow-xl hover:shadow-[#6566F1]/10 transition-all duration-300 rounded-2xl overflow-visible hover:-translate-y-1 z-10">
+                {/* Gradient Background Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#6566F1]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <CardHeader className="pb-4 relative z-10">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3 min-w-0 flex-1">
-                      <div className="w-10 h-10 bg-[#6566F1] rounded-lg flex items-center justify-center">
-                        <Bot className="h-5 w-5 text-white" />
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#6566F1] to-[#5A5BD8] rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+                        <Bot className="h-6 w-6 text-white" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <CardTitle className="text-lg truncate">{bot.name}</CardTitle>
+                        <CardTitle className="text-lg font-semibold truncate group-hover:text-[#6566F1] transition-colors duration-200">{bot.name}</CardTitle>
                         <p className="text-sm text-gray-500 truncate">{bot.domain}</p>
+                        <p className="text-xs text-gray-400 truncate">Assigned by: {bot.assignedBy}</p>
                       </div>
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100 rounded-lg">
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -175,62 +211,64 @@ const BotsPage = () => {
                           View Details
                         </DropdownMenuItem>
                         <DropdownMenuItem>
-                          <Edit className="w-4 h-4 mr-2" />
-                          Edit Bot
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
                           <PlayCircle className="w-4 h-4 mr-2" />
                           Test Bot
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Settings className="w-4 h-4 mr-2" />
-                          Settings
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600">
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete Bot
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                
+                <CardContent className="space-y-4 relative z-10">
+                  {/* Status and Last Active */}
                   <div className="flex items-center justify-between">
-                    <Badge className={getStatusColor(bot.status)}>
+                    <Badge className={`${getStatusColor(bot.status)} font-medium px-3 py-1`}>
                       {bot.status}
                     </Badge>
-                    <span className="text-sm text-gray-500">{bot.lastActive}</span>
+                    <span className="text-sm text-gray-500 font-medium">{bot.lastActive}</span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center space-x-2">
-                      <Bot className="w-4 h-4 text-gray-400" />
-                      <span>{bot.conversations} chats</span>
+                  {/* Bot Statistics */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <Bot className="w-4 h-4 text-[#6566F1]" />
+                        <span className="text-xs font-medium text-gray-600">Your Chats</span>
+                      </div>
+                      <p className="text-lg font-bold text-gray-900">{bot.conversations}</p>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Settings className="w-4 h-4 text-gray-400" />
-                      <span>{bot.knowledgeBase} docs</span>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <Settings className="w-4 h-4 text-[#6566F1]" />
+                        <span className="text-xs font-medium text-gray-600">Assigned</span>
+                      </div>
+                      <p className="text-sm font-semibold text-gray-900">{new Date(bot.assignedAt).toLocaleDateString()}</p>
                     </div>
                   </div>
 
+                  {/* Description */}
+                  <div className="bg-blue-50 rounded-lg p-3">
+                    <p className="text-sm text-gray-700 leading-relaxed">{bot.description}</p>
+                  </div>
+
+                  {/* Action Buttons */}
                   <div className="flex space-x-2 pt-2">
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="flex-1 border-gray-300 hover:bg-gray-50 text-gray-700 rounded-2xl"
-                      onClick={() => handleNavigation('/dashboard/analytics')}
+                      className="flex-1 border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl font-medium"
+                      onClick={() => handleNavigation(`/user-dashboard/test-bot?botId=${bot.id}`)}
                     >
                       <PlayCircle className="w-4 h-4 mr-2" />
-                      Test
+                      Test Bot
                     </Button>
                     <Button 
                       size="sm" 
-                      className="flex-1 bg-[#6566F1] hover:bg-[#5A5BD8] text-white rounded-2xl"
-                      onClick={() => handleNavigation('/dashboard/settings')}
+                      className="flex-1 bg-[#6566F1] hover:bg-[#5A5BD8] text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-shadow duration-300"
+                      onClick={() => handleNavigation(`/user-dashboard/conversations?botId=${bot.id}`)}
                     >
-                      <Settings className="w-4 h-4 mr-2" />
-                      Manage
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Chats
                     </Button>
                   </div>
                 </CardContent>

@@ -59,6 +59,23 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Check if user is assigned to this bot (unless it's a test message from manager)
+    if (!isTestMessage) {
+      const { BotAssignment } = await import('@/entities/BotAssignment');
+      const assignmentRepository = AppDataSource.getRepository(BotAssignment);
+      const assignment = await assignmentRepository.findOne({
+        where: {
+          userId: user.id,
+          botId: botId,
+          status: 'active'
+        }
+      });
+
+      if (!assignment) {
+        return NextResponse.json({ error: 'Access denied. You are not assigned to this bot.' }, { status: 403 });
+      }
+    }
+
     // Get the bot from database
     const botRepository = AppDataSource.getRepository(Bot);
     const bot = await botRepository.findOne({
@@ -137,13 +154,7 @@ export async function POST(request: NextRequest) {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            body: {
-              message: message,
-              agent_id: user.id, // Using the manager's user ID as agent_id
-              chatbot_id: bot.id, // Using the bot ID as chatbot_id
-              bot_name: bot.name,
-              bot_domain: bot.domain
-            }
+            message: message
           }),
         });
 

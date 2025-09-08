@@ -1,29 +1,100 @@
 'use client';
 
-import React from 'react';
-import { Bot, MessageSquare, BarChart3, Clock, TrendingUp, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Bot, MessageSquare, BarChart3, Clock, TrendingUp, Users, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import RoleGuard from '@/components/auth/RoleGuard';
 
+interface UserStats {
+  assignedBots: number;
+  totalConversations: number;
+  activeConversations: number;
+  responseTime: string;
+}
+
+interface RecentActivity {
+  id: string;
+  type: string;
+  bot: string;
+  time: string;
+  status: string;
+}
+
 export default function UserOverviewPage() {
-  // Mock data - in real app, this would come from API
-  const stats = {
-    assignedBots: 3,
-    totalConversations: 45,
-    activeConversations: 12,
-    responseTime: '2.3 min'
+  const [stats, setStats] = useState<UserStats>({
+    assignedBots: 0,
+    totalConversations: 0,
+    activeConversations: 0,
+    responseTime: '0 min'
+  });
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch user analytics
+        const analyticsResponse = await fetch('/api/user/analytics');
+        const analyticsData = await analyticsResponse.json();
+        
+        if (analyticsData.stats) {
+          setStats({
+            assignedBots: analyticsData.stats.assignedBots,
+            totalConversations: analyticsData.stats.totalConversations,
+            activeConversations: analyticsData.stats.activeConversations,
+            responseTime: analyticsData.stats.avgResponseTime
+          });
+        }
+
+        if (analyticsData.recentActivity) {
+          // Format recent activity with relative time
+          const formattedActivity = analyticsData.recentActivity.map((activity: any) => ({
+            ...activity,
+            time: formatRelativeTime(activity.time)
+          }));
+          setRecentActivity(formattedActivity);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const formatRelativeTime = (timestamp: string) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffInMinutes = Math.floor((now.getTime() - time.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hour ago`;
+    return `${Math.floor(diffInMinutes / 1440)} day ago`;
   };
 
-  const recentActivity = [
-    { id: 1, type: 'conversation', bot: 'Customer Support Bot', time: '2 min ago', status: 'active' },
-    { id: 2, type: 'conversation', bot: 'Sales Assistant', time: '15 min ago', status: 'completed' },
-    { id: 3, type: 'conversation', bot: 'FAQ Helper', time: '1 hour ago', status: 'completed' },
-    { id: 4, type: 'bot_assigned', bot: 'Technical Support', time: '2 hours ago', status: 'new' },
-  ];
+  if (loading) {
+    return (
+      <RoleGuard allowedRoles={['user']}>
+        <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 animate-spin text-[#6566F1] mx-auto mb-4" />
+              <p className="text-gray-600">Loading your dashboard...</p>
+            </div>
+          </div>
+        </div>
+      </RoleGuard>
+    );
+  }
 
   return (
     <RoleGuard allowedRoles={['user']}>
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-[#6566F1] to-[#5A5BD9] rounded-2xl p-6 text-white">
         <h1 className="text-2xl font-bold mb-2">Welcome back!</h1>
