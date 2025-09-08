@@ -50,7 +50,7 @@ export default function UserOverviewPage() {
 
         if (analyticsData.recentActivity) {
           // Format recent activity with relative time
-          const formattedActivity = analyticsData.recentActivity.map((activity: any) => ({
+          const formattedActivity = analyticsData.recentActivity.map((activity: { id: string; type: string; description: string; time: string }) => ({
             ...activity,
             time: formatRelativeTime(activity.time)
           }));

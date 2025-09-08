@@ -375,8 +375,6 @@ const TeamManagement = () => {
                             <Badge className={`text-xs font-medium px-2 py-1 transition-colors duration-200 shadow-sm ${
                               member.onlineStatus === 'online' 
                                 ? 'bg-green-500 text-white border-green-600 hover:bg-green-600 hover:border-green-700'
-                                : member.onlineStatus === 'busy'
-                                ? 'bg-orange-500 text-white border-orange-600 hover:bg-orange-600 hover:border-orange-700'
                                 : 'bg-gray-400 text-white border-gray-500 hover:bg-gray-500 hover:border-gray-600'
                             }`}>
                               {member.onlineStatus}
@@ -446,8 +444,6 @@ const TeamManagement = () => {
                     <Badge className={`text-xs font-medium px-2 py-1 transition-colors duration-200 shadow-sm ${
                       selectedAgentData.onlineStatus === 'online' 
                         ? 'bg-green-500 text-white border-green-600 hover:bg-green-600 hover:border-green-700'
-                        : selectedAgentData.onlineStatus === 'busy'
-                        ? 'bg-orange-500 text-white border-orange-600 hover:bg-orange-600 hover:border-orange-700'
                         : 'bg-gray-400 text-white border-gray-500 hover:bg-gray-500 hover:border-gray-600'
                     }`}>
                       {selectedAgentData.onlineStatus}

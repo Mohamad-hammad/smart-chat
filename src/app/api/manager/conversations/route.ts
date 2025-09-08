@@ -159,7 +159,21 @@ export async function GET(request: NextRequest) {
     const conversations = await query.getMany();
 
     // Group conversations by user and bot (all messages between same user and bot = one conversation)
-    const conversationSessions = new Map<string, any>();
+    const conversationSessions = new Map<string, { 
+      id: string; 
+      botId: string; 
+      botName: string; 
+      userId: string; 
+      userName: string; 
+      userEmail: string; 
+      startTime: Date; 
+      endTime: Date;
+      lastMessageAt: Date; 
+      messageCount: number; 
+      conversations: Conversation[];
+      status: string; 
+      messages: { id: string; content: string; timestamp: Date }[] 
+    }>();
     
     conversations.forEach(conv => {
       // Create session key based only on user and bot (no time window)
@@ -178,22 +192,26 @@ export async function GET(request: NextRequest) {
           userEmail: user?.email || 'Unknown',
           startTime: conv.createdAt,
           endTime: conv.createdAt,
+          lastMessageAt: conv.createdAt,
           messageCount: 0,
           conversations: [],
-          status: 'active' // Will be determined based on time
+          status: 'active', // Will be determined based on time
+          messages: []
         });
       }
       
       const session = conversationSessions.get(sessionKey);
-      session.conversations.push(conv);
-      session.messageCount++;
-      
-      // Update start and end times
-      if (conv.createdAt < session.startTime) {
-        session.startTime = conv.createdAt;
-      }
-      if (conv.createdAt > session.endTime) {
-        session.endTime = conv.createdAt;
+      if (session) {
+        session.conversations.push(conv);
+        session.messageCount++;
+        
+        // Update start and end times
+        if (conv.createdAt < session.startTime) {
+          session.startTime = conv.createdAt;
+        }
+        if (conv.createdAt > session.endTime) {
+          session.endTime = conv.createdAt;
+        }
       }
     });
 

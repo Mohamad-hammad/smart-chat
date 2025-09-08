@@ -216,7 +216,7 @@ const ManagerConversationsPage = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Conversations</h1>
             <p className="text-gray-600 mt-1">
-              Monitor and manage all conversations from your team's assigned bots
+              Monitor and manage all conversations from your team&apos;s assigned bots
             </p>
           </div>
         </div>

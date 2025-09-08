@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     // Get bot assignments (only if there are invited users)
     const assignmentRepository = AppDataSource.getRepository(BotAssignment);
-    let assignments = [];
+    let assignments: BotAssignment[] = [];
     if (invitedUserIds.length > 0) {
       assignments = await assignmentRepository.find({
         where: { 
@@ -63,8 +63,8 @@ export async function GET(request: NextRequest) {
     const conversationRepository = AppDataSource.getRepository(Conversation);
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     
-    let recentConversations = [];
-    let yesterdayConversations = [];
+    let recentConversations: Conversation[] = [];
+    let yesterdayConversations: Conversation[] = [];
     
     if (invitedUserIds.length > 0) {
       recentConversations = await conversationRepository

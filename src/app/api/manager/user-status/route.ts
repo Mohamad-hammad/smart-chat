@@ -5,6 +5,7 @@ import { AppDataSource } from '@/config/database';
 import { User } from '@/entities/User';
 import { BotAssignment } from '@/entities/BotAssignment';
 import { Conversation } from '@/entities/Conversation';
+import { In } from 'typeorm';
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     const assignmentRepository = AppDataSource.getRepository(BotAssignment);
     const assignments = await assignmentRepository.find({
       where: { 
-        userId: invitedUsers.map(u => u.id),
+        userId: In(invitedUsers.map(u => u.id)),
         status: 'active'
       },
       relations: ['bot']
