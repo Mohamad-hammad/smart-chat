@@ -8,12 +8,10 @@ import {
   Clock, 
   CheckCircle, 
   XCircle,
-  Filter,
   Search,
   MoreVertical,
   Eye,
-  MessageCircle,
-  Phone
+  MessageCircle
 } from 'lucide-react';
 
 interface ChatbotIssue {
@@ -121,7 +119,7 @@ const ChatbotIssuesPage: React.FC = () => {
 
   const handleUpdateStatus = (issueId: string, newStatus: string) => {
     setIssues(prev => prev.map(issue => 
-      issue.id === issueId ? { ...issue, status: newStatus as any } : issue
+      issue.id === issueId ? { ...issue, status: newStatus as 'pending' | 'in_progress' | 'resolved' | 'closed' } : issue
     ));
   };
 
@@ -428,7 +426,7 @@ const ChatbotIssuesPage: React.FC = () => {
                   value={selectedIssue.status}
                   onChange={(e) => {
                     handleUpdateStatus(selectedIssue.id, e.target.value);
-                    setSelectedIssue({ ...selectedIssue, status: e.target.value as any });
+                    setSelectedIssue({ ...selectedIssue, status: e.target.value as 'pending' | 'in_progress' | 'resolved' | 'closed' });
                   }}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6566F1] focus:border-transparent"
                 >
