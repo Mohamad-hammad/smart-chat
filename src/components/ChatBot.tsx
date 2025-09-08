@@ -21,7 +21,7 @@ interface Message {
 }
 
 interface ChatBotProps {
-  apiKey: string;
+  apiKey?: string; // Made optional since we're not using it anymore
 }
 
 const ChatBot: React.FC<ChatBotProps> = ({ apiKey }) => {
@@ -85,16 +85,17 @@ const ChatBot: React.FC<ChatBotProps> = ({ apiKey }) => {
     setIsLoading(true);
 
     try {
-      // Send to n8n webhook
-      const response = await fetch('/api/chatbot', {
+      // Use the same N8N webhook as the test bot pages
+      const response = await fetch('/api/chat/send-message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          botId: 'general-assistant', // Use a general bot ID for the main chatbot
           message: inputValue,
-          apiKey: apiKey,
-          timestamp: new Date().toISOString()
+          userId: 'guest-user', // For guest users
+          isTestMessage: true // Flag to identify test messages
         }),
       });
 
