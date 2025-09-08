@@ -40,21 +40,21 @@ const BillingPage = () => {
 
         {/* Page Title */}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Billing</h1>
-          <p className="text-sm text-gray-600 mt-1">Manage your subscription, usage, and billing information</p>
+          <h1 className="text-3xl font-bold text-gray-900">Billing</h1>
+          <p className="text-gray-600 mt-1">Manage your subscription, usage, and billing information</p>
         </div>
 
         {/* Tabs Navigation */}
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-8">
+        <div className="bg-white rounded-xl border border-gray-200 p-1 shadow-sm">
+          <nav className="flex">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
                   activeTab === tab.id
-                    ? 'border-[#6566F1] text-[#6566F1] bg-[#6566F1]/10'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'bg-[#6566F1] text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
                 {tab.label}
@@ -67,52 +67,65 @@ const BillingPage = () => {
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Current Plan */}
-            <Card className="border border-gray-200 bg-white">
-              <CardHeader>
+            <Card className="group relative border-2 border-purple-200 bg-purple-50 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 rounded-2xl overflow-visible hover:-translate-y-1 z-10">
+              {/* Gradient Background Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              
+              <CardHeader className="relative z-10">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-lg">Current Plan</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-xl font-bold text-gray-900">Current Plan</CardTitle>
+                    <CardDescription className="text-gray-600">
                       Your current subscription and next billing date
                     </CardDescription>
                   </div>
-                  <Badge className="bg-[#6566F1] text-white">Pro</Badge>
+                  <Badge className="bg-gradient-to-r from-[#6566F1] to-[#5A5BD8] text-white px-3 py-1 rounded-full font-semibold">Pro</Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6 relative z-10">
                 <div>
-                  <p className="text-3xl font-bold text-gray-900">$29/month</p>
-                  <p className="text-gray-600">Billed monthly • Next billing: March 15, 2024</p>
+                  <p className="text-4xl font-bold text-gray-900">$29<span className="text-lg text-gray-600">/month</span></p>
+                  <p className="text-gray-600 mt-1">Billed monthly • Next billing: March 15, 2024</p>
                 </div>
                 
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-600" />
-                    <span className="text-gray-700">5 active bots</span>
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700 font-medium">5 active bots</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-600" />
-                    <span className="text-gray-700">Priority support</span>
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700 font-medium">Priority support</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-600" />
-                    <span className="text-gray-700">10,000 conversations/month</span>
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700 font-medium">10,000 conversations/month</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-600" />
-                    <span className="text-gray-700">Custom branding</span>
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700 font-medium">Custom branding</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-600" />
-                    <span className="text-gray-700">Advanced analytics</span>
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700 font-medium">Advanced analytics</span>
                   </div>
                 </div>
 
-                <div className="flex space-x-3 pt-2">
-                  <Button variant="outline" className="border-gray-300 hover:bg-gray-50">
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  <Button className="bg-[#6566F1] hover:bg-[#5A5BD8] text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300">
                     Change Plan
                   </Button>
-                  <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                  <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 rounded-xl font-medium">
                     Cancel Subscription
                   </Button>
                 </div>

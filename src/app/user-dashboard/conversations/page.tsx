@@ -1,52 +1,70 @@
 'use client';
 
-import React, { useState } from 'react';
-import { MessageSquare, Clock, User, Search, Filter, MoreHorizontal } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { MessageSquare, Clock, User, Search, Filter, MoreHorizontal, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import RoleGuard from '@/components/auth/RoleGuard';
 
-// Mock conversation data
-const mockConversations = [
-  {
-    id: '1',
-    customerName: 'John Smith',
-    customerEmail: 'john@example.com',
-    botName: 'Customer Support Bot',
-    startTime: '2024-01-15 10:30:00',
-    endTime: '2024-01-15 10:45:00',
-    status: 'completed',
-    messageCount: 12,
-    satisfaction: 5
-  },
-  {
-    id: '2',
-    customerName: 'Sarah Johnson',
-    customerEmail: 'sarah@example.com',
-    botName: 'Sales Assistant',
-    startTime: '2024-01-15 11:15:00',
-    endTime: null,
-    status: 'active',
-    messageCount: 8,
-    satisfaction: null
-  },
-  {
-    id: '3',
-    customerName: 'Mike Wilson',
-    customerEmail: 'mike@example.com',
-    botName: 'FAQ Helper',
-    startTime: '2024-01-15 09:20:00',
-    endTime: '2024-01-15 09:35:00',
-    status: 'completed',
-    messageCount: 6,
-    satisfaction: 4
-  }
-];
+interface ConversationSession {
+  id: string;
+  customerName: string;
+  customerEmail: string;
+  botName: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  messageCount: number;
+  duration: string;
+  satisfaction: number;
+}
+
+interface ConversationStats {
+  total: number;
+  active: number;
+  completed: number;
+  avgRating: number;
+}
 
 const ConversationsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [conversations, setConversations] = useState<ConversationSession[]>([]);
+  const [stats, setStats] = useState<ConversationStats>({
+    total: 0,
+    active: 0,
+    completed: 0,
+    avgRating: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch conversations from API
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/user/conversations');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch conversations');
+        }
+        
+        const data = await response.json();
+        setConversations(data.conversations || []);
+        setStats(data.stats || { total: 0, active: 0, completed: 0, avgRating: 0 });
+      } catch (err) {
+        console.error('Error fetching conversations:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch conversations');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConversations();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -65,7 +83,7 @@ const ConversationsPage = () => {
     return new Date(timeString).toLocaleString();
   };
 
-  const filteredConversations = mockConversations.filter(conversation => {
+  const filteredConversations = conversations.filter(conversation => {
     const matchesSearch = conversation.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          conversation.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          conversation.botName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -73,17 +91,57 @@ const ConversationsPage = () => {
     return matchesSearch && matchesStatus;
   });
 
-  return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Conversations</h1>
-          <p className="text-gray-600 mt-1">
-            View and manage all conversations from your assigned bots
-          </p>
+  if (loading) {
+    return (
+      <RoleGuard allowedRoles={['user']}>
+        <div className="p-6 space-y-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 animate-spin text-[#6566F1] mx-auto mb-4" />
+              <p className="text-gray-600">Loading conversations...</p>
+            </div>
+          </div>
         </div>
-      </div>
+      </RoleGuard>
+    );
+  }
+
+  if (error) {
+    return (
+      <RoleGuard allowedRoles={['user']}>
+        <div className="p-6 space-y-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="w-8 h-8 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Conversations</h3>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <Button 
+                onClick={() => window.location.reload()}
+                className="bg-[#6566F1] hover:bg-[#5A5BD8] text-white"
+              >
+                Try Again
+              </Button>
+            </div>
+          </div>
+        </div>
+      </RoleGuard>
+    );
+  }
+
+  return (
+    <RoleGuard allowedRoles={['user']}>
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Conversations</h1>
+            <p className="text-gray-600 mt-1">
+              View and manage all conversations from your assigned bots
+            </p>
+          </div>
+        </div>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
@@ -108,56 +166,56 @@ const ConversationsPage = () => {
         </select>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border border-gray-200 bg-white">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <MessageSquare className="w-5 h-5 text-[#6566F1]" />
-              <div>
-                <p className="text-2xl font-bold">{mockConversations.length}</p>
-                <p className="text-sm text-gray-600">Total Conversations</p>
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="border border-gray-200 bg-white">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <MessageSquare className="w-5 h-5 text-[#6566F1]" />
+                <div>
+                  <p className="text-2xl font-bold">{stats.total}</p>
+                  <p className="text-sm text-gray-600">Total Conversations</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border border-gray-200 bg-white">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Clock className="w-5 h-5 text-green-500" />
-              <div>
-                <p className="text-2xl font-bold">{mockConversations.filter(c => c.status === 'active').length}</p>
-                <p className="text-sm text-gray-600">Active</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="border border-gray-200 bg-white">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <Clock className="w-5 h-5 text-green-500" />
+                <div>
+                  <p className="text-2xl font-bold">{stats.active}</p>
+                  <p className="text-sm text-gray-600">Active</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border border-gray-200 bg-white">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <User className="w-5 h-5 text-blue-500" />
-              <div>
-                <p className="text-2xl font-bold">{mockConversations.filter(c => c.status === 'completed').length}</p>
-                <p className="text-sm text-gray-600">Completed</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="border border-gray-200 bg-white">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <User className="w-5 h-5 text-blue-500" />
+                <div>
+                  <p className="text-2xl font-bold">{stats.completed}</p>
+                  <p className="text-sm text-gray-600">Completed</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border border-gray-200 bg-white">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-yellow-400 text-lg">★</span>
-              <div>
-                <p className="text-2xl font-bold">4.5</p>
-                <p className="text-sm text-gray-600">Avg Rating</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="border border-gray-200 bg-white">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-yellow-400 text-lg">★</span>
+                <div>
+                  <p className="text-2xl font-bold">{stats.avgRating}</p>
+                  <p className="text-sm text-gray-600">Avg Rating</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
 
       {/* Conversations List */}
       <div className="space-y-4">
@@ -169,7 +227,7 @@ const ConversationsPage = () => {
               <p className="text-gray-600">
                 {searchTerm || filterStatus !== 'all' 
                   ? 'Try adjusting your search or filter criteria.'
-                  : 'No conversations have been recorded yet.'}
+                  : 'No conversations from your assigned bots have been recorded yet.'}
               </p>
             </CardContent>
           </Card>
@@ -215,7 +273,8 @@ const ConversationsPage = () => {
           ))
         )}
       </div>
-    </div>
+      </div>
+    </RoleGuard>
   );
 };
 

@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
         'user.email',
         'user.role',
         'user.password',
+        'user.lastLoginAt',
         'user.createdAt'
       ])
       .getMany();
@@ -60,6 +61,7 @@ export async function GET(request: NextRequest) {
         email: user.email,
         role: user.role,
         status: user.password ? 'accepted' : 'pending', // accepted if they have password, pending if not
+        lastLoginAt: user.lastLoginAt,
         createdAt: user.createdAt
       };
     });

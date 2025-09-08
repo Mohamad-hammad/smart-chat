@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Settings, 
+import {
+  Settings,
   User, 
   Shield, 
-  Bell, 
-  Globe, 
+  Bell,
+  Globe,
   Database,
   Key,
   Mail,
@@ -52,7 +52,7 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
-      {/* Header */}
+        {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
@@ -65,33 +65,33 @@ const SettingsPage: React.FC = () => {
           <Save className="w-5 h-5" />
           <span>Save Changes</span>
         </button>
-      </div>
+        </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl shadow-sm border-0 p-4">
             <nav className="space-y-2">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-colors ${
-                      activeTab === tab.id
+                    activeTab === tab.id
                         ? 'bg-[#6566F1] text-white'
                         : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
+                  }`}
+                >
                     <Icon className="w-5 h-5 mr-3" />
                     {tab.label}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-        </div>
+                </button>
+              );
+            })}
+          </nav>
+                </div>
+              </div>
 
         {/* Content */}
         <div className="lg:col-span-3">
@@ -101,24 +101,24 @@ const SettingsPage: React.FC = () => {
                 <h2 className="text-xl font-bold text-gray-900">General Settings</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
+                <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Site Name</label>
                     <input
                       type="text"
                       value={settings.siteName}
                       onChange={(e) => setSettings({...settings, siteName: e.target.value})}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6566F1] focus:border-transparent"
-                    />
-                  </div>
-                  <div>
+                  />
+                </div>
+                <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Admin Email</label>
                     <input
                       type="email"
                       value={settings.adminEmail}
                       onChange={(e) => setSettings({...settings, adminEmail: e.target.value})}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6566F1] focus:border-transparent"
-                    />
-                  </div>
+                  />
+                </div>
                 </div>
 
                 <div>
@@ -129,10 +129,10 @@ const SettingsPage: React.FC = () => {
                     rows={3}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6566F1] focus:border-transparent"
                   />
-                </div>
+              </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
+              <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
                     <select
                       value={settings.timezone}
@@ -158,13 +158,13 @@ const SettingsPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            )}
+        )}
 
-            {activeTab === 'security' && (
+        {activeTab === 'security' && (
               <div className="space-y-6">
                 <h2 className="text-xl font-bold text-gray-900">Security Settings</h2>
                 
-                <div className="space-y-4">
+              <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                     <div>
                       <h3 className="font-semibold text-gray-900">Two-Factor Authentication</h3>
@@ -211,7 +211,7 @@ const SettingsPage: React.FC = () => {
                       <option value="strong">Strong</option>
                       <option value="very-strong">Very Strong</option>
                     </select>
-                  </div>
+              </div>
                 </div>
               </div>
             )}
@@ -257,13 +257,13 @@ const SettingsPage: React.FC = () => {
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#6566F1]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6566F1]"></div>
                     </label>
-                  </div>
+                </div>
 
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                     <div>
                       <h3 className="font-semibold text-gray-900">SMS Notifications</h3>
                       <p className="text-sm text-gray-600">Receive notifications via SMS</p>
-                    </div>
+                </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
@@ -276,7 +276,7 @@ const SettingsPage: React.FC = () => {
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#6566F1]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6566F1]"></div>
                     </label>
-                  </div>
+                </div>
                 </div>
               </div>
             )}
@@ -285,10 +285,10 @@ const SettingsPage: React.FC = () => {
               <div className="space-y-6">
                 <h2 className="text-xl font-bold text-gray-900">Integrations</h2>
                 
-                <div className="space-y-4">
+              <div className="space-y-4">
                   <div className="p-4 bg-gray-50 rounded-xl">
                     <div className="flex items-center justify-between">
-                      <div>
+                  <div>
                         <h3 className="font-semibold text-gray-900">N8N Webhooks</h3>
                         <p className="text-sm text-gray-600">Configure webhook endpoints for automation</p>
                       </div>
@@ -308,11 +308,11 @@ const SettingsPage: React.FC = () => {
                         Active
                       </span>
                     </div>
-                  </div>
+                </div>
 
                   <div className="p-4 bg-gray-50 rounded-xl">
                     <div className="flex items-center justify-between">
-                      <div>
+                  <div>
                         <h3 className="font-semibold text-gray-900">Analytics</h3>
                         <p className="text-sm text-gray-600">Google Analytics integration</p>
                       </div>
@@ -323,7 +323,7 @@ const SettingsPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            )}
+        )}
           </div>
         </div>
       </div>
