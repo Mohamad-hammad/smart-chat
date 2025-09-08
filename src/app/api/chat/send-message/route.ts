@@ -80,6 +80,8 @@ export async function POST(request: NextRequest) {
     const botRepository = AppDataSource.getRepository(Bot);
     let bot;
     
+    console.log('Bot lookup:', { botId, userId: user.id, isTestMessage, userRole: user.role });
+    
     if (isTestMessage) {
       // For test messages, check if the user is a manager and owns the bot
       bot = await botRepository.findOne({
@@ -88,6 +90,7 @@ export async function POST(request: NextRequest) {
           createdBy: user.id
         }
       });
+      console.log('Test message bot lookup result:', bot ? { id: bot.id, name: bot.name, status: bot.status, createdBy: bot.createdBy } : 'null');
     } else {
       // For regular messages, just check if bot exists
       bot = await botRepository.findOne({
@@ -95,6 +98,7 @@ export async function POST(request: NextRequest) {
           id: botId
         }
       });
+      console.log('Regular message bot lookup result:', bot ? { id: bot.id, name: bot.name, status: bot.status } : 'null');
     }
 
     if (!bot) {
@@ -104,9 +108,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if bot is active
+    console.log('Bot status check:', { 
+      botId, 
+      botStatus: bot.status, 
+      userId: user.id, 
+      isTestMessage,
+      botName: bot.name 
+    });
+    
     if (bot.status !== 'active') {
       return NextResponse.json({ 
-        error: 'Bot is not active' 
+        error: `Bot is not active. Current status: ${bot.status}` 
       }, { status: 400 });
     }
 
