@@ -62,10 +62,10 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
       { id: 'analytics', label: 'Analytics', icon: BarChart3, path: `${basePath}/analytics` },
       { id: 'chatbot-analytics', label: 'Chatbot Analytics', icon: MessageSquare, path: `${basePath}/chatbot-analytics` },
       { id: 'chatbot-issues', label: 'Chatbot Issues', icon: AlertTriangle, path: `${basePath}/chatbot-issues` },
+      { id: 'billing-management', label: 'Billing Management', icon: CreditCard, path: `${basePath}/billing-management` },
       { id: 'system-health', label: 'System Health', icon: Activity, path: `${basePath}/system-health` },
       { id: 'database', label: 'Database', icon: Database, path: `${basePath}/database` },
       { id: 'settings', label: 'Settings', icon: Settings, path: `${basePath}/settings` },
-      { id: 'billing', label: 'Billing', icon: CreditCard, path: `${basePath}/billing` },
       { id: 'help', label: 'Help', icon: HelpCircle, path: `${basePath}/help` },
     ];
   };
@@ -77,7 +77,7 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
     if (pathname === basePath) return 'overview';
     if (pathname.includes('/user-management')) return 'user-management';
     if (pathname.includes('/analytics')) return 'analytics';
-    if (pathname.includes('/billing')) return 'billing';
+    if (pathname.includes('/billing-management')) return 'billing-management';
     if (pathname.includes('/bots')) return 'bots';
     if (pathname.includes('/chatbot-analytics')) return 'chatbot-analytics';
     if (pathname.includes('/chatbot-issues')) return 'chatbot-issues';

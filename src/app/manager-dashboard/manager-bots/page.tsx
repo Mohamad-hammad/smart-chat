@@ -293,34 +293,23 @@ export default function BotsPage() {
   };
 
   const handleCreateBot = async () => {
-    try {
-      const response = await fetch('/api/manager/create-bot', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newBot),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Bot created successfully:', result);
-        // Refresh the bots list
-        const refreshResponse = await fetch('/api/manager/bots');
-        if (refreshResponse.ok) {
-          const refreshData = await refreshResponse.json();
-          setBots(refreshData.bots || []);
-        }
-      } else {
-        const error = await response.json();
-        console.error('Failed to create bot:', error);
-      }
-    } catch (error) {
-      console.error('Error creating bot:', error);
+    // Validate required fields
+    if (!newBot.name.trim()) {
+      console.error('Bot name is required');
+      return;
     }
-    
-    setNewBot({ name: "", description: "", domain: "", status: "active" });
+
+    // Close modal and redirect to payment
     setShowCreateModal(false);
+    
+    // Redirect to payment page with bot details
+    const params = new URLSearchParams({
+      plan: 'signup',
+      botName: newBot.name,
+      botDescription: newBot.description || '',
+    });
+    
+    window.location.href = `/payment?${params.toString()}`;
   };
 
   const handleAssignUser = async (botId: string, userId: string) => {
