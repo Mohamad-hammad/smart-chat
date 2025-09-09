@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -15,7 +15,6 @@ import {
   Shield,
   AlertTriangle,
   MessageSquare,
-  TrendingUp,
   Activity,
   PanelLeftClose,
   PanelLeftOpen
@@ -24,7 +23,7 @@ import {
 interface NavItem {
   id: string;
   label: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
   path: string;
 }
 
