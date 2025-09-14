@@ -9,7 +9,6 @@ import {
   Clock, 
   CheckCircle,
   AlertTriangle,
-  Users,
   Zap,
   Sparkles
 } from 'lucide-react';
@@ -48,7 +47,7 @@ const PlaygroundPage = () => {
           setError('Failed to fetch assigned bots');
         }
       } catch (error) {
-        console.error('Error fetching assigned bots:', error);
+        // Error fetching assigned bots
         setError('Error loading bots');
       } finally {
         setLoading(false);
@@ -233,7 +232,7 @@ const PlaygroundPage = () => {
               <Bot className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No Bots Assigned</h3>
               <p className="text-gray-600 mb-4">
-                You don't have any bots assigned to you yet. Contact your manager to get access to bots for testing.
+                You don&apos;t have any bots assigned to you yet. Contact your manager to get access to bots for testing.
               </p>
               <Button 
                 onClick={() => router.push('/user-dashboard/bots')}
@@ -318,7 +317,7 @@ const PlaygroundPage = () => {
                 <ul className="space-y-2 text-sm text-gray-600">
                   <li className="flex items-start space-x-2">
                     <span className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></span>
-                    <span>Ask questions related to the bot's domain</span>
+                    <span>Ask questions related to the bot&apos;s domain</span>
                   </li>
                   <li className="flex items-start space-x-2">
                     <span className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></span>

@@ -62,15 +62,6 @@ const ReportIssuePage = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending': return <Clock className="w-4 h-4" />;
-      case 'in_progress': return <Clock className="w-4 h-4" />;
-      case 'resolved': return <CheckCircle className="w-4 h-4" />;
-      case 'closed': return <XCircle className="w-4 h-4" />;
-      default: return <Clock className="w-4 h-4" />;
-    }
-  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -180,7 +171,7 @@ const ReportIssuePage = () => {
                 <div className="text-center py-8">
                   <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Issue Submitted!</h3>
-                  <p className="text-gray-600">Thank you for your feedback. We'll review your issue and get back to you soon.</p>
+                  <p className="text-gray-600">Thank you for your feedback. We&apos;ll review your issue and get back to you soon.</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
