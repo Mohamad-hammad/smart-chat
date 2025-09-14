@@ -17,7 +17,8 @@ import {
   LogOut,
   User,
   Shield,
-  AlertTriangle
+  AlertTriangle,
+  HandHeart
 } from 'lucide-react';
 
 interface UserDashboardLayoutProps {
@@ -37,12 +38,28 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
     pending: 2
   });
 
+  // Mock data for human handoff counts
+  const [handoffCounts] = useState({
+    total: 2,
+    pending: 1,
+    inProgress: 1,
+    resolved: 0
+  });
+
   // Navigation items for user dashboard
   const navigationItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/user-dashboard' },
     { id: 'bots', label: 'My Bots', icon: Bot, path: '/user-dashboard/bots' },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/user-dashboard/analytics' },
     { id: 'conversations', label: 'Conversations', icon: MessageSquare, path: '/user-dashboard/conversations' },
+    { 
+      id: 'human-handoff', 
+      label: 'Human Handoff', 
+      icon: HandHeart, 
+      path: '/user-dashboard/human-handoff',
+      badge: handoffCounts.pending > 0 ? handoffCounts.pending : null,
+      subtitle: `${handoffCounts.resolved}/${handoffCounts.total} resolved`
+    },
     { 
       id: 'report-issue', 
       label: 'Report an Issue', 
@@ -63,6 +80,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
     if (pathname.includes('/bots')) return 'bots';
     if (pathname.includes('/analytics')) return 'analytics';
     if (pathname.includes('/conversations')) return 'conversations';
+    if (pathname.includes('/human-handoff')) return 'human-handoff';
     if (pathname.includes('/report-issue')) return 'report-issue';
     if (pathname.includes('/help')) return 'help';
     return 'overview';
