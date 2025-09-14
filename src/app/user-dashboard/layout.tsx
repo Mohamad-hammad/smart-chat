@@ -18,7 +18,8 @@ import {
   User,
   Shield,
   AlertTriangle,
-  HandHeart
+  HandHeart,
+  PlayCircle
 } from 'lucide-react';
 
 interface UserDashboardLayoutProps {
@@ -50,6 +51,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
   const navigationItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/user-dashboard' },
     { id: 'bots', label: 'My Bots', icon: Bot, path: '/user-dashboard/bots' },
+    { id: 'playground', label: 'Playground', icon: PlayCircle, path: '/user-dashboard/playground' },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/user-dashboard/analytics' },
     { id: 'conversations', label: 'Conversations', icon: MessageSquare, path: '/user-dashboard/conversations' },
     { 
@@ -78,6 +80,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
   const getActiveSection = () => {
     if (pathname === '/user-dashboard') return 'overview';
     if (pathname.includes('/bots')) return 'bots';
+    if (pathname.includes('/playground')) return 'playground';
     if (pathname.includes('/analytics')) return 'analytics';
     if (pathname.includes('/conversations')) return 'conversations';
     if (pathname.includes('/human-handoff')) return 'human-handoff';
