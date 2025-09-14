@@ -366,7 +366,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ apiKey }) => {
 
                   {/* Request Human Agent Modal */}
             {showRequestHuman && (
-              <div className="fixed inset-0 bg-black bg-opacity-5 backdrop-blur-sm flex items-center justify-center z-60">
+              <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-60">
                 <div className="bg-white rounded-2xl p-6 w-[480px] max-w-[90vw] shadow-2xl border border-gray-100">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-3">
@@ -452,7 +452,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ apiKey }) => {
 
       {/* Report Issue Modal */}
       {showReportIssue && (
-        <div className="fixed inset-0 bg-black bg-opacity-5 backdrop-blur-sm flex items-center justify-center z-60">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-60">
           <div className="bg-white rounded-2xl p-6 w-[520px] max-w-[90vw] shadow-2xl border border-gray-100">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
