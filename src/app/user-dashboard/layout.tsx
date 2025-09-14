@@ -16,7 +16,8 @@ import {
   Home,
   LogOut,
   User,
-  Shield
+  Shield,
+  AlertTriangle
 } from 'lucide-react';
 
 interface UserDashboardLayoutProps {
@@ -29,12 +30,27 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
   const { data: session, status } = useSession();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  // Mock data for issue counts
+  const [issueCounts] = useState({
+    total: 3,
+    resolved: 1,
+    pending: 2
+  });
+
   // Navigation items for user dashboard
   const navigationItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/user-dashboard' },
     { id: 'bots', label: 'My Bots', icon: Bot, path: '/user-dashboard/bots' },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/user-dashboard/analytics' },
     { id: 'conversations', label: 'Conversations', icon: MessageSquare, path: '/user-dashboard/conversations' },
+    { 
+      id: 'report-issue', 
+      label: 'Report an Issue', 
+      icon: AlertTriangle, 
+      path: '/user-dashboard/report-issue',
+      badge: issueCounts.pending > 0 ? issueCounts.pending : null,
+      subtitle: `${issueCounts.resolved}/${issueCounts.total} resolved`
+    },
     { id: 'help', label: 'Help', icon: HelpCircle, path: '/user-dashboard/help' },
   ];
 
@@ -47,6 +63,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
     if (pathname.includes('/bots')) return 'bots';
     if (pathname.includes('/analytics')) return 'analytics';
     if (pathname.includes('/conversations')) return 'conversations';
+    if (pathname.includes('/report-issue')) return 'report-issue';
     if (pathname.includes('/help')) return 'help';
     return 'overview';
   };
@@ -113,9 +130,21 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-[#6566F1]' : 'text-[#7F82F3]'} flex-shrink-0`} />
+                  <div className="relative">
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#6566F1]' : 'text-[#7F82F3]'} flex-shrink-0`} />
+                    {item.badge && !sidebarCollapsed && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-[10px] font-bold">
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
                   <div className={`overflow-hidden transition-all duration-300 ${sidebarCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
-                    <span className="ml-3 whitespace-nowrap">{item.label}</span>
+                    <div className="ml-3 flex flex-col items-start">
+                      <span className="whitespace-nowrap">{item.label}</span>
+                      {item.subtitle && (
+                        <span className="text-[10px] text-gray-500 whitespace-nowrap">{item.subtitle}</span>
+                      )}
+                    </div>
                   </div>
                 </button>
               );
