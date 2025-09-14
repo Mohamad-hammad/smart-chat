@@ -18,19 +18,52 @@ export const STRIPE_CONFIG = {
     description: 'Create your first bot (refundable)',
     productId: 'prod_T1Oq2owhO3uruq', // Your existing Stripe product
   },
-  // Starter plan - $29.00
+  // Free plan - $0.00
+  FREE_PLAN: {
+    price: 0, // $0.00 in cents
+    currency: 'usd',
+    name: 'Free Plan',
+    description: '1 Bot, 50 conversations/month, 1 team member',
+  },
+  // Starter plan - $19.00
   STARTER_PLAN: {
-    price: 2900, // $29.00 in cents
+    price: 1900, // $19.00 in cents
     currency: 'usd',
     name: 'Starter Plan',
-    description: 'Up to 10 users, 3 bots, basic support',
+    description: '2 Bots, 1,000 conversations/month, 2 team members',
   },
-  // Professional plan - $79.00
-  PROFESSIONAL_PLAN: {
-    price: 7900, // $79.00 in cents
+  // Pro plan - $49.00
+  PRO_PLAN: {
+    price: 4900, // $49.00 in cents
     currency: 'usd',
-    name: 'Professional Plan',
-    description: 'Up to 50 users, 10 bots, priority support',
+    name: 'Pro Plan',
+    description: '5 Bots, 10,000 conversations/month, 5 team members',
+  },
+  // Enterprise plan - $99.00
+  ENTERPRISE_PLAN: {
+    price: 9900, // $99.00 in cents
+    currency: 'usd',
+    name: 'Enterprise Plan',
+    description: '20 Bots, 50,000 conversations/month, 20+ team members',
+  },
+  // Add-ons
+  ADDON_EXTRA_CONVERSATIONS: {
+    price: 1000, // $10.00 in cents
+    currency: 'usd',
+    name: 'Extra Conversations',
+    description: '+5,000 conversations',
+  },
+  ADDON_EXTRA_BOT: {
+    price: 500, // $5.00 in cents
+    currency: 'usd',
+    name: 'Extra Bot Seat',
+    description: 'Additional bot',
+  },
+  ADDON_DEDICATED_HOSTING: {
+    price: 10000, // $100.00 in cents
+    currency: 'usd',
+    name: 'Dedicated Hosting',
+    description: 'Dedicated server hosting',
   },
 };
 

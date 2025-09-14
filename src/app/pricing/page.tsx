@@ -11,13 +11,20 @@ const PricingPage = () => {
       name: "Free",
       price: "$0",
       period: "/month",
-      description: "Perfect for trying out our service",
+      description: "For testing & small blogs",
       features: [
-        "1 AI chatbot",
-        "100 conversations/month",
-        "Basic customization",
-        "Community support",
-        "7-day response time"
+        "1 Bot / 1 Website",
+        "50 Conversations / Month",
+        "1 Team Member",
+        "2MB per File (10MB Quota)",
+        "Unlimited Links",
+        "Default Templates Only",
+        "1 Parallel Chat at a time"
+      ],
+      limitations: [
+        "No Customize Branding",
+        "No API / Integrations",
+        "No Analytics"
       ],
       cta: "Get Started Free",
       popular: false,
@@ -25,55 +32,94 @@ const PricingPage = () => {
     },
     {
       name: "Starter",
-      price: "$29",
+      price: "$19",
       period: "/month",
-      description: "Perfect for small businesses",
+      yearlyPrice: "$190",
+      yearlyPeriod: "/year",
+      description: "For freelancers & small businesses",
       features: [
-        "1 AI chatbot",
-        "1,000 conversations/month",
-        "Basic customization", 
-        "Email support",
-        "Basic integrations",
-        "24-hour response time"
+        "2 Bots / 2 Websites",
+        "1,000 Conversations / Month",
+        "2 Team Members",
+        "5MB per File (50MB Quota)",
+        "Unlimited Links",
+        "10 Parallel Chats at a time",
+        "Default Templates",
+        "Limited Analytics Dashboard",
+        "Email Support"
+      ],
+      limitations: [
+        "No Customize Branding"
       ],
       cta: "Start Free Trial",
       popular: false,
       highlight: false
     },
     {
-      name: "Professional",
-      price: "$79",
+      name: "Pro",
+      price: "$49",
       period: "/month",
-      description: "Best for growing businesses",
+      yearlyPrice: "$490",
+      yearlyPeriod: "/year",
+      description: "For agencies & e-commerce",
       features: [
-        "5 AI chatbots",
-        "10,000 conversations/month",
-        "Advanced customization",
-        "Priority support",
-        "All integrations",
-        "Analytics dashboard",
-        "Human handover",
-        "1-hour response time"
+        "5 Bots / 5 Websites",
+        "10,000 Conversations / Month",
+        "5 Team Members",
+        "10MB per File (200MB Quota)",
+        "Unlimited Links",
+        "25 Parallel Chats at a time",
+        "Default + Custom Templates",
+        "Customize Branding (Colors, Logo, Theme)",
+        "API Access + Integrations",
+        "Priority Email & Chat Support",
+        "Full Analytics Dashboard"
       ],
+      limitations: [],
       cta: "Start Free Trial",
       popular: true,
       highlight: true
     },
     {
       name: "Enterprise",
+      price: "$99",
+      period: "/month",
+      yearlyPrice: "$990",
+      yearlyPeriod: "/year",
+      description: "For large businesses & SaaS",
+      features: [
+        "20 Bots / Unlimited Websites",
+        "50,000 Conversations / Month",
+        "20+ Team Members",
+        "25MB per File (1GB Quota)",
+        "Unlimited Links",
+        "100 Parallel Chats at a time",
+        "White Label (Your Brand Only)",
+        "Dedicated Account Manager",
+        "Premium Integrations",
+        "Advanced Reporting & Team Collaboration"
+      ],
+      limitations: [],
+      cta: "Start Free Trial",
+      popular: false,
+      highlight: false
+    },
+    {
+      name: "Custom",
       price: "Custom",
       period: "",
-      description: "For large organizations",
+      description: "For enterprises with special needs",
       features: [
-        "Unlimited chatbots",
-        "Unlimited conversations",
-        "White-label solution",
-        "Dedicated support",
-        "Custom integrations",
-        "SLA guarantee",
-        "Advanced analytics",
-        "Dedicated account manager"
+        "Unlimited Bots & Conversations",
+        "Unlimited Team Members",
+        "Unlimited File Quota (Custom GB)",
+        "Unlimited Links",
+        "Unlimited Parallel Chats",
+        "Fully White Label + On-Premise Hosting",
+        "Custom Integrations (ERP, CRM, API)",
+        "Dedicated 24/7 Support + SLA"
       ],
+      limitations: [],
       cta: "Contact Sales",
       popular: false,
       highlight: false
@@ -106,7 +152,7 @@ const PricingPage = () => {
             </div>
 
             {/* Pricing cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-16">
               {plans.map((plan, index) => (
                 <div
                   key={index}
@@ -139,19 +185,42 @@ const PricingPage = () => {
                         {plan.period}
                       </span>
                     </div>
+                    {plan.yearlyPrice && (
+                      <div className="text-center mb-4">
+                        <span className="text-2xl font-semibold text-slate-700">
+                          {plan.yearlyPrice}
+                        </span>
+                        <span className="text-slate-600 ml-1">
+                          {plan.yearlyPeriod}
+                        </span>
+                        <div className="text-sm text-green-600 font-medium mt-1">
+                          Save 17% with yearly billing
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <ul className="space-y-4 mb-8 flex-grow">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start">
-                        <Check className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                        <Check className="w-5 h-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" />
                         <span className="text-slate-600 text-sm">{feature}</span>
                       </li>
                     ))}
+                    {plan.limitations && plan.limitations.length > 0 && (
+                      <>
+                        {plan.limitations.map((limitation, limitationIndex) => (
+                          <li key={`limitation-${limitationIndex}`} className="flex items-start">
+                            <span className="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0 text-center text-lg leading-none">×</span>
+                            <span className="text-slate-400 text-sm line-through">{limitation}</span>
+                          </li>
+                        ))}
+                      </>
+                    )}
                   </ul>
 
                   <button
-                    className={`w-full group mt-auto py-3 px-6 rounded-lg font-medium transition-all duration-300 flex items-center justify-center ${
+                    className={`w-full group mt-auto py-2.5 px-6 rounded-lg font-medium transition-all duration-300 flex items-center justify-center ${
                       plan.popular 
                         ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90" 
                         : "border-2 border-slate-200 text-slate-900 hover:border-blue-600 hover:text-blue-600"
@@ -162,6 +231,51 @@ const PricingPage = () => {
                   </button>
                 </div>
               ))}
+            </div>
+
+            {/* Add-ons Section */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg mb-12">
+              <h3 className="text-2xl font-bold text-center mb-8 text-slate-900">
+                Optional Add-ons
+              </h3>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="text-center space-y-3 p-4 border border-slate-200 rounded-lg">
+                  <div className="w-12 h-12 bg-blue-600/10 rounded-full flex items-center justify-center mx-auto">
+                    <span className="text-2xl">💬</span>
+                  </div>
+                  <h4 className="font-semibold text-slate-900">Extra Conversations</h4>
+                  <p className="text-sm text-slate-600 mb-2">
+                    Add more conversations to your plan
+                  </p>
+                  <div className="text-lg font-bold text-blue-600">
+                    $10 for +5,000 conversations
+                  </div>
+                </div>
+                <div className="text-center space-y-3 p-4 border border-slate-200 rounded-lg">
+                  <div className="w-12 h-12 bg-blue-600/10 rounded-full flex items-center justify-center mx-auto">
+                    <span className="text-2xl">🤖</span>
+                  </div>
+                  <h4 className="font-semibold text-slate-900">Extra Bot Seats</h4>
+                  <p className="text-sm text-slate-600 mb-2">
+                    Add more bots to your plan
+                  </p>
+                  <div className="text-lg font-bold text-blue-600">
+                    $5 per additional bot
+                  </div>
+                </div>
+                <div className="text-center space-y-3 p-4 border border-slate-200 rounded-lg">
+                  <div className="w-12 h-12 bg-blue-600/10 rounded-full flex items-center justify-center mx-auto">
+                    <span className="text-2xl">🏠</span>
+                  </div>
+                  <h4 className="font-semibold text-slate-900">Dedicated Hosting</h4>
+                  <p className="text-sm text-slate-600 mb-2">
+                    Get your own dedicated server
+                  </p>
+                  <div className="text-lg font-bold text-blue-600">
+                    +$100 / month
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Features comparison */}
