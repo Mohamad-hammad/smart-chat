@@ -288,7 +288,7 @@ const ManagerDashboardLayout: React.FC<ManagerDashboardLayoutProps> = ({
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-50 lg:hidden">
           <div className="fixed inset-y-0 left-0 w-72 bg-white">
             <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
               <span className="text-lg font-bold text-gray-900">Menu</span>

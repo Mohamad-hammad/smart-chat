@@ -153,7 +153,7 @@ const AdminDashboardLayout: React.FC<{ children: React.ReactNode }> = ({ childre
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-md lg:hidden"
           onClick={toggleSidebar}
         />
       )}

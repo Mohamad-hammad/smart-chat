@@ -533,7 +533,7 @@ const TeamManagement = () => {
 
       {/* Add New Member Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Add New Member</h2>
@@ -639,7 +639,7 @@ const TeamManagement = () => {
 
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && userToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Delete User</h2>
