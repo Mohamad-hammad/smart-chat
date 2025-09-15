@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Send, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,34 +23,41 @@ const ReportIssuePage = () => {
   const [priority, setPriority] = useState('medium');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data for user's reported issues
-  const [userIssues] = useState<IssueReport[]>([
-    {
-      id: '1',
-      type: 'Bug Report',
-      description: 'Chatbot not responding to specific questions about pricing',
-      status: 'resolved',
-      createdAt: '2024-01-15T10:30:00Z',
-      priority: 'high'
-    },
-    {
-      id: '2',
-      type: 'Feature Request',
-      description: 'Would like to add voice message support to the chatbot',
-      status: 'in_progress',
-      createdAt: '2024-01-20T14:15:00Z',
-      priority: 'medium'
-    },
-    {
-      id: '3',
-      type: 'Bug Report',
-      description: 'Mobile interface not displaying correctly on iOS devices',
-      status: 'pending',
-      createdAt: '2024-01-22T09:45:00Z',
-      priority: 'high'
-    }
-  ]);
+  // Real data for user's reported issues
+  const [userIssues, setUserIssues] = useState<IssueReport[]>([]);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    resolved: 0
+  });
+
+  // Fetch user's issues on component mount
+  useEffect(() => {
+    const fetchUserIssues = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/user/issues');
+        if (response.ok) {
+          const data = await response.json();
+          setUserIssues(data.issues || []);
+          setStats(data.stats || { total: 0, pending: 0, resolved: 0 });
+        } else {
+          console.error('Failed to fetch user issues');
+          setError('Failed to load your issues');
+        }
+      } catch (error) {
+        console.error('Error fetching user issues:', error);
+        setError('Failed to load your issues');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserIssues();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -78,25 +85,55 @@ const ReportIssuePage = () => {
     if (!issueType || !description) return;
 
     setIsSubmitting(true);
+    setError(null);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setSubmitted(true);
-    setIsSubmitting(false);
-    
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setSubmitted(false);
-      setIssueType('');
-      setDescription('');
-      setPriority('medium');
-    }, 3000);
+    try {
+      const response = await fetch('/api/user/report-issue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          issueType,
+          description,
+          priority
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSubmitted(true);
+        
+        // Refresh the issues list
+        const issuesResponse = await fetch('/api/user/issues');
+        if (issuesResponse.ok) {
+          const issuesData = await issuesResponse.json();
+          setUserIssues(issuesData.issues || []);
+          setStats(issuesData.stats || { total: 0, pending: 0, resolved: 0 });
+        }
+        
+        // Reset form after 3 seconds
+        setTimeout(() => {
+          setSubmitted(false);
+          setIssueType('');
+          setDescription('');
+          setPriority('medium');
+        }, 3000);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to submit issue');
+      }
+    } catch (error) {
+      console.error('Error submitting issue:', error);
+      setError('Failed to submit issue. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const totalIssues = userIssues.length;
-  const resolvedIssues = userIssues.filter(issue => issue.status === 'resolved').length;
-  const pendingIssues = userIssues.filter(issue => issue.status === 'pending' || issue.status === 'in_progress').length;
+  const totalIssues = stats.total;
+  const resolvedIssues = stats.resolved;
+  const pendingIssues = stats.pending;
 
   return (
     <RoleGuard allowedRoles={['user']}>
@@ -175,6 +212,14 @@ const ReportIssuePage = () => {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {error && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="flex items-center">
+                        <XCircle className="w-5 h-5 text-red-600 mr-2" />
+                        <p className="text-red-800 text-sm">{error}</p>
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Issue Type
@@ -254,7 +299,12 @@ const ReportIssuePage = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {userIssues.length === 0 ? (
+                {loading ? (
+                  <div className="text-center py-8">
+                    <div className="w-8 h-8 border-2 border-[#6566F1] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading your issues...</p>
+                  </div>
+                ) : userIssues.length === 0 ? (
                   <div className="text-center py-8">
                     <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600">No issues reported yet</p>
