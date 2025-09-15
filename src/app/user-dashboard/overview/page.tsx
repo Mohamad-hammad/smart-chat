@@ -80,11 +80,11 @@ export default function UserOverviewPage() {
   if (loading) {
     return (
       <RoleGuard allowedRoles={['user']}>
-        <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50 min-h-screen">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <Loader2 className="w-8 h-8 animate-spin text-[#6566F1] mx-auto mb-4" />
-              <p className="text-gray-600">Loading your dashboard...</p>
+              <p className="text-gray-600 text-sm sm:text-base">Loading your dashboard...</p>
             </div>
           </div>
         </div>
@@ -94,15 +94,15 @@ export default function UserOverviewPage() {
 
   return (
     <RoleGuard allowedRoles={['user']}>
-      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50 min-h-screen">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-[#6566F1] to-[#5A5BD9] rounded-2xl p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">Welcome back!</h1>
-        <p className="text-[#6566F1]/80">Here&apos;s what&apos;s happening with your assigned bots today.</p>
+      <div className="bg-gradient-to-r from-[#6566F1] to-[#5A5BD9] rounded-2xl p-4 sm:p-6 text-white">
+        <h1 className="text-xl sm:text-2xl font-bold mb-2">Welcome back!</h1>
+        <p className="text-[#6566F1]/80 text-sm sm:text-base">Here&apos;s what&apos;s happening with your assigned bots today.</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card className="border border-gray-200 bg-white hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">Assigned Bots</CardTitle>
@@ -149,7 +149,7 @@ export default function UserOverviewPage() {
       </div>
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card className="border border-gray-200 bg-white">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">

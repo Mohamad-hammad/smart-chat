@@ -94,11 +94,11 @@ const ConversationsPage = () => {
   if (loading) {
     return (
       <RoleGuard allowedRoles={['user']}>
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <Loader2 className="w-8 h-8 animate-spin text-[#6566F1] mx-auto mb-4" />
-              <p className="text-gray-600">Loading conversations...</p>
+              <p className="text-gray-600 text-sm sm:text-base">Loading conversations...</p>
             </div>
           </div>
         </div>
@@ -109,14 +109,14 @@ const ConversationsPage = () => {
   if (error) {
     return (
       <RoleGuard allowedRoles={['user']}>
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageSquare className="w-8 h-8 text-red-600" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Conversations</h3>
-              <p className="text-gray-600 mb-4">{error}</p>
+              <p className="text-gray-600 mb-4 text-sm sm:text-base">{error}</p>
               <Button 
                 onClick={() => window.location.reload()}
                 className="bg-[#6566F1] hover:bg-[#5A5BD8] text-white"
@@ -132,12 +132,12 @@ const ConversationsPage = () => {
 
   return (
     <RoleGuard allowedRoles={['user']}>
-      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50 min-h-screen">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Conversations</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Conversations</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">
               View and manage all conversations from your assigned bots
             </p>
           </div>
@@ -167,7 +167,7 @@ const ConversationsPage = () => {
       </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="border border-gray-200 bg-white">
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">

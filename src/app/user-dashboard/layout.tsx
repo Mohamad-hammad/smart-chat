@@ -19,7 +19,9 @@ import {
   Shield,
   AlertTriangle,
   HandHeart,
-  PlayCircle
+  PlayCircle,
+  Menu,
+  X
 } from 'lucide-react';
 
 interface UserDashboardLayoutProps {
@@ -31,6 +33,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Mock data for issue counts
   const [issueCounts] = useState({
@@ -77,6 +80,14 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
   const getActiveSection = () => {
     if (pathname === '/user-dashboard') return 'overview';
     if (pathname.includes('/bots')) return 'bots';
@@ -93,6 +104,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
 
   const handleNavigation = (path: string) => {
     router.push(path);
+    closeMobileMenu(); // Close mobile menu when navigating
   };
 
   const handleSignOut = () => {
@@ -114,9 +126,19 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobile menu overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-md z-40 lg:hidden"
+          onClick={closeMobileMenu}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-40 ${
+      <div className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-50 ${
         sidebarCollapsed ? 'w-20' : 'w-72'
+      } ${
+        mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
         {/* Logo */}
         <div className="flex items-center justify-center h-16 border-b border-gray-200">
@@ -232,30 +254,43 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
       </div>
 
       {/* User Top Bar */}
-      <div className="fixed top-0 right-0 left-72 bg-white border-b border-gray-200 h-16 z-30 transition-all duration-300" style={{ left: sidebarCollapsed ? '80px' : '288px' }}>
-        <div className="flex items-center justify-between h-full px-6">
+      <div className={`fixed top-0 right-0 left-0 bg-white border-b border-gray-200 h-16 z-30 transition-all duration-300 lg:${
+        sidebarCollapsed ? 'left-20' : 'left-72'
+      }`}>
+        <div className="flex items-center justify-between h-full px-4 lg:px-6">
+          {/* Mobile menu button */}
+          <button
+            onClick={toggleMobileMenu}
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <Menu className="w-5 h-5 text-gray-600" />
+          </button>
+          
           <h1 className="text-lg font-bold text-gray-900">User Dashboard</h1>
-          <div className="flex items-center space-x-4">
+          
+          <div className="flex items-center space-x-2 lg:space-x-4">
             <button
               onClick={() => handleNavigation('/')}
-              className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
+              className="hidden sm:flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
             >
               <Home className="w-4 h-4" />
-              <span>Home</span>
+              <span className="hidden lg:inline">Home</span>
             </button>
             <button
               onClick={handleSignOut}
               className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
             >
               <LogOut className="w-4 h-4" />
-              <span>Logout</span>
+              <span className="hidden lg:inline">Logout</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="pt-16 transition-all duration-300" style={{ marginLeft: sidebarCollapsed ? '80px' : '288px' }}>
+      <div className={`pt-16 transition-all duration-300 ${
+        sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'
+      }`}>
         <div className="min-h-screen">
           {children}
         </div>

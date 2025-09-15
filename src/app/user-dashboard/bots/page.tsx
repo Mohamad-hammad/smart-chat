@@ -94,19 +94,19 @@ const BotsPage = () => {
 
   return (
     <RoleGuard allowedRoles={['user']}>
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Assigned Bots</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Assigned Bots</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">
               View and interact with bots assigned to you by your manager
             </p>
           </div>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-2xl border border-gray-300 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-gray-300 p-4 sm:p-6 shadow-sm">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -181,7 +181,7 @@ const BotsPage = () => {
 
         {/* Bots Grid */}
         {filteredBots.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredBots.map((bot) => (
               <Card key={bot.id} className="group relative border border-gray-300 bg-white hover:shadow-xl hover:shadow-[#6566F1]/10 transition-all duration-300 rounded-2xl overflow-visible hover:-translate-y-1 z-10">
                 {/* Gradient Background Overlay */}
