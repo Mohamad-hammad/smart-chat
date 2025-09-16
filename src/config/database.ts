@@ -73,7 +73,8 @@ export const AppDataSource = new DataSource({
   migrations: [],
   subscribers: [],
   ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: false // Required for managed databases like Supabase
+    rejectUnauthorized: false, // Required for managed databases like Supabase
+    ca: process.env.DATABASE_SSL_CERT, // Optional: if you have a specific CA cert
   } : false,
   extra: {
     // Connection pool settings for production
@@ -81,17 +82,36 @@ export const AppDataSource = new DataSource({
     min: process.env.NODE_ENV === 'production' ? 5 : 2,
     acquire: 30000,
     idle: 10000,
+    // SSL configuration for production
+    ssl: process.env.NODE_ENV === 'production' ? {
+      rejectUnauthorized: false,
+    } : false,
   }
 });
 
-// Initialize the data source
-export const initializeDatabase = async () => {
-  try {
-    if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize();
+// Initialize the data source with retry logic
+export const initializeDatabase = async (retries = 3) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      if (!AppDataSource.isInitialized) {
+        console.log(`Attempting database connection (attempt ${i + 1}/${retries})`);
+        await AppDataSource.initialize();
+        console.log('Database connection established successfully');
+        return;
+      }
+    } catch (error) {
+      console.error(`Database connection attempt ${i + 1} failed:`, error);
+      
+      if (i === retries - 1) {
+        console.error('All database connection attempts failed');
+        throw error;
+      }
+      
+      // Wait before retrying (exponential backoff)
+      const delay = Math.pow(2, i) * 1000;
+      console.log(`Retrying in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
-  } catch (error) {
-    throw error;
   }
 };
 

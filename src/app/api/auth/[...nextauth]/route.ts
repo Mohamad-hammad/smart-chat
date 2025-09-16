@@ -42,7 +42,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Initialize database connection
+          // Initialize database connection with retry logic
           if (!AppDataSource.isInitialized) {
             await AppDataSource.initialize();
           }
@@ -91,7 +91,7 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
-          // Initialize database connection
+          // Initialize database connection with retry logic
           if (!AppDataSource.isInitialized) {
             await AppDataSource.initialize();
           }
