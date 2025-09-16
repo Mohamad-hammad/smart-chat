@@ -1,6 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { BotAssignment } from './BotAssignment';
-import { Conversation } from './Conversation';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('bots')
 export class Bot {
@@ -77,10 +75,10 @@ export class Bot {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  // Relations - simplified to avoid metadata issues
-  @OneToMany(() => BotAssignment, assignment => assignment.bot)
-  assignments?: BotAssignment[];
+  // Relations - removed to avoid circular dependency issues
+  // @OneToMany(() => BotAssignment, assignment => assignment.bot)
+  // assignments?: BotAssignment[];
 
-  @OneToMany(() => Conversation, conversation => conversation.bot)
-  conversations?: Conversation[];
+  // @OneToMany(() => Conversation, conversation => conversation.bot)
+  // conversations?: Conversation[];
 }
