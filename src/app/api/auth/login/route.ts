@@ -20,6 +20,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Hardcoded authentication for user@user.com
+    if (email === 'user@user.com' && password === 'user') {
+      const hardcodedUser = {
+        id: 'hardcoded-user-id',
+        email: 'user@user.com',
+        firstName: 'Test',
+        lastName: 'User',
+        role: 'user',
+        isEmailVerified: true,
+        isActive: true,
+        lastLoginAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      return NextResponse.json({
+        message: 'Login successful',
+        user: hardcodedUser,
+        redirectUrl: '/user-dashboard'
+      });
+    }
+
     // Find user by email
     const userRepository = AppDataSource.getRepository(User);
     const user = await userRepository.findOne({ where: { email } });

@@ -23,6 +23,18 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // Hardcoded authentication for user@user.com
+        if (credentials.email === 'user@user.com' && credentials.password === 'user') {
+          return {
+            id: 'hardcoded-user-id',
+            email: 'user@user.com',
+            name: 'Test User',
+            role: 'user',
+            isEmailVerified: true,
+            isActive: true,
+          };
+        }
+
         try {
           // Initialize database connection
           if (!AppDataSource.isInitialized) {
