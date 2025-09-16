@@ -18,7 +18,6 @@ import {
   Rocket,
   Star,
   Activity,
-  Settings,
   Plus
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -105,8 +104,73 @@ const ManagerPlaygroundPage = () => {
     <RoleGuard allowedRoles={['manager']}>
       <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
 
-        {/* Stats Cards */}
+        {/* Advanced Testing Environment Section */}
         <div className="container mx-auto px-6 pt-8 mb-8">
+          <div className="max-w-6xl mx-auto">
+            <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-0 rounded-3xl shadow-xl overflow-hidden">
+              <CardContent className="p-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl mb-6 shadow-lg">
+                      <Sparkles className="w-8 h-8 text-white" />
+                    </div>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                      Manager Testing Environment
+                    </h2>
+                    <p className="text-lg text-gray-700 leading-relaxed mb-6">
+                      Test and optimize your bot creations in a controlled environment. 
+                      Analyze performance, test different scenarios, and ensure your bots 
+                      are ready for production deployment.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <MessageSquare className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">Real-time Testing</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <Bot className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">All Your Bots</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                          <Zap className="w-4 h-4 text-green-600" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">Instant Analysis</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <p className="text-sm text-gray-600">Testing bot performance metrics...</p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-3">
+                          <p className="text-sm text-blue-800">Analyzing conversation flows...</p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-3">
+                          <p className="text-sm text-green-800">Optimization complete!</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="container mx-auto px-6 mb-12">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="bg-blue-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
@@ -173,71 +237,6 @@ const ManagerPlaygroundPage = () => {
                 </CardContent>
               </Card>
             </div>
-          </div>
-        </div>
-
-        {/* Advanced Testing Environment Section */}
-        <div className="container mx-auto px-6 mb-12">
-          <div className="max-w-6xl mx-auto">
-            <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-0 rounded-3xl shadow-xl overflow-hidden">
-              <CardContent className="p-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                  <div>
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl mb-6 shadow-lg">
-                      <Sparkles className="w-8 h-8 text-white" />
-                    </div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                      Manager Testing Environment
-                    </h2>
-                    <p className="text-lg text-gray-700 leading-relaxed mb-6">
-                      Test and optimize your bot creations in a controlled environment. 
-                      Analyze performance, test different scenarios, and ensure your bots 
-                      are ready for production deployment.
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <MessageSquare className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-700">Real-time Testing</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <Bot className="w-4 h-4 text-purple-600" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-700">All Your Bots</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                          <Zap className="w-4 h-4 text-green-600" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-700">Instant Analysis</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="relative">
-                    <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-                      <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <p className="text-sm text-gray-600">Testing bot performance metrics...</p>
-                        </div>
-                        <div className="bg-blue-50 rounded-lg p-3">
-                          <p className="text-sm text-blue-800">Analyzing conversation flows...</p>
-                        </div>
-                        <div className="bg-green-50 rounded-lg p-3">
-                          <p className="text-sm text-green-800">Optimization complete!</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
 
@@ -335,21 +334,13 @@ const ManagerPlaygroundPage = () => {
                           </div>
                         </div>
 
-                        <div className="flex space-x-2">
-                          <Button 
-                            onClick={() => handleTestBot(bot.id)}
-                            className="flex-1 bg-[#6566F1] hover:bg-[#5A5BD8] text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
-                          >
-                            <PlayCircle className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                            Test Bot
-                          </Button>
-                          <Button 
-                            variant="outline"
-                            className="px-3 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-300"
-                          >
-                            <Settings className="w-4 h-4" />
-                          </Button>
-                        </div>
+                        <Button 
+                          onClick={() => handleTestBot(bot.id)}
+                          className="w-full bg-[#6566F1] hover:bg-[#5A5BD8] text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
+                        >
+                          <PlayCircle className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                          Test Bot
+                        </Button>
                       </CardContent>
                     </Card>
                   ))}
