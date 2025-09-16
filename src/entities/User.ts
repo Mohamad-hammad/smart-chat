@@ -3,7 +3,7 @@ import { UserRole } from "../types/UserRole";
 import { BotAssignment } from "./BotAssignment";
 import { Conversation } from "./Conversation";
 
-@Entity("users")
+@Entity("User")
 export class User {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
