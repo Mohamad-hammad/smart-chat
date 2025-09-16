@@ -27,8 +27,14 @@ const getDatabaseConfig = () => {
     if (!testDbUrl) {
       throw new Error('TEST_DATABASE_URL is required for test environment');
     }
+    
+    // Add SSL parameters to the connection string for test as well
+    const urlWithSSL = testDbUrl.includes('?') 
+      ? `${testDbUrl}&sslmode=require&sslcert=&sslkey=&sslrootcert=`
+      : `${testDbUrl}?sslmode=require&sslcert=&sslkey=&sslrootcert=`;
+    
     return {
-      url: testDbUrl,
+      url: urlWithSSL,
       synchronize: true, // Allow schema changes in test
       logging: false
     };
@@ -58,8 +64,14 @@ const getDatabaseConfig = () => {
   if (!devDbUrl) {
     throw new Error('DATABASE_URL is required for development environment');
   }
+  
+  // Add SSL parameters to the connection string for development as well
+  const urlWithSSL = devDbUrl.includes('?') 
+    ? `${devDbUrl}&sslmode=require&sslcert=&sslkey=&sslrootcert=`
+    : `${devDbUrl}?sslmode=require&sslcert=&sslkey=&sslrootcert=`;
+  
   return {
-    url: devDbUrl,
+    url: urlWithSSL,
     synchronize: true, // Allow schema changes in development
     logging: true,
     nodeEnv: nodeEnv // Add nodeEnv to the config
@@ -82,35 +94,37 @@ const createDataSourceConfig = () => {
     subscribers: [],
   };
 
-  // Production SSL configuration
+  // SSL configuration for all environments to handle self-signed certificates
+  const sslConfig = {
+    rejectUnauthorized: false,
+    require: true,
+  };
+
+  // Production configuration
   if (process.env.NODE_ENV === 'production') {
     return {
       ...baseConfig,
-      ssl: {
-        rejectUnauthorized: false,
-        require: true,
-      },
+      ssl: sslConfig,
       extra: {
         max: 20,
         min: 5,
         acquire: 30000,
         idle: 10000,
-        ssl: {
-          rejectUnauthorized: false,
-          require: true,
-        }
+        ssl: sslConfig
       }
     };
   }
 
-  // Development configuration
+  // Development and other environments - also include SSL config
   return {
     ...baseConfig,
+    ssl: sslConfig,
     extra: {
       max: 10,
       min: 2,
       acquire: 30000,
       idle: 10000,
+      ssl: sslConfig
     }
   };
 };
@@ -119,41 +133,47 @@ export const AppDataSource = new DataSource(createDataSourceConfig());
 
 // Initialize the data source with retry logic
 export const initializeDatabase = async (retries = 3) => {
-  // Set NODE_TLS_REJECT_UNAUTHORIZED for production to handle self-signed certificates
-  if (process.env.NODE_ENV === 'production') {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  }
+  // Set NODE_TLS_REJECT_UNAUTHORIZED to handle self-signed certificates in all environments
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  
+  const isDebugMode = process.env.DATABASE_DEBUG === 'true';
   
   for (let i = 0; i < retries; i++) {
     try {
       if (!AppDataSource.isInitialized) {
-        console.log(`Attempting database connection (attempt ${i + 1}/${retries})`);
-        console.log('Environment:', process.env.NODE_ENV);
-        console.log('NODE_TLS_REJECT_UNAUTHORIZED:', process.env.NODE_TLS_REJECT_UNAUTHORIZED);
-        console.log('SSL Config:', (AppDataSource.options as any).ssl);
-        console.log('Extra SSL Config:', (AppDataSource.options as any).extra?.ssl);
-        console.log('Connection URL (masked):', config.url.replace(/:[^:@]+@/, ':****@'));
+        if (isDebugMode) {
+          // eslint-disable-next-line no-console
+          console.log(`Attempting database connection (attempt ${i + 1}/${retries})`);
+          // eslint-disable-next-line no-console
+          console.log('Environment:', process.env.NODE_ENV);
+          // eslint-disable-next-line no-console
+          console.log('NODE_TLS_REJECT_UNAUTHORIZED:', process.env.NODE_TLS_REJECT_UNAUTHORIZED);
+        }
+        
         await AppDataSource.initialize();
-        console.log('Database connection established successfully');
+        
+        if (isDebugMode) {
+          // eslint-disable-next-line no-console
+          console.log('Database connection established successfully');
+        }
         return;
       }
     } catch (error) {
-      console.error(`Database connection attempt ${i + 1} failed:`, error);
-      console.error('Error details:', {
-        message: (error as Error).message,
-        code: (error as any).code,
-        ssl: (AppDataSource.options as any).ssl,
-        extraSsl: (AppDataSource.options as any).extra?.ssl
-      });
+      if (isDebugMode) {
+        // eslint-disable-next-line no-console
+        console.error(`Database connection attempt ${i + 1} failed:`, error);
+      }
       
       if (i === retries - 1) {
-        console.error('All database connection attempts failed');
         throw error;
       }
       
       // Wait before retrying (exponential backoff)
       const delay = Math.pow(2, i) * 1000;
-      console.log(`Retrying in ${delay}ms...`);
+      if (isDebugMode) {
+        // eslint-disable-next-line no-console
+        console.log(`Retrying in ${delay}ms...`);
+      }
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }

@@ -20,6 +20,7 @@ const missingVars = Object.entries(requiredEnvVars)
   .map(([key]) => key);
 
 if (missingVars.length > 0) {
+  // eslint-disable-next-line no-console
   console.error('Missing required environment variables:', missingVars);
 }
 
@@ -74,13 +75,19 @@ export const authOptions: NextAuthOptions = {
             isActive: user.isActive,
           };
         } catch (error) {
-          console.error('Error in credentials authorization:', error);
-          console.error('Database connection status:', AppDataSource.isInitialized);
-          console.error('Environment check:', {
-            hasDbUrl: !!process.env.DATABASE_URL,
-            hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
-            hasNextAuthUrl: !!process.env.NEXTAUTH_URL
-          });
+          // Only log errors in development or when debug mode is enabled
+          if (process.env.NODE_ENV === 'development' || process.env.DATABASE_DEBUG === 'true') {
+            // eslint-disable-next-line no-console
+            console.error('Error in credentials authorization:', error);
+            // eslint-disable-next-line no-console
+            console.error('Database connection status:', AppDataSource.isInitialized);
+            // eslint-disable-next-line no-console
+            console.error('Environment check:', {
+              hasDbUrl: !!process.env.DATABASE_URL,
+              hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
+              hasNextAuthUrl: !!process.env.NEXTAUTH_URL
+            });
+          }
           return null;
         }
       }
@@ -130,7 +137,10 @@ export const authOptions: NextAuthOptions = {
           
           return true;
         } catch (error) {
-          console.error('Error in Google sign in:', error);
+          if (process.env.NODE_ENV === 'development' || process.env.DATABASE_DEBUG === 'true') {
+            // eslint-disable-next-line no-console
+            console.error('Error in Google sign in:', error);
+          }
           return false;
         }
       }
@@ -157,7 +167,10 @@ export const authOptions: NextAuthOptions = {
             token.isActive = dbUser.isActive;
           }
         } catch (error) {
-          console.error('Error fetching user role for Google sign-in:', error);
+          if (process.env.NODE_ENV === 'development' || process.env.DATABASE_DEBUG === 'true') {
+            // eslint-disable-next-line no-console
+            console.error('Error fetching user role for Google sign-in:', error);
+          }
         }
       }
       
