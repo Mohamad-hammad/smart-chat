@@ -299,17 +299,62 @@ export default function BotsPage() {
       return;
     }
 
-    // Close modal and redirect to payment
-    setShowCreateModal(false);
-    
-    // Redirect to payment page with bot details
-    const params = new URLSearchParams({
-      plan: 'signup',
-      botName: newBot.name,
-      botDescription: newBot.description || '',
-    });
-    
-    window.location.href = `/payment?${params.toString()}`;
+    if (!newBot.description.trim()) {
+      console.error('Bot description is required');
+      return;
+    }
+
+    if (!newBot.domain.trim()) {
+      console.error('Bot domain is required');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Create bot directly via API (no payment required)
+      const response = await fetch('/api/manager/create-bot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newBot.name,
+          description: newBot.description,
+          domain: newBot.domain,
+          status: 'active'
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create bot');
+      }
+
+      const result = await response.json();
+      console.log('Bot created successfully:', result);
+
+      // Close modal and reset form
+      setShowCreateModal(false);
+      setNewBot({
+        name: '',
+        description: '',
+        domain: '',
+        status: 'active'
+      });
+
+      // Refresh the bots list
+      fetchBots();
+
+      // Show success message (you can add a toast notification here)
+      alert('Bot created successfully!');
+
+    } catch (error) {
+      console.error('Error creating bot:', error);
+      alert(`Error creating bot: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAssignUser = async (botId: string, userId: string) => {
@@ -851,11 +896,18 @@ export default function BotsPage() {
                 </Button>
               <Button
                 onClick={handleCreateBot}
-                disabled={!newBot.name || !newBot.description || !newBot.domain}
+                disabled={!newBot.name || !newBot.description || !newBot.domain || loading}
                 className="px-6 py-2 bg-[#6566F1] hover:bg-[#5A5BD9] text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                  Create Bot
-                </Button>
+                {loading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Creating...</span>
+                  </div>
+                ) : (
+                  'Create Bot'
+                )}
+              </Button>
               </div>
             </div>
       </div>

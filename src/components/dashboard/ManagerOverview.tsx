@@ -304,24 +304,24 @@ const ManagerOverview = () => {
           const colors = getMetricColors(metric.title, index);
 
           return (
-            <Card key={index} className={`${colors.bg} border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden`}>
+            <Card key={index} className={`${colors.bg} border border-gray-200 rounded-xl shadow-sm hover:shadow-lg hover:shadow-gray-200/50 hover:scale-[1.02] transition-all duration-300 overflow-hidden cursor-pointer group`}>
               <CardContent className="p-4">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-10 h-10 ${colors.iconBg} rounded-lg flex items-center justify-center shadow-sm flex-shrink-0`}>
-                    <metric.icon className="w-5 h-5 text-white" />
+                  <div className={`w-10 h-10 ${colors.iconBg} rounded-lg flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-110 group-hover:shadow-md transition-all duration-300`}>
+                    <metric.icon className="w-5 h-5 text-white group-hover:scale-110 transition-transform duration-300" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-gray-900 truncate">{metric.title}</p>
-                    <p className={`text-xl font-bold ${colors.textColor}`}>{metric.value}</p>
+                    <p className="text-xs font-medium text-gray-900 truncate group-hover:text-gray-700 transition-colors duration-300">{metric.title}</p>
+                    <p className={`text-xl font-bold ${colors.textColor} group-hover:scale-105 transition-transform duration-300`}>{metric.value}</p>
                     {metric.change && (
                       <div className="flex items-center space-x-1 mt-1">
-                        {metric.changeType === "positive" && <ArrowUp className="w-2 h-2 text-green-600" />}
-                        {metric.changeType === "negative" && <ArrowDown className="w-2 h-2 text-red-600" />}
+                        {metric.changeType === "positive" && <ArrowUp className="w-2 h-2 text-green-600 group-hover:text-green-700 transition-colors duration-300" />}
+                        {metric.changeType === "negative" && <ArrowDown className="w-2 h-2 text-red-600 group-hover:text-red-700 transition-colors duration-300" />}
                         <p className={`text-xs ${
-                          metric.changeType === "positive" ? "text-green-600" : 
-                          metric.changeType === "negative" ? "text-red-600" : 
-                          "text-gray-600"
-                        }`}>
+                          metric.changeType === "positive" ? "text-green-600 group-hover:text-green-700" : 
+                          metric.changeType === "negative" ? "text-red-600 group-hover:text-red-700" : 
+                          "text-gray-600 group-hover:text-gray-700"
+                        } transition-colors duration-300`}>
                           {metric.change}
                         </p>
                       </div>
@@ -382,15 +382,15 @@ const ManagerOverview = () => {
             const colors = getConnectedMetricColors(metric.title, index);
 
             return (
-              <Card key={index} className={`${colors.bg} border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden`}>
+              <Card key={index} className={`${colors.bg} border border-gray-200 rounded-xl shadow-sm hover:shadow-lg hover:shadow-gray-200/50 hover:scale-[1.02] transition-all duration-300 overflow-hidden cursor-pointer group`}>
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 ${colors.iconBg} rounded-lg flex items-center justify-center shadow-sm flex-shrink-0`}>
-                      <metric.icon className="w-5 h-5 text-white" />
+                    <div className={`w-10 h-10 ${colors.iconBg} rounded-lg flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-110 group-hover:shadow-md transition-all duration-300`}>
+                      <metric.icon className="w-5 h-5 text-white group-hover:scale-110 transition-transform duration-300" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-gray-900 truncate">{metric.title}</p>
-                      <p className={`text-xl font-bold ${colors.textColor}`}>{metric.value}</p>
+                      <p className="text-xs font-medium text-gray-900 truncate group-hover:text-gray-700 transition-colors duration-300">{metric.title}</p>
+                      <p className={`text-xl font-bold ${colors.textColor} group-hover:scale-105 transition-transform duration-300`}>{metric.value}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -402,37 +402,37 @@ const ManagerOverview = () => {
         {/* User List */}
         <div className="space-y-3">
           {users.map((user, index) => (
-            <Card key={index} className="group relative border border-gray-200 bg-white hover:shadow-md hover:shadow-gray-200/50 transition-all duration-200 rounded-xl overflow-hidden">
+            <Card key={index} className="group relative border border-gray-200 bg-white hover:shadow-lg hover:shadow-gray-200/50 hover:scale-[1.01] transition-all duration-300 rounded-xl overflow-hidden cursor-pointer">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     {/* Avatar */}
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors duration-200 flex-shrink-0">
-                      <span className="text-xs font-medium text-gray-600">{user.initials}</span>
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gray-200 group-hover:scale-110 transition-all duration-300 flex-shrink-0">
+                      <span className="text-xs font-medium text-gray-600 group-hover:text-gray-700 transition-colors duration-300">{user.initials}</span>
                     </div>
                     
                     {/* User Info */}
                     <div className="space-y-0.5">
-                      <h3 className="text-sm font-semibold text-gray-900 hover:text-gray-700 transition-colors duration-200">{user.name}</h3>
-                      <p className="text-xs text-gray-600">{user.email}</p>
+                      <h3 className="text-sm font-semibold text-gray-900 group-hover:text-gray-700 transition-colors duration-300">{user.name}</h3>
+                      <p className="text-xs text-gray-600 group-hover:text-gray-700 transition-colors duration-300">{user.email}</p>
                       <div className="flex items-center space-x-1.5">
                         {user.badges.map((badge, badgeIndex) => {
                           // Create hover state that makes colors one step duller
                           const getHoverClass = (color: string) => {
                             if (color.includes('bg-green-100 text-green-600')) {
-                              return 'hover:bg-green-200 hover:text-green-700';
+                              return 'group-hover:bg-green-200 group-hover:text-green-700';
                             } else if (color.includes('bg-yellow-100 text-yellow-600')) {
-                              return 'hover:bg-yellow-200 hover:text-yellow-700';
+                              return 'group-hover:bg-yellow-200 group-hover:text-yellow-700';
                             } else if (color.includes('bg-orange-100 text-orange-600')) {
-                              return 'hover:bg-orange-200 hover:text-orange-700';
+                              return 'group-hover:bg-orange-200 group-hover:text-orange-700';
                             } else if (color.includes('bg-gray-100 text-gray-600')) {
-                              return 'hover:bg-gray-200 hover:text-gray-700';
+                              return 'group-hover:bg-gray-200 group-hover:text-gray-700';
                             }
-                            return 'hover:opacity-80';
+                            return 'group-hover:opacity-80';
                           };
                           
                           return (
-                            <Badge key={badgeIndex} className={`text-xs px-2 py-0.5 ${badge.color} ${getHoverClass(badge.color)} transition-all duration-200`}>
+                            <Badge key={badgeIndex} className={`text-xs px-2 py-0.5 ${badge.color} ${getHoverClass(badge.color)} transition-all duration-300`}>
                             {badge.text}
                           </Badge>
                           );
@@ -444,15 +444,15 @@ const ManagerOverview = () => {
                   <div className="flex items-center space-x-4">
                     {/* Stats */}
                     <div className="text-right space-y-0.5">
-                      <p className="text-xs text-gray-600">{user.bots}</p>
-                      <p className="text-xs text-gray-500">{user.lastActive}</p>
+                      <p className="text-xs text-gray-600 group-hover:text-gray-700 transition-colors duration-300">{user.bots}</p>
+                      <p className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors duration-300">{user.lastActive}</p>
                     </div>
 
                     {/* Action Button */}
                     <Button 
                       variant="outline" 
                       size="sm"
-                      className="bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 hover:scale-105 rounded-lg transition-all duration-200 text-xs px-3 py-1.5"
+                      className="bg-white border-gray-200 text-gray-700 group-hover:bg-gray-50 group-hover:border-gray-300 group-hover:scale-110 group-hover:shadow-md transition-all duration-300 rounded-lg text-xs px-3 py-1.5"
                     >
                       View Details
                     </Button>
@@ -467,31 +467,31 @@ const ManagerOverview = () => {
       {/* Bottom Section - Recent Activity and Team Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
-        <Card className="bg-white rounded-2xl shadow-sm border-0 hover:shadow-lg transition-shadow duration-200">
+        <Card className="bg-white rounded-2xl shadow-sm border-0 hover:shadow-lg hover:shadow-gray-200/50 transition-all duration-300 group">
           <CardHeader className="p-6 pb-4">
             <div className="flex items-center space-x-2">
-              <Clock className="w-6 h-6 text-gray-600" />
-              <CardTitle className="text-xl font-bold text-gray-900">Recent Activity</CardTitle>
+              <Clock className="w-6 h-6 text-gray-600 group-hover:text-gray-700 transition-colors duration-300" />
+              <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors duration-300">Recent Activity</CardTitle>
             </div>
-            <p className="text-sm text-gray-600">Latest team activities and handoffs</p>
+            <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors duration-300">Latest team activities and handoffs</p>
           </CardHeader>
           <CardContent className="p-6 pt-0">
             <div className="space-y-4">
               {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200 cursor-pointer">
+                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 hover:scale-[1.02] hover:shadow-md hover:shadow-gray-200/50 transition-all duration-300 cursor-pointer group">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors duration-200">
-                      <activity.icon className="w-4 h-4 text-gray-600" />
+                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center group-hover:bg-gray-50 group-hover:scale-110 transition-all duration-300">
+                      <activity.icon className="w-4 h-4 text-gray-600 group-hover:text-gray-700 group-hover:scale-110 transition-all duration-300" />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900 hover:text-gray-700 transition-colors duration-200">{activity.title}</p>
-                      <p className="text-sm text-gray-600">{activity.description}</p>
+                      <p className="font-medium text-gray-900 group-hover:text-gray-700 transition-colors duration-300">{activity.title}</p>
+                      <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors duration-300">{activity.description}</p>
                     </div>
                   </div>
-                  <Badge className={`text-xs ${activity.statusColor} ${activity.statusColor.includes('bg-purple-100 text-purple-600') ? 'hover:bg-purple-200 hover:text-purple-700' : 
-                    activity.statusColor.includes('bg-green-100 text-green-600') ? 'hover:bg-green-200 hover:text-green-700' : 
-                    activity.statusColor.includes('bg-yellow-100 text-yellow-600') ? 'hover:bg-yellow-200 hover:text-yellow-700' : 
-                    'hover:opacity-80'} transition-all duration-200`}>
+                  <Badge className={`text-xs ${activity.statusColor} ${activity.statusColor.includes('bg-purple-100 text-purple-600') ? 'group-hover:bg-purple-200 group-hover:text-purple-700' : 
+                    activity.statusColor.includes('bg-green-100 text-green-600') ? 'group-hover:bg-green-200 group-hover:text-green-700' : 
+                    activity.statusColor.includes('bg-yellow-100 text-yellow-600') ? 'group-hover:bg-yellow-200 group-hover:text-yellow-700' : 
+                    'group-hover:opacity-80'} transition-all duration-300`}>
                     {activity.status}
                   </Badge>
                 </div>
@@ -501,36 +501,36 @@ const ManagerOverview = () => {
         </Card>
 
         {/* Team Performance */}
-        <Card className="bg-white rounded-2xl shadow-sm border-0 hover:shadow-lg transition-shadow duration-200">
+        <Card className="bg-white rounded-2xl shadow-sm border-0 hover:shadow-lg hover:shadow-gray-200/50 transition-all duration-300 group">
           <CardHeader className="p-6 pb-4">
             <div className="flex items-center space-x-2">
-              <Users className="w-6 h-6 text-gray-600" />
-              <CardTitle className="text-xl font-bold text-gray-900">Team Performance</CardTitle>
+              <Users className="w-6 h-6 text-gray-600 group-hover:text-gray-700 transition-colors duration-300" />
+              <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors duration-300">Team Performance</CardTitle>
             </div>
-            <p className="text-sm text-gray-600">Current agent performance metrics</p>
+            <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors duration-300">Current agent performance metrics</p>
           </CardHeader>
           <CardContent className="p-6 pt-0">
             <div className="space-y-4">
               {teamPerformance.map((agent, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200 cursor-pointer">
+                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 hover:scale-[1.02] hover:shadow-md hover:shadow-gray-200/50 transition-all duration-300 cursor-pointer group">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200">
-                      <span className="text-sm font-medium text-gray-600">{agent.initials}</span>
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center group-hover:bg-gray-300 group-hover:scale-110 transition-all duration-300">
+                      <span className="text-sm font-medium text-gray-600 group-hover:text-gray-700 transition-colors duration-300">{agent.initials}</span>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900 hover:text-gray-700 transition-colors duration-200">{agent.name}</p>
-                      <p className="text-sm text-gray-600">{agent.chats}</p>
+                      <p className="font-medium text-gray-900 group-hover:text-gray-700 transition-colors duration-300">{agent.name}</p>
+                      <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors duration-300">{agent.chats}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="flex items-center space-x-1">
-                      <Star className="w-4 h-4 text-yellow-500 hover:text-yellow-600 transition-colors duration-200" />
-                      <span className="text-sm font-medium text-gray-900">{agent.rating}</span>
+                      <Star className="w-4 h-4 text-yellow-500 group-hover:text-yellow-600 group-hover:scale-110 transition-all duration-300" />
+                      <span className="text-sm font-medium text-gray-900 group-hover:text-gray-700 transition-colors duration-300">{agent.rating}</span>
                     </div>
-                    <Badge className={`text-xs ${agent.statusColor} ${agent.statusColor.includes('bg-green-100 text-green-600') ? 'hover:bg-green-200 hover:text-green-700' : 
-                      agent.statusColor.includes('bg-orange-100 text-orange-600') ? 'hover:bg-orange-200 hover:text-orange-700' : 
-                      agent.statusColor.includes('bg-gray-100 text-gray-600') ? 'hover:bg-gray-200 hover:text-gray-700' : 
-                      'hover:opacity-80'} transition-all duration-200`}>
+                    <Badge className={`text-xs ${agent.statusColor} ${agent.statusColor.includes('bg-green-100 text-green-600') ? 'group-hover:bg-green-200 group-hover:text-green-700' : 
+                      agent.statusColor.includes('bg-orange-100 text-orange-600') ? 'group-hover:bg-orange-200 group-hover:text-orange-700' : 
+                      agent.statusColor.includes('bg-gray-100 text-gray-600') ? 'group-hover:bg-gray-200 group-hover:text-gray-700' : 
+                      'group-hover:opacity-80'} transition-all duration-300`}>
                       {agent.status}
                     </Badge>
                   </div>

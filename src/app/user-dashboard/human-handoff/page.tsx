@@ -445,24 +445,3 @@ const UserHumanHandoffPage = () => {
 };
 
 export default UserHumanHandoffPage;
-
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </RoleGuard>
-  );
-};
-
-export default UserHumanHandoffPage;
