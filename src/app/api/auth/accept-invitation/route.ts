@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AppDataSource } from '@/config/database';
+import { AppDataSource } from '@/config';
 import { User } from '@/entities/User';
 import bcrypt from 'bcryptjs';
 

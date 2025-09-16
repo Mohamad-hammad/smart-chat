@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { AppDataSource } from '@/config/database';
+import { AppDataSource } from '@/config';
 import { User } from '@/entities/User';
 import { UserRole } from '@/types/UserRole';
 

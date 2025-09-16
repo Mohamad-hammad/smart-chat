@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { EmailVerificationService } from '@/services/emailVerificationService';
-import { AppDataSource } from '@/config/database';
+import { AppDataSource } from '@/config';
 
 export async function GET(request: NextRequest) {
   try {

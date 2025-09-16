@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { AppDataSource } from '@/config/database';
+import { AppDataSource } from '@/config';
 import { Bot } from '@/entities/Bot';
 import { User } from '@/entities/User';
 import Stripe from 'stripe';

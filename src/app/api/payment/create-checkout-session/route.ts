@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { stripe, STRIPE_CONFIG } from '@/lib/stripe';
-import { AppDataSource } from '@/config/database';
+import { AppDataSource } from '@/config';
 import { User } from '@/entities/User';
 
 export async function POST(request: NextRequest) {

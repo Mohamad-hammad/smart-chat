@@ -1,7 +1,7 @@
 import NextAuth, { type NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { AppDataSource } from "@/config/database"
+import { AppDataSource } from "@/config"
 import { User } from "@/entities/User"
 import { UserRole } from "@/types/UserRole"
 import bcrypt from "bcryptjs"

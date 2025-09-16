@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { AppDataSource } from '@/config/database';
+import { AppDataSource } from '@/config';
 import { Conversation } from '@/entities/Conversation';
 import { User } from '@/entities/User';
 import { Bot } from '@/entities/Bot';
