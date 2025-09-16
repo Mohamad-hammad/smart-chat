@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import RoleGuard from '@/components/auth/RoleGuard';
+import ProfessionalSpinner from '@/components/ui/ProfessionalSpinner';
 
 interface HandoffRequest {
   id: string;
@@ -126,7 +127,7 @@ const UserHumanHandoffPage = () => {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'urgent': return 'bg-red-500 text-white';
-      case 'high': return 'bg-orange-500 text-white';
+      case 'high': return 'bg-red-500 text-white';
       case 'medium': return 'bg-blue-500 text-white';
       case 'low': return 'bg-gray-500 text-white';
       default: return 'bg-gray-500 text-white';
@@ -167,100 +168,118 @@ const UserHumanHandoffPage = () => {
 
   return (
     <RoleGuard allowedRoles={['user']}>
-      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Dashboard</span>
-            </button>
+        <div className="container mx-auto px-6 pt-8 pb-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <button className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back to Dashboard</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Page Title */}
+            <div className="mt-6">
+              <h1 className="text-3xl font-bold text-gray-900">Human Handoff Requests</h1>
+              <p className="text-lg text-gray-600 mt-2">Track your requests for human assistance from your bots.</p>
+            </div>
           </div>
         </div>
 
-        {/* Page Title */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Human Handoff Requests</h1>
-          <p className="text-sm text-gray-600 mt-1">Track your requests for human assistance from your bots.</p>
-        </div>
-
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="border border-gray-200 bg-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Requests</p>
-                  <p className="text-2xl font-bold text-gray-900">{handoffRequests.length}</p>
-                </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <HandHeart className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="container mx-auto px-6 mb-8">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="bg-blue-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                      <HandHeart className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-gray-900 truncate">Total Requests</p>
+                      <p className="text-xl font-bold text-blue-600">{handoffRequests.length}</p>
+                      <p className="text-xs text-gray-600 mt-1">All time</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-          <Card className="border border-gray-200 bg-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Pending</p>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {handoffRequests.filter(req => req.status === 'pending').length}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-orange-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              <Card className="bg-orange-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                      <Clock className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-gray-900 truncate">Pending</p>
+                      <p className="text-xl font-bold text-orange-600">
+                        {handoffRequests.filter(req => req.status === 'pending').length}
+                      </p>
+                      <p className="text-xs text-gray-600 mt-1">Awaiting agent</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-          <Card className="border border-gray-200 bg-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">In Progress</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {handoffRequests.filter(req => req.status === 'in_progress').length}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <RefreshCw className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              <Card className="bg-purple-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                      <RefreshCw className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-gray-900 truncate">In Progress</p>
+                      <p className="text-xl font-bold text-purple-600">
+                        {handoffRequests.filter(req => req.status === 'in_progress').length}
+                      </p>
+                      <p className="text-xs text-gray-600 mt-1">Being handled</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-          <Card className="border border-gray-200 bg-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Resolved</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {handoffRequests.filter(req => req.status === 'resolved').length}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              <Card className="bg-green-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                      <CheckCircle className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-gray-900 truncate">Resolved</p>
+                      <p className="text-xl font-bold text-green-600">
+                        {handoffRequests.filter(req => req.status === 'resolved').length}
+                      </p>
+                      <p className="text-xs text-gray-600 mt-1">Completed</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Panel - Handoff Requests */}
-          <div className="lg:col-span-1">
-            <Card className="bg-white rounded-2xl shadow-sm border-0">
-              <CardHeader className="p-6 pb-4">
-                <div className="flex items-center space-x-2">
-                  <HandHeart className="w-5 h-5 text-gray-600" />
-                  <CardTitle className="text-lg font-bold text-gray-900">Your Requests</CardTitle>
-                </div>
-                <p className="text-sm text-gray-600">Track your human handoff requests.</p>
-              </CardHeader>
+        <div className="container mx-auto px-6 pb-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Panel - Handoff Requests */}
+              <div className="lg:col-span-1">
+                <Card className="bg-white rounded-2xl shadow-lg border border-gray-200">
+                  <CardHeader className="p-6 pb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <HandHeart className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg font-bold text-gray-900">Your Requests</CardTitle>
+                        <p className="text-sm text-gray-600">Track your human handoff requests</p>
+                      </div>
+                    </div>
+                  </CardHeader>
               <CardContent className="p-6 pt-0">
                 <div className="space-y-4">
                   {handoffRequests.map((request, index) => (
@@ -314,10 +333,10 @@ const UserHumanHandoffPage = () => {
             </Card>
           </div>
 
-          {/* Right Panel - Request Details */}
-          <div className="lg:col-span-2">
-            <Card className="bg-white rounded-2xl shadow-sm border-0">
-              <CardContent className="p-6">
+              {/* Right Panel - Request Details */}
+              <div className="lg:col-span-2">
+                <Card className="bg-white rounded-2xl shadow-lg border border-gray-200">
+                  <CardContent className="p-6">
                 {/* Request Info */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
@@ -414,8 +433,31 @@ const UserHumanHandoffPage = () => {
                     ))}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </RoleGuard>
+  );
+};
+
+export default UserHumanHandoffPage;
+
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>

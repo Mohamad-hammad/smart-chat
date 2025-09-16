@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import RoleGuard from '@/components/auth/RoleGuard';
+import ProfessionalSpinner from '@/components/ui/ProfessionalSpinner';
 
 interface ConversationSession {
   id: string;
@@ -92,23 +92,11 @@ const ConversationsPage = () => {
   });
 
   if (loading) {
-    return (
-      <RoleGuard allowedRoles={['user']}>
-        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin text-[#6566F1] mx-auto mb-4" />
-              <p className="text-gray-600 text-sm sm:text-base">Loading conversations...</p>
-            </div>
-          </div>
-        </div>
-      </RoleGuard>
-    );
+    return <ProfessionalSpinner text="Loading conversations..." />;
   }
 
   if (error) {
     return (
-      <RoleGuard allowedRoles={['user']}>
         <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
@@ -126,12 +114,10 @@ const ConversationsPage = () => {
             </div>
           </div>
         </div>
-      </RoleGuard>
     );
   }
 
   return (
-    <RoleGuard allowedRoles={['user']}>
       <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50 min-h-screen">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -157,60 +143,72 @@ const ConversationsPage = () => {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-xl focus:border-[#6566F1] focus:ring-[#6566F1] bg-white"
+          className="px-4 py-2 border border-gray-300 rounded-xl focus:border-[#6566F1] focus:ring-[#6566F1] bg-white text-gray-900"
         >
-          <option value="all">All Status</option>
-          <option value="active">Active</option>
-          <option value="completed">Completed</option>
-          <option value="pending">Pending</option>
+          <option value="all" className="text-gray-900">All Status</option>
+          <option value="active" className="text-gray-900">Active</option>
+          <option value="completed" className="text-gray-900">Completed</option>
+          <option value="pending" className="text-gray-900">Pending</option>
         </select>
       </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border border-gray-200 bg-white">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-blue-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
             <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <MessageSquare className="w-5 h-5 text-[#6566F1]" />
-                <div>
-                  <p className="text-2xl font-bold">{stats.total}</p>
-                  <p className="text-sm text-gray-600">Total Conversations</p>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                  <MessageSquare className="w-5 h-5 text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-gray-900 truncate">Total Conversations</p>
+                  <p className="text-xl font-bold text-blue-600">{stats.total}</p>
+                  <p className="text-xs text-gray-600 mt-1">All time</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="border border-gray-200 bg-white">
+          <Card className="bg-green-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
             <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <Clock className="w-5 h-5 text-green-500" />
-                <div>
-                  <p className="text-2xl font-bold">{stats.active}</p>
-                  <p className="text-sm text-gray-600">Active</p>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                  <Clock className="w-5 h-5 text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-gray-900 truncate">Active</p>
+                  <p className="text-xl font-bold text-green-600">{stats.active}</p>
+                  <p className="text-xs text-gray-600 mt-1">In progress</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="border border-gray-200 bg-white">
+          <Card className="bg-purple-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
             <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <User className="w-5 h-5 text-blue-500" />
-                <div>
-                  <p className="text-2xl font-bold">{stats.completed}</p>
-                  <p className="text-sm text-gray-600">Completed</p>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                  <User className="w-5 h-5 text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-gray-900 truncate">Completed</p>
+                  <p className="text-xl font-bold text-purple-600">{stats.completed}</p>
+                  <p className="text-xs text-gray-600 mt-1">Finished</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="border border-gray-200 bg-white">
+          <Card className="bg-orange-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
             <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-yellow-400 text-lg">★</span>
-                <div>
-                  <p className="text-2xl font-bold">{stats.avgRating}</p>
-                  <p className="text-sm text-gray-600">Avg Rating</p>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                  <span className="text-white text-lg">★</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-gray-900 truncate">Avg Rating</p>
+                  <p className="text-xl font-bold text-orange-600">{stats.avgRating}</p>
+                  <p className="text-xs text-gray-600 mt-1">Out of 5</p>
                 </div>
               </div>
             </CardContent>
@@ -274,7 +272,6 @@ const ConversationsPage = () => {
         )}
       </div>
       </div>
-    </RoleGuard>
   );
 };
 

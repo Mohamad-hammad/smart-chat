@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
         assignedBots: assignedBots,
         recentChats: recentChatCount,
         avgResponseTime: avgResponseTime,
-        rating: 4.5 + Math.random() * 0.5, // Mock rating between 4.5-5.0
+        rating: (4.5 + Math.random() * 0.5).toFixed(1), // Mock rating between 4.5-5.0
         totalChats: Math.floor(Math.random() * 50) + 10 // Mock total chats
       };
     });

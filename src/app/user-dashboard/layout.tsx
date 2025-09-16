@@ -21,8 +21,10 @@ import {
   HandHeart,
   PlayCircle,
   Menu,
-  X
+  X,
+  ArrowLeft
 } from 'lucide-react';
+import RoleGuard from '@/components/auth/RoleGuard';
 
 interface UserDashboardLayoutProps {
   children: React.ReactNode;
@@ -37,8 +39,8 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
 
   // Mock data for issue counts
   const [issueCounts] = useState({
-    total: 3,
-    resolved: 1,
+    total: 2,
+    resolved: 0,
     pending: 2
   });
 
@@ -62,8 +64,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
       label: 'Human Handoff', 
       icon: HandHeart, 
       path: '/user-dashboard/human-handoff',
-      badge: handoffCounts.pending > 0 ? handoffCounts.pending : null,
-      subtitle: `${handoffCounts.resolved}/${handoffCounts.total} resolved`
+      badge: handoffCounts.pending > 0 ? handoffCounts.pending : null
     },
     { 
       id: 'report-issue', 
@@ -125,30 +126,31 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile menu overlay */}
-      {mobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-md z-40 lg:hidden"
-          onClick={closeMobileMenu}
-        />
-      )}
+    <RoleGuard allowedRoles={['user']}>
+      <div className="min-h-screen bg-gray-50">
+        {/* Mobile menu overlay */}
+        {mobileMenuOpen && (
+          <div 
+            className="fixed inset-0 bg-black/20 backdrop-blur-md z-40 lg:hidden"
+            onClick={closeMobileMenu}
+          />
+        )}
 
-      {/* Sidebar */}
-      <div className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-50 ${
-        sidebarCollapsed ? 'w-20' : 'w-72'
-      } ${
-        mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-      }`}>
+        {/* Sidebar */}
+        <div className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-50 ${
+          sidebarCollapsed ? 'w-20' : 'w-72'
+        } ${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}>
         {/* Logo */}
         <div className="flex items-center justify-center h-16 border-b border-gray-200">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-[#7F82F3] rounded-lg flex items-center justify-center flex-shrink-0">
-              <User className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm">AI</span>
             </div>
             <div className={`overflow-hidden transition-all duration-300 ${sidebarCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
               <span className="text-base font-bold text-gray-900 whitespace-nowrap">
-                User Portal
+                ChatBot Pro
               </span>
             </div>
           </div>
@@ -258,15 +260,37 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
         sidebarCollapsed ? 'left-20' : 'left-72'
       }`}>
         <div className="flex items-center justify-between h-full px-4 lg:px-6">
-          {/* Mobile menu button */}
-          <button
-            onClick={toggleMobileMenu}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <Menu className="w-5 h-5 text-gray-600" />
-          </button>
+          <div className="flex items-center space-x-4">
+            {/* Mobile menu button */}
+            <button
+              onClick={toggleMobileMenu}
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <Menu className="w-5 h-5 text-gray-600" />
+            </button>
+            
+            {/* Back to Dashboard button - only show if not on main dashboard */}
+            {!pathname.endsWith('/user-dashboard') && (
+              <button
+                onClick={() => handleNavigation('/user-dashboard')}
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="text-sm font-medium">Back to Dashboard</span>
+              </button>
+            )}
+          </div>
           
-          <h1 className="text-lg font-bold text-gray-900">User Dashboard</h1>
+          <h1 className="text-lg font-bold text-gray-900">
+            {pathname.includes('/playground') ? 'AI Bot Playground' : 
+             pathname.includes('/bots') ? 'My Bots' :
+             pathname.includes('/analytics') ? 'Analytics' :
+             pathname.includes('/conversations') ? 'Conversations' :
+             pathname.includes('/human-handoff') ? 'Human Handoff' :
+             pathname.includes('/report-issue') ? 'Report an Issue' :
+             pathname.includes('/help') ? 'Help' :
+             'User Dashboard'}
+          </h1>
           
           <div className="flex items-center space-x-2 lg:space-x-4">
             <button
@@ -287,15 +311,32 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className={`pt-16 transition-all duration-300 ${
-        sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'
-      }`}>
-        <div className="min-h-screen">
-          {children}
+        {/* Main Content */}
+        <div className={`pt-16 transition-all duration-300 ${
+          sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'
+        }`}>
+          <div className="min-h-screen">
+            {children}
+          </div>
         </div>
       </div>
-    </div>
+    </RoleGuard>
+  );
+};
+
+export default UserDashboardLayout;
+
+
+        {/* Main Content */}
+        <div className={`pt-16 transition-all duration-300 ${
+          sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'
+        }`}>
+          <div className="min-h-screen">
+            {children}
+          </div>
+        </div>
+      </div>
+    </RoleGuard>
   );
 };
 

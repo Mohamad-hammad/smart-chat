@@ -172,7 +172,7 @@ export async function GET(request: NextRequest) {
         assignedBots: assignedBots,
         lastActive: lastActive,
         status: user.password ? 'accepted' : 'pending',
-        rating: 4.5 + Math.random() * 0.5 // Mock rating
+        rating: (4.5 + Math.random() * 0.5).toFixed(1) // Mock rating
       };
     });
 
@@ -201,7 +201,7 @@ export async function GET(request: NextRequest) {
         name: user.name,
         initials: user.initials,
         chats: `${chatCount} chat${chatCount !== 1 ? 's' : ''} today`,
-        rating: user.rating.toFixed(1),
+        rating: user.rating,
         status: user.onlineStatus,
         statusColor: user.onlineStatus === 'online' ? 'bg-green-100 text-green-600' : 
                      user.onlineStatus === 'busy' ? 'bg-orange-100 text-orange-600' : 

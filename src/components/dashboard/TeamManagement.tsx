@@ -131,7 +131,7 @@ const TeamManagement = () => {
           
           return {
             ...user,
-            rating: 4.5 + Math.random() * 0.5, // Random rating between 4.5-5.0
+            rating: (4.5 + Math.random() * 0.5).toFixed(1), // Random rating between 4.5-5.0
             totalChats: Math.floor(Math.random() * 50) + 10, // Random total chats
             onlineStatus: onlineStatus,
             specialties: ['Customer Service'], // Default specialty
@@ -388,7 +388,7 @@ const TeamManagement = () => {
                         <div className="text-right">
                           <div className="flex items-center space-x-1">
                             <Star className="w-4 h-4 text-yellow-500" />
-                            <span className="text-xs font-medium text-gray-900">{member.rating}</span>
+                            <span className="text-xs font-medium text-gray-900">{typeof member.rating === 'number' ? member.rating.toFixed(1) : member.rating}</span>
                           </div>
                           <p className="text-xs text-gray-600">{member.totalChats || 0} total chats</p>
                         </div>
@@ -473,7 +473,7 @@ const TeamManagement = () => {
                   {/* Performance */}
                   <div className="flex items-center space-x-3">
                     <Star className="w-4 h-4 text-yellow-500" />
-                    <span className="text-gray-900">{selectedAgentData.rating} rating • {selectedAgentData.totalChats} total chats</span>
+                    <span className="text-gray-900">{typeof selectedAgentData.rating === 'number' ? selectedAgentData.rating.toFixed(1) : selectedAgentData.rating} rating • {selectedAgentData.totalChats} total chats</span>
                   </div>
 
                   {/* Specialties */}

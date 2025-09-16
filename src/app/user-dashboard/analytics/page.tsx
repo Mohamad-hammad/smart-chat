@@ -89,14 +89,14 @@ const AnalyticsPage = () => {
           </div>
           <div className="flex gap-3">
             <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-32 border-gray-300 focus:border-[#6566F1] focus:ring-[#6566F1] bg-white rounded-2xl">
-                <SelectValue className="text-gray-700" />
+              <SelectTrigger className="w-32 border-gray-300 focus:border-[#6566F1] focus:ring-[#6566F1] bg-white rounded-2xl text-gray-900">
+                <SelectValue className="text-gray-900" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="24h" className="text-gray-700">Last 24h</SelectItem>
-                <SelectItem value="7d" className="text-gray-700">Last 7 days</SelectItem>
-                <SelectItem value="30d" className="text-gray-700">Last 30 days</SelectItem>
-                <SelectItem value="90d" className="text-gray-700">Last 90 days</SelectItem>
+                <SelectItem value="24h" className="text-gray-900">Last 24h</SelectItem>
+                <SelectItem value="7d" className="text-gray-900">Last 7 days</SelectItem>
+                <SelectItem value="30d" className="text-gray-900">Last 30 days</SelectItem>
+                <SelectItem value="90d" className="text-gray-900">Last 90 days</SelectItem>
               </SelectContent>
             </Select>
             <Button className="bg-[#6566F1] hover:bg-[#5A5BD8] text-white rounded-2xl">
