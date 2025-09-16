@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { AppDataSource } from '@/config/database';
+import { AppDataSource, initializeDatabase } from '@/config/database';
 
 export async function GET() {
   try {
@@ -12,20 +12,34 @@ export async function GET() {
       services: {
         database: 'unknown',
         email: 'unknown',
-        auth: 'unknown'
-      }
+        auth: 'unknown',
+        databaseError: undefined as string | undefined
+      },
+      // Add debug info in development or debug mode
+      ...(process.env.NODE_ENV === 'development' || process.env.DATABASE_DEBUG === 'true' ? {
+        debug: {
+          hasDatabaseUrl: !!process.env.DATABASE_URL,
+          hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
+          hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
+          nodeTlsRejectUnauthorized: process.env.NODE_TLS_REJECT_UNAUTHORIZED,
+          databaseUrlMasked: process.env.DATABASE_URL?.replace(/:[^:@]+@/, ':****@')
+        }
+      } : {})
     };
 
-    // Check database connection
+    // Check database connection using our enhanced initialization
     try {
-      if (!AppDataSource.isInitialized) {
-        await AppDataSource.initialize();
-      }
+      await initializeDatabase();
       await AppDataSource.query('SELECT 1');
       healthCheck.services.database = 'healthy';
     } catch (error) {
       healthCheck.services.database = 'unhealthy';
       healthCheck.status = 'degraded';
+      
+      // Add error details in development or debug mode
+      if (process.env.NODE_ENV === 'development' || process.env.DATABASE_DEBUG === 'true') {
+        healthCheck.services.databaseError = (error as Error).message;
+      }
     }
 
     // Check email configuration
