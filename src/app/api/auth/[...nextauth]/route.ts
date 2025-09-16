@@ -6,7 +6,25 @@ import { User } from "@/entities/User"
 import { UserRole } from "@/types/UserRole"
 import bcrypt from "bcryptjs"
 
+// Validate required environment variables
+const requiredEnvVars = {
+  NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+  DATABASE_URL: process.env.DATABASE_URL,
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+};
+
+const missingVars = Object.entries(requiredEnvVars)
+  .filter(([_, value]) => !value)
+  .map(([key]) => key);
+
+if (missingVars.length > 0) {
+  console.error('Missing required environment variables:', missingVars);
+}
+
 export const authOptions: NextAuthOptions = {
+  debug: process.env.NODE_ENV === 'development',
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -57,6 +75,12 @@ export const authOptions: NextAuthOptions = {
           };
         } catch (error) {
           console.error('Error in credentials authorization:', error);
+          console.error('Database connection status:', AppDataSource.isInitialized);
+          console.error('Environment check:', {
+            hasDbUrl: !!process.env.DATABASE_URL,
+            hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
+            hasNextAuthUrl: !!process.env.NEXTAUTH_URL
+          });
           return null;
         }
       }
