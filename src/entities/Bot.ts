@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { BotAssignment } from './BotAssignment';
 import { Conversation } from './Conversation';
 
-@Entity('bots')
+@Entity('Bot')
 export class Bot {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
