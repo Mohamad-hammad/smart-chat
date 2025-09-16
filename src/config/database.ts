@@ -1,4 +1,5 @@
 import { DataSource } from "typeorm";
+// Import entities in dependency order to avoid circular imports
 import { User } from "../entities/User";
 import { Bot } from "../entities/Bot";
 import { BotAssignment } from "../entities/BotAssignment";
@@ -64,12 +65,24 @@ const getDatabaseConfig = () => {
 const config = getDatabaseConfig();
 // Database config logging removed for production
 
+// Define entities in dependency order
+const entities = [
+  User,
+  Bot,
+  BotAssignment,
+  Conversation,
+  Subscription,
+  BillingPlan,
+  Invoice,
+  ChatbotIssue
+];
+
 export const AppDataSource = new DataSource({
   type: "postgres",
   url: config.url,
   synchronize: config.synchronize,
   logging: config.logging,
-  entities: [User, Bot, BotAssignment, Conversation, Subscription, BillingPlan, Invoice, ChatbotIssue],
+  entities: entities,
   migrations: [],
   subscribers: [],
   ssl: process.env.NODE_ENV === 'production' ? {
