@@ -61,11 +61,11 @@ export class User {
   @UpdateDateColumn({ type: "timestamp" })
   updatedAt!: Date;
 
-  // Relations
-  @OneToMany('BotAssignment', 'user')
+  // Relations - simplified to avoid metadata issues
+  @OneToMany(() => BotAssignment, assignment => assignment.user)
   botAssignments?: BotAssignment[];
 
-  @OneToMany('Conversation', 'user')
+  @OneToMany(() => Conversation, conversation => conversation.user)
   conversations?: Conversation[];
 
   // Virtual property for full name

@@ -33,16 +33,16 @@ export class BotAssignment {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  // Relations
-  @ManyToOne('User', 'botAssignments')
+  // Relations - simplified to avoid metadata issues
+  @ManyToOne(() => User)
   @JoinColumn({ name: 'userId' })
   user?: User;
 
-  @ManyToOne('Bot', 'assignments')
+  @ManyToOne(() => Bot)
   @JoinColumn({ name: 'botId' })
   bot?: Bot;
 
-  @ManyToOne('User')
+  @ManyToOne(() => User)
   @JoinColumn({ name: 'assignedBy' })
   assignedByUser?: User;
 }

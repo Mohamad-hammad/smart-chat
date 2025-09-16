@@ -98,6 +98,11 @@ const createDataSourceConfig = () => {
   const sslConfig = {
     rejectUnauthorized: false,
     require: true,
+    // Additional options for Supabase and other managed databases
+    sslmode: 'require',
+    sslcert: '',
+    sslkey: '',
+    sslrootcert: ''
   };
 
   // Production configuration
@@ -129,12 +134,32 @@ const createDataSourceConfig = () => {
   };
 };
 
-export const AppDataSource = new DataSource(createDataSourceConfig());
+// Create the data source with proper entity loading
+const dataSourceConfig = createDataSourceConfig();
+
+// Ensure entities are properly loaded
+dataSourceConfig.entities = [
+  User, 
+  Bot, 
+  BotAssignment, 
+  Conversation, 
+  Subscription, 
+  BillingPlan, 
+  Invoice, 
+  ChatbotIssue
+];
+
+export const AppDataSource = new DataSource(dataSourceConfig);
 
 // Initialize the data source with retry logic
 export const initializeDatabase = async (retries = 3) => {
   // Set NODE_TLS_REJECT_UNAUTHORIZED to handle self-signed certificates in all environments
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  
+  // Also set it globally for Node.js
+  if (typeof process.env.NODE_TLS_REJECT_UNAUTHORIZED === 'undefined') {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  }
   
   const isDebugMode = process.env.DATABASE_DEBUG === 'true';
   

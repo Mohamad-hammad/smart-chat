@@ -77,10 +77,10 @@ export class Bot {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  // Relations
-  @OneToMany('BotAssignment', 'bot')
+  // Relations - simplified to avoid metadata issues
+  @OneToMany(() => BotAssignment, assignment => assignment.bot)
   assignments?: BotAssignment[];
 
-  @OneToMany('Conversation', 'bot')
+  @OneToMany(() => Conversation, conversation => conversation.bot)
   conversations?: Conversation[];
 }

@@ -37,12 +37,12 @@ export class Conversation {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  // Relations
-  @ManyToOne('User', 'conversations')
+  // Relations - simplified to avoid metadata issues
+  @ManyToOne(() => User, user => user.conversations)
   @JoinColumn({ name: 'userId' })
   user?: User;
 
-  @ManyToOne('Bot', 'conversations')
+  @ManyToOne(() => Bot, bot => bot.conversations)
   @JoinColumn({ name: 'botId' })
   bot?: Bot;
 }
