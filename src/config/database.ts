@@ -1,5 +1,12 @@
 import { DataSource } from "typeorm";
-import { entities } from "../entities";
+import { User } from "../entities/User";
+import { Bot } from "../entities/Bot";
+import { BotAssignment } from "../entities/BotAssignment";
+import { Conversation } from "../entities/Conversation";
+import { Subscription } from "../entities/Subscription";
+import { BillingPlan } from "../entities/BillingPlan";
+import { Invoice } from "../entities/Invoice";
+import { ChatbotIssue } from "../entities/ChatbotIssue";
 
 // Environment-specific database configuration
 const getDatabaseConfig = () => {
@@ -62,7 +69,7 @@ export const AppDataSource = new DataSource({
   url: config.url,
   synchronize: config.synchronize,
   logging: config.logging,
-  entities: entities,
+  entities: [User, Bot, BotAssignment, Conversation, Subscription, BillingPlan, Invoice, ChatbotIssue],
   migrations: [],
   subscribers: [],
   ssl: process.env.NODE_ENV === 'production' ? {
@@ -82,7 +89,6 @@ export const initializeDatabase = async () => {
   try {
     if (!AppDataSource.isInitialized) {
       await AppDataSource.initialize();
-      console.log("Loaded entities:", AppDataSource.entityMetadatas.map(e => e.name));
     }
   } catch (error) {
     throw error;
