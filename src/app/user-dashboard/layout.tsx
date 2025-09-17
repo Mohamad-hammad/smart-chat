@@ -325,19 +325,3 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
 };
 
 export default UserDashboardLayout;
-
-
-        {/* Main Content */}
-        <div className={`pt-16 transition-all duration-300 ${
-          sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'
-        }`}>
-          <div className="min-h-screen">
-            {children}
-          </div>
-        </div>
-      </div>
-    </RoleGuard>
-  );
-};
-
-export default UserDashboardLayout;

@@ -169,26 +169,26 @@ export default function BotsPage() {
   const [showConversationDetail, setShowConversationDetail] = useState(false);
 
   // Fetch bots from API
-  useEffect(() => {
-    const fetchBots = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/manager/bots');
-        if (response.ok) {
-          const data = await response.json();
-          setBots(data.bots || []);
-        } else {
-          console.error('Failed to fetch bots');
-          setBots([]); // Set empty array instead of mock data
-        }
-      } catch (error) {
-        console.error('Error fetching bots:', error);
+  const fetchBots = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/manager/bots');
+      if (response.ok) {
+        const data = await response.json();
+        setBots(data.bots || []);
+      } else {
+        console.error('Failed to fetch bots');
         setBots([]); // Set empty array instead of mock data
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching bots:', error);
+      setBots([]); // Set empty array instead of mock data
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchBots();
   }, []);
 
