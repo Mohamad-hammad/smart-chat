@@ -7,6 +7,8 @@ frontend:
         - npm cache clean --force
         - echo "Installing dependencies..."
         - npm install --legacy-peer-deps --no-audit --no-fund
+        - echo "Verifying TypeScript installation..."
+        - npx tsc --version
     build:
       commands:
         - echo "Building the application..."
