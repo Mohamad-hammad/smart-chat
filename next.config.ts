@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Production optimizations
-  output: 'standalone', // For Docker deployment
+  // AWS Amplify specific configuration
+  trailingSlash: true,
+  skipTrailingSlashRedirect: true,
+  
   // External packages for server components
   serverExternalPackages: ['typeorm', 'pg'],
   
@@ -14,10 +16,10 @@ const nextConfig: NextConfig = {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
   
-  // Image optimization
+  // Image optimization for Amplify
   images: {
     domains: ['localhost'],
-    unoptimized: process.env.NODE_ENV === 'development',
+    unoptimized: true, // Disable image optimization for Amplify compatibility
   },
   
   // Security headers

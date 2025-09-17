@@ -3,10 +3,10 @@ frontend:
   phases:
     preBuild:
       commands:
+        - echo "Clearing npm cache..."
+        - npm cache clean --force
         - echo "Installing dependencies..."
-        - npm ci
-        - echo "Installing additional dependencies..."
-        - npm install autoprefixer
+        - npm install --legacy-peer-deps --no-audit --no-fund
     build:
       commands:
         - echo "Building the application..."
